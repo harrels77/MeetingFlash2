@@ -1,0 +1,313 @@
+.nav {
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  z-index: 500;
+  height: 60px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 32px;
+  background: rgba(6,12,24,0.88);
+  backdrop-filter: blur(20px);
+  border-bottom: 1px solid rgba(255,255,255,0.07);
+}
+
+.logo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 16px;
+  font-weight: 700;
+  color: #F8FAFC;
+  text-decoration: none;
+  letter-spacing: -0.3px;
+}
+
+.logoMark {
+  width: 22px; height: 22px;
+  background: #2563EB;
+  border-radius: 6px;
+  flex-shrink: 0;
+}
+
+.logoInner { display: none; }
+
+.desktopLinks {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.navLink {
+  padding: 7px 14px;
+  font-size: 14px;
+  font-weight: 500;
+  color: rgba(248,250,252,0.55);
+  border-radius: 8px;
+  transition: all 0.15s;
+  text-decoration: none;
+}
+.navLink:hover { color: #F8FAFC; background: rgba(255,255,255,0.06); }
+
+.navCta {
+  margin-left: 8px;
+  padding: 8px 18px;
+  background: #2563EB;
+  color: #fff;
+  font-size: 14px;
+  font-weight: 600;
+  border-radius: 8px;
+  transition: all 0.2s;
+  text-decoration: none;
+}
+.navCta:hover { background: #3B82F6; transform: translateY(-1px); box-shadow: 0 6px 20px rgba(37,99,235,0.35); }
+
+/* ACCOUNT DROPDOWN */
+.accountWrap {
+  position: relative;
+  margin-left: 8px;
+}
+
+.accountBtn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 10px;
+  padding: 6px 12px;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.accountBtn:hover { background: rgba(255,255,255,0.1); border-color: rgba(255,255,255,0.18); }
+
+.accountAvatar {
+  width: 26px; height: 26px;
+  border-radius: 50%;
+  background: rgba(37,99,235,0.2);
+  border: 1px solid rgba(37,99,235,0.4);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 12px;
+  font-weight: 700;
+  color: #60A5FA;
+  flex-shrink: 0;
+}
+
+.accountName {
+  font-size: 13px;
+  font-weight: 500;
+  color: rgba(248,250,252,0.85);
+  max-width: 120px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.accountChevron {
+  font-size: 10px;
+  color: rgba(248,250,252,0.4);
+}
+
+.accountMenu {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  background: #111D35;
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 12px;
+  overflow: hidden;
+  z-index: 600;
+  min-width: 220px;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+  animation: menuIn 0.15s ease forwards;
+}
+
+@keyframes menuIn {
+  from { opacity: 0; transform: translateY(-6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.accountMenuHeader {
+  padding: 16px;
+  border-bottom: 1px solid rgba(255,255,255,0.07);
+}
+
+.accountMenuName {
+  font-size: 14px;
+  font-weight: 600;
+  color: #F8FAFC;
+  margin-bottom: 3px;
+  letter-spacing: -0.2px;
+}
+
+.accountMenuEmail {
+  font-size: 12px;
+  color: rgba(248,250,252,0.4);
+  margin-bottom: 8px;
+}
+
+.accountMenuPlan {
+  display: inline-block;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: #60A5FA;
+  background: rgba(37,99,235,0.15);
+  border: 1px solid rgba(37,99,235,0.3);
+  padding: 2px 9px;
+  border-radius: 20px;
+}
+
+.accountMenuItem {
+  display: block;
+  width: 100%;
+  padding: 11px 16px;
+  font-size: 13px;
+  font-weight: 500;
+  color: rgba(248,250,252,0.65);
+  background: none;
+  border: none;
+  border-bottom: 1px solid rgba(255,255,255,0.05);
+  cursor: pointer;
+  transition: all 0.15s;
+  text-align: left;
+  text-decoration: none;
+}
+.accountMenuItem:last-child { border-bottom: none; }
+.accountMenuItem:hover { background: rgba(255,255,255,0.05); color: #F8FAFC; }
+
+.accountMenuSignOut { color: rgba(252,165,165,0.8) !important; }
+.accountMenuSignOut:hover { color: #FCA5A5 !important; background: rgba(239,68,68,0.08) !important; }
+
+/* BURGER */
+.burger {
+  display: none;
+  flex-direction: column;
+  gap: 5px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 4px;
+}
+
+.burgerLine {
+  display: block;
+  width: 22px;
+  height: 1.5px;
+  background: #F8FAFC;
+  border-radius: 2px;
+  transition: all 0.25s ease;
+  transform-origin: center;
+}
+
+.burgerLine1Open { transform: rotate(45deg) translate(4px, 4px); }
+.burgerLineHide  { opacity: 0; transform: scaleX(0); }
+.burgerLine3Open { transform: rotate(-45deg) translate(4px, -4px); }
+
+/* MOBILE MENU */
+.mobileMenu {
+  position: fixed;
+  top: 60px; left: 0; right: 0; bottom: 0;
+  background: #060C18;
+  z-index: 490;
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+  animation: slideDown 0.2s ease forwards;
+  border-top: 1px solid rgba(255,255,255,0.07);
+}
+
+@keyframes slideDown {
+  from { opacity: 0; transform: translateY(-8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.mobileLink {
+  padding: 18px 24px;
+  font-size: 16px;
+  font-weight: 500;
+  color: rgba(248,250,252,0.7);
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+  transition: all 0.15s;
+  text-decoration: none;
+  background: none;
+  border-left: none;
+  border-right: none;
+  border-top: none;
+  cursor: pointer;
+  text-align: left;
+  width: 100%;
+  display: block;
+}
+.mobileLink:hover { color: #F8FAFC; background: rgba(255,255,255,0.03); }
+
+.mobileSignOut { color: rgba(252,165,165,0.8) !important; }
+.mobileSignOut:hover { background: rgba(239,68,68,0.06) !important; }
+
+.mobileDivider {
+  height: 1px;
+  background: rgba(255,255,255,0.08);
+  margin: 4px 0;
+}
+
+.mobileProfile {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 20px 24px;
+  background: rgba(255,255,255,0.02);
+}
+
+.mobileAvatar {
+  width: 40px; height: 40px;
+  border-radius: 50%;
+  background: rgba(37,99,235,0.15);
+  border: 1px solid rgba(37,99,235,0.3);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 18px;
+  font-weight: 700;
+  color: #60A5FA;
+  flex-shrink: 0;
+}
+
+.mobileProfileName {
+  font-size: 15px;
+  font-weight: 600;
+  color: #F8FAFC;
+  margin-bottom: 3px;
+}
+
+.mobileProfileEmail {
+  font-size: 12px;
+  color: rgba(248,250,252,0.4);
+}
+
+.mobileCta {
+  margin: 20px 24px;
+  padding: 16px;
+  background: #2563EB;
+  color: #fff;
+  font-size: 15px;
+  font-weight: 600;
+  text-align: center;
+  border-radius: 10px;
+  transition: background 0.15s;
+  text-decoration: none;
+  display: block;
+}
+.mobileCta:hover { background: #3B82F6; }
+
+@media (min-width: 769px) {
+  .burger { display: none !important; }
+  .mobileMenu { display: none !important; }
+}
+
+@media (max-width: 768px) {
+  .nav { padding: 0 20px; }
+  .desktopLinks { display: none !important; }
+  .burger { display: flex !important; }
+}

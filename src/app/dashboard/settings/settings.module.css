@@ -1,0 +1,338 @@
+.loading {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--bg);
+}
+
+.loadingGlyph {
+  width: 28px; height: 28px;
+  border: 2px solid var(--border2);
+  border-top-color: var(--blue);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+.page {
+  min-height: 100vh;
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font);
+}
+
+.nav {
+  height: 60px;
+  display: flex;
+  align-items: center;
+  padding: 0 32px;
+  border-bottom: 1px solid var(--border);
+  background: rgba(6,12,24,0.9);
+  backdrop-filter: blur(20px);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+.back {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--muted);
+  transition: color 0.15s;
+}
+.back:hover { color: var(--text); }
+
+.content {
+  max-width: 640px;
+  margin: 0 auto;
+  padding: 48px 32px 100px;
+}
+
+.header { margin-bottom: 48px; }
+
+.title {
+  font-size: 40px;
+  font-weight: 800;
+  letter-spacing: -2px;
+  color: var(--text);
+  margin-bottom: 8px;
+}
+
+.sub {
+  font-size: 15px;
+  color: var(--muted);
+}
+
+.section { margin-bottom: 32px; }
+
+.sectionTitle {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--faint);
+  margin-bottom: 12px;
+}
+
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 24px;
+}
+
+.dangerCard {
+  border-color: rgba(239,68,68,0.2);
+  background: rgba(239,68,68,0.04);
+}
+
+.cardRow {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.avatar {
+  width: 48px; height: 48px;
+  border-radius: 50%;
+  background: rgba(37,99,235,0.15);
+  border: 1px solid rgba(37,99,235,0.3);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--blue3);
+  flex-shrink: 0;
+}
+
+.accountInfo { display: flex; flex-direction: column; gap: 3px; }
+
+.accountName {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--text);
+  letter-spacing: -0.3px;
+}
+
+.accountEmail {
+  font-size: 13px;
+  color: var(--muted);
+}
+
+.accountDate {
+  font-size: 11px;
+  color: var(--faint);
+  margin-top: 2px;
+}
+
+.planRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.planName {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--text);
+  margin-bottom: 4px;
+  letter-spacing: -0.2px;
+}
+
+.planDetail {
+  font-size: 13px;
+  color: var(--muted);
+}
+
+.upgradeBtn {
+  background: var(--blue);
+  color: #fff;
+  padding: 8px 16px;
+  font-family: var(--font);
+  font-size: 13px;
+  font-weight: 600;
+  border-radius: 8px;
+  text-decoration: none;
+  white-space: nowrap;
+  transition: background 0.15s;
+  flex-shrink: 0;
+}
+.upgradeBtn:hover { background: var(--blue2); }
+
+.usageBar {
+  height: 4px;
+  background: var(--border);
+  border-radius: 4px;
+  overflow: hidden;
+  margin-bottom: 8px;
+}
+
+.usageBarFill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--blue), var(--blue3));
+  border-radius: 4px;
+  transition: width 0.4s ease;
+}
+
+.usageLabel {
+  font-size: 12px;
+  color: var(--faint);
+}
+
+.fieldGroup { display: flex; flex-direction: column; gap: 8px; }
+
+.label {
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  color: var(--faint);
+  text-transform: uppercase;
+}
+
+.fieldRow { display: flex; gap: 8px; }
+
+.input {
+  flex: 1;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  color: var(--text);
+  font-family: var(--font);
+  font-size: 14px;
+  padding: 10px 14px;
+  outline: none;
+  border-radius: 8px;
+  transition: border-color 0.2s;
+}
+.input:focus { border-color: rgba(37,99,235,0.5); }
+
+.saveBtn {
+  background: var(--blue);
+  color: #fff;
+  border: none;
+  font-family: var(--font);
+  font-size: 12px;
+  font-weight: 600;
+  padding: 0 18px;
+  cursor: pointer;
+  border-radius: 8px;
+  transition: all 0.15s;
+  white-space: nowrap;
+}
+.saveBtn:hover:not(:disabled) { background: var(--blue2); }
+.saveBtn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+.emailDisplay {
+  font-size: 14px;
+  color: var(--muted);
+  padding: 10px 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.sessionRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.sessionTitle {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--text);
+  margin-bottom: 4px;
+}
+
+.sessionSub {
+  font-size: 13px;
+  color: var(--muted);
+  line-height: 1.5;
+}
+
+.signOutBtn {
+  background: transparent;
+  border: 1px solid var(--border2);
+  font-family: var(--font);
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--muted);
+  padding: 8px 16px;
+  cursor: pointer;
+  border-radius: 8px;
+  transition: all 0.15s;
+  white-space: nowrap;
+}
+.signOutBtn:hover { color: var(--text); border-color: var(--border3); }
+
+.dangerTitle {
+  font-size: 15px;
+  font-weight: 600;
+  color: #FCA5A5;
+  margin-bottom: 4px;
+}
+
+.dangerBtn {
+  background: transparent;
+  border: 1px solid rgba(239,68,68,0.3);
+  font-family: var(--font);
+  font-size: 13px;
+  font-weight: 500;
+  color: #FCA5A5;
+  padding: 8px 16px;
+  cursor: pointer;
+  border-radius: 8px;
+  transition: all 0.15s;
+  white-space: nowrap;
+}
+.dangerBtn:hover { background: rgba(239,68,68,0.1); }
+
+.confirmRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.confirmText {
+  font-size: 12px;
+  color: #FCA5A5;
+}
+
+.dangerBtnConfirm {
+  background: #EF4444;
+  color: #fff;
+  border: none;
+  font-family: var(--font);
+  font-size: 12px;
+  font-weight: 600;
+  padding: 8px 14px;
+  cursor: pointer;
+  border-radius: 8px;
+  transition: opacity 0.15s;
+  white-space: nowrap;
+}
+.dangerBtnConfirm:hover { opacity: 0.85; }
+.dangerBtnConfirm:disabled { opacity: 0.5; cursor: not-allowed; }
+
+.cancelBtn {
+  background: transparent;
+  border: 1px solid var(--border);
+  font-family: var(--font);
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--faint);
+  padding: 7px 12px;
+  cursor: pointer;
+  border-radius: 8px;
+  transition: all 0.15s;
+}
+.cancelBtn:hover { color: var(--text); }
+
+@media (max-width: 680px) {
+  .content { padding: 32px 20px 80px; }
+  .nav { padding: 0 20px; }
+  .title { font-size: 32px; }
+  .planRow { flex-direction: column; align-items: flex-start; }
+}

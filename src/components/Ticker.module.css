@@ -1,0 +1,36 @@
+.ticker {
+  overflow: hidden;
+  height: 34px;
+  border-top: 1px solid var(--wire);
+  border-bottom: 1px solid var(--wire);
+  background: var(--deep);
+  display: flex;
+  align-items: center;
+}
+
+.inner {
+  display: flex;
+  align-items: center;
+  animation: scroll 30s linear infinite;
+  white-space: nowrap;
+  will-change: transform;
+}
+
+.item {
+  font-size: 9.5px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--ash);
+  padding: 0 24px;
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  flex-shrink: 0;
+}
+
+.sep { color: var(--spark); font-size: 6px; }
+
+@keyframes scroll {
+  from { transform: translateX(0); }
+  to   { transform: translateX(-50%); }
+}

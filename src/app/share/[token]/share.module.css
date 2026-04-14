@@ -1,0 +1,185 @@
+.page {
+  min-height: 100vh;
+  background: #060608;
+  color: #f0ede8;
+  font-family: 'Fragment Mono', monospace;
+}
+
+.nav {
+  height: 56px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 40px;
+  border-bottom: 1px solid rgba(255,255,255,0.07);
+  background: rgba(6,6,8,0.9);
+  backdrop-filter: blur(20px);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+.logo {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  font-size: 13px;
+  color: rgba(240,237,232,0.6);
+  text-decoration: none;
+  letter-spacing: -0.2px;
+}
+
+.logoMark {
+  width: 18px; height: 18px;
+  border: 1.5px solid #c8f03c;
+  transform: rotate(45deg);
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+}
+
+.logoInner { width: 6px; height: 6px; background: #c8f03c; }
+
+.navBadge {
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: rgba(240,237,232,0.3);
+  border: 1px solid rgba(255,255,255,0.08);
+  padding: 4px 12px;
+  border-radius: 10px;
+}
+
+.content {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 48px 40px 100px;
+}
+
+.header {
+  margin-bottom: 40px;
+  padding-bottom: 28px;
+  border-bottom: 1px solid rgba(255,255,255,0.07);
+}
+
+.meta {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 12px;
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: #7a7870;
+}
+
+.metaDot { color: rgba(255,255,255,0.12); }
+
+.title {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 48px;
+  font-weight: 700;
+  font-style: italic;
+  letter-spacing: -2px;
+  line-height: 1;
+  color: #f0ede8;
+}
+
+.blocks {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 48px;
+}
+
+.block {
+  border-radius: 8px;
+  padding: 16px 18px;
+  border: 1px solid rgba(255,255,255,0.07);
+  animation: fadeIn 0.4s ease both;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.block_spark  { background: rgba(200,240,60,0.05);  border-left: 2px solid rgba(200,240,60,0.5); }
+.block_ember  { background: rgba(245,166,35,0.05);  border-left: 2px solid rgba(245,166,35,0.5); }
+.block_danger { background: rgba(232,93,58,0.05);   border-left: 2px solid rgba(232,93,58,0.5); }
+.block_fog    { background: rgba(255,255,255,0.02); border-left: 2px solid rgba(255,255,255,0.1); }
+.block_paper  { background: rgba(255,255,255,0.02); border-left: 2px solid rgba(255,255,255,0.08); }
+
+.blockHead {
+  display: flex;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.blockType {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+
+.blockDot { width: 5px; height: 5px; flex-shrink: 0; border-radius: 1px; }
+.dot_spark  { background: #c8f03c; }
+.dot_ember  { background: #f5a623; }
+.dot_danger { background: #e85d3a; }
+.dot_fog    { background: #7a7870; }
+.dot_paper  { background: #7a7870; }
+
+.blockLabel {
+  font-size: 9px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+.label_spark  { color: #c8f03c; }
+.label_ember  { color: #f5a623; }
+.label_danger { color: #e85d3a; }
+.label_fog    { color: #7a7870; }
+.label_paper  { color: #7a7870; }
+
+.blockContent {
+  font-size: 13px;
+  color: #b8b6ae;
+  line-height: 1.9;
+  white-space: pre-wrap;
+  font-style: italic;
+}
+
+.footer {
+  padding-top: 32px;
+  border-top: 1px solid rgba(255,255,255,0.07);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.footer p {
+  font-size: 11px;
+  color: #7a7870;
+  font-style: italic;
+}
+
+.footerCta {
+  background: #c8f03c;
+  color: #060608;
+  padding: 9px 18px;
+  font-family: 'Fragment Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  font-weight: 700;
+  border-radius: 6px;
+  text-decoration: none;
+  transition: background 0.15s;
+}
+.footerCta:hover { background: #d6f84a; }
+
+@media (max-width: 680px) {
+  .content { padding: 32px 20px 80px; }
+  .nav { padding: 0 20px; }
+  .title { font-size: 36px; }
+}
