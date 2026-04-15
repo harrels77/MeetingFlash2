@@ -89,7 +89,7 @@ export default function MobileNav() {
             <>
               <Link href="/login" className={styles.navLink}>Sign in</Link>
 
-              <Link href="/app"   className={styles.navCta}>Get started free →</Link>
+              <Link href="/app"   className={styles.navCta}>Try with sample notes →</Link>
             </>
           )}
         </div>
@@ -174,7 +174,7 @@ export default function MobileNav() {
                 Create account
               </Link>
               <Link href="/app" className={styles.mobileCta} onClick={() => setOpen(false)}>
-                Get started free →
+                Try with sample notes →
               </Link>
             </>
           )}

@@ -26,14 +26,14 @@ export default function HeroCta({ className }: { className?: string }) {
     async function check() {
       if (!user) {
         const guestUsed = localStorage.getItem('mf_guest_used')
-        setLabel(guestUsed ? 'Continue →' : 'Get your first pack free')
+        setLabel(guestUsed ? 'Continue Flashing →' : 'Try with sample notes →')
         return
       }
       const { count } = await supabase
         .from('meetings')
         .select('id', { count: 'exact', head: true })
         .eq('user_id', user.id)
-      setLabel(count && count > 0 ? 'Continue →' : 'Get your first pack free')
+      setLabel(count && count > 0 ? 'Continue →' : 'Try with sample notes →')
     }
     check()
   }, [user, loading])

@@ -190,6 +190,108 @@
   background: var(--border2);
 }
 
+/* ── MINI BEFORE/AFTER ── */
+.miniDemo {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  gap: 16px;
+  align-items: center;
+  max-width: 780px;
+  width: 100%;
+  margin-top: 48px;
+  padding: 24px;
+  background: var(--surface);
+  border: 1px solid var(--border2);
+  border-radius: 16px;
+  box-shadow: 0 0 0 1px rgba(37,99,235,0.1), 0 24px 60px rgba(0,0,0,0.3);
+  animation: fadeUp 0.8s 0.6s ease both;
+}
+
+.miniDemoLeft, .miniDemoRight {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.miniDemoTag {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--faint);
+  margin-bottom: 4px;
+}
+
+.miniDemoContent {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.miniLine {
+  font-family: var(--mono);
+  font-size: 12px;
+  color: var(--faint);
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 6px 10px;
+  display: block;
+}
+
+.miniOutput {
+  font-family: var(--mono);
+  font-size: 12px;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 6px 10px;
+  display: block;
+  font-weight: 500;
+}
+
+.miniDemoArrow {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding: 0 8px;
+}
+
+.miniDemoArrowLine {
+  width: 1px;
+  height: 40px;
+  background: linear-gradient(to bottom, transparent, var(--blue), transparent);
+}
+
+.miniDemoArrowLabel {
+  font-size: 10px;
+  color: var(--blue3);
+  font-weight: 600;
+  white-space: nowrap;
+  letter-spacing: 0.04em;
+}
+
+.miniDemoArrowIcon {
+  font-size: 16px;
+}
+
+@media (max-width: 680px) {
+  .miniDemo {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+  .miniDemoArrow {
+    flex-direction: row;
+    justify-content: center;
+  }
+  .miniDemoArrowLine {
+    width: 40px;
+    height: 1px;
+    background: linear-gradient(to right, transparent, var(--blue), transparent);
+  }
+}
+
 /* ── LIVE DEMO ── */
 .demoSection {
   position: relative;

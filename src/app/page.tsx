@@ -163,6 +163,38 @@ export default function Home() {
     return () => revealRef.current?.disconnect()
   }, [])
 
+  function MiniBeforeAfter() {
+    return (
+      <div className={s.miniDemo}>
+        <div className={s.miniDemoLeft}>
+          <div className={s.miniDemoTag}>Raw notes</div>
+          <div className={s.miniDemoContent}>
+            <span className={s.miniLine}>Sarah: launch April 28th</span>
+            <span className={s.miniLine}>Tom: feature list by Friday</span>
+            <span className={s.miniLine}>freeze tool subscriptions Q2</span>
+            <span className={s.miniLine}>interviews start April 22nd</span>
+          </div>
+        </div>
+
+        <div className={s.miniDemoArrow}>
+          <div className={s.miniDemoArrowLine} />
+          <div className={s.miniDemoArrowLabel}>20 seconds</div>
+          <div className={s.miniDemoArrowIcon}>⚡</div>
+        </div>
+
+        <div className={s.miniDemoRight}>
+          <div className={s.miniDemoTag} style={{color:'var(--blue3)'}}>Execution Pack</div>
+          <div className={s.miniDemoContent}>
+            <span className={s.miniOutput} style={{color:'var(--blue3)'}}>📌 Launch set for April 28th</span>
+            <span className={s.miniOutput} style={{color:'var(--green)'}}>✓ Tom → Feature list (Fri)</span>
+            <span className={s.miniOutput} style={{color:'var(--green)'}}>✓ Freeze subscriptions Q2</span>
+            <span className={s.miniOutput} style={{color:'#FCD34D)'}}>⚠ Interview timeline tight</span>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
   return (
     <div className={s.root}>
       {/* AMBIENT */}
@@ -201,6 +233,8 @@ export default function Home() {
             <span className={s.heroStatN}>20s</span>
             <span className={s.heroStatL}>avg. time</span>
           </div>
+          <MiniBeforeAfter />
+
           <div className={s.heroStatDiv} />
           <div className={s.heroStat}>
             <span className={s.heroStatN}>7</span>
