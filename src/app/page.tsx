@@ -435,13 +435,13 @@ export default function Home() {
               <button
                 className={s.planBtnPro}
                 onClick={async () => {
+                  const priceId = annual
+                    ? process.env.NEXT_PUBLIC_STRIPE_PRO_ANNUAL_PRICE_ID
+                    : process.env.NEXT_PUBLIC_STRIPE_PRO_PRICE_ID
                   const res = await fetch('/api/checkout', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                      priceId: process.env.NEXT_PUBLIC_STRIPE_PRO_PRICE_ID,
-                      email: '',
-                    })
+                    body: JSON.stringify({ priceId, email: '' })
                   })
                   const { url } = await res.json()
                   if (url) window.location.href = url
@@ -463,13 +463,13 @@ export default function Home() {
             <button
               className={s.planBtnPro}
               onClick={async () => {
+                const priceId = annual
+                  ? process.env.NEXT_PUBLIC_STRIPE_TEAM_ANNUAL_PRICE_ID
+                  : process.env.NEXT_PUBLIC_STRIPE_TEAM_PRICE_ID
                 const res = await fetch('/api/checkout', {
                   method: 'POST',
                   headers: { 'Content-Type': 'application/json' },
-                  body: JSON.stringify({
-                    priceId: process.env.NEXT_PUBLIC_STRIPE_TEAM_PRICE_ID,
-                    email: '',
-                  })
+                  body: JSON.stringify({ priceId, email: '' })
                 })
                 const { url } = await res.json()
                 if (url) window.location.href = url

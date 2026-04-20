@@ -1,97 +1,218 @@
-# MeetingFlash — Context for Claude
+# MeetingFlash — AI Context (Claude.ai + Claude Code)
+
+## AI CONTEXT (IMPORTANT)
+This project is assisted by AI coding agents (Claude Code + Claude.ai).
+
+### Rules for AI:
+- Always read this file first before making changes
+- Never assume missing architecture decisions
+- If context is unclear, ask before modifying core logic
+- Update this file when new decisions are made
+- This file is the single source of truth
+
+---
 
 ## Product
-Post-meeting execution SaaS. Transforms raw meeting notes into
-a complete Execution Pack in 20 seconds. 7 structured outputs:
-decisions, action items, open questions, risks, follow-up email,
-Slack message, next agenda.
+Post-meeting execution SaaS. Transforms raw meeting notes into a complete
+Execution Pack in under 20 seconds. Users paste raw notes and get 7 structured
+outputs: decisions, action items, open questions, risks, follow-up email,
+Slack message, and next agenda.
 
-## Stack
-- Next.js 14 App Router + TypeScript
-- Supabase (auth + PostgreSQL + RLS)
-- Anthropic Claude API (claude-sonnet-4-20250514) with prompt caching
-- CSS Modules
-- Stripe (subscriptions) — apiVersion: 2026-03-25.dahlia
+Target: agencies, freelancers, small product teams who want to eliminate
+post-meeting admin work. Key differentiator vs ChatGPT: zero prompts required,
+persistent project memory, structured ready-to-use outputs.
+
+**Current status:** MVP deployed on Vercel. Stripe fully integrated. Auth working.
+
+---
+
+## Tech Stack
+- **Frontend:** Next.js 14 App Router + TypeScript
+- **Styling:** CSS Modules (no Tailwind)
+- **Auth:** Supabase Auth (Google OAuth + email/password)
+- **Database:** Supabase PostgreSQL + RLS
+- **AI:** Anthropic Claude API (claude-sonnet-4-20250514) with prompt caching
+- **Payments:** Stripe (subscriptions) — apiVersion: 2026-03-25.dahlia
+- **Deployment:** Vercel
+
+---
 
 ## Design System
-- Background: #060C18
-- Blue primary: #2563EB
-- Fonts: Plus Jakarta Sans, Instrument Serif, JetBrains Mono
-- CSS variables in src/styles/globals.css
+- Background: `#060C18`
+- Surface: `#111D35`
+- Blue primary: `#2563EB`
+- Blue bright: `#3B82F6`
+- Accent: `#60A5FA`
+- Text: `#F8FAFC`
+- Muted: `#94A3B8`
+- Fonts: Plus Jakarta Sans + Instrument Serif + JetBrains Mono
+- All CSS variables defined in `src/styles/globals.css`
+
+### Design Decisions (do not revert)
+- Ambient glow blobs: opacity ~0.22 (NOT 0.12 — was too subtle, intentionally bolder)
+- Pricing featured card: elevated with `translateY(-4px)` + double box-shadow glow
+- Logo bar label: "Works alongside your existing stack" (NOT "Trusted by teams using" — old text implied integrations that don't exist yet)
+- Logo bar tools: meeting tools only (Zoom, Teams, Google Meet, Loom, etc.) — no Stripe/Vercel
+- Nav logo: 36px (NOT 28px — was too small)
+
+---
 
 ## All Pages & Routes
-- src/app/page.tsx — Landing page (hero, demo, features, testimonials, pricing)
-- src/app/app/page.tsx — Flash tool (main product)
-- src/app/dashboard/page.tsx — Dashboard (recent packs + projects tabs)
-- src/app/dashboard/pack/[id]/page.tsx — View a single saved pack
-- src/app/dashboard/project/[id]/page.tsx — View all packs in a project
-- src/app/dashboard/search/page.tsx — Search across meetings
-- src/app/dashboard/settings/page.tsx — Account settings
-- src/app/login/page.tsx — Login
-- src/app/signup/page.tsx — Signup
-- src/app/share/[token]/page.tsx — Public share link for a pack
-- src/app/privacy/page.tsx — Privacy policy
-- src/app/terms/page.tsx — Terms of service
-- src/app/api/flash/route.ts — Core AI route (Claude API)
-- src/app/api/checkout/route.ts — Stripe checkout session
-- src/app/api/webhook/route.ts — Stripe webhook handler
-- src/lib/supabase.ts — Supabase client
-- src/lib/AuthProvider.tsx — Auth context
+src/
+├── app/
+│   ├── page.tsx                     ← Landing page (hero, demo, features, testimonials, pricing)
+│   ├── layout.tsx                   ← Root layout + AuthProvider + SEO metadata
+│   ├── app/page.tsx                 ← Flash tool (main product)
+│   ├── dashboard/
+│   │   ├── page.tsx                 ← Dashboard (recent packs + projects tabs)
+│   │   ├── pack/[id]/page.tsx       ← Pack detail + task tracker
+│   │   ├── project/[id]/page.tsx    ← Project memory (decisions + tasks)
+│   │   ├── search/page.tsx          ← Smart search across meetings
+│   │   └── settings/page.tsx        ← Account settings
+│   ├── api/
+│   │   ├── flash/route.ts           ← Core AI route (Claude API)
+│   │   ├── checkout/route.ts        ← Stripe checkout session
+│   │   └── webhook/route.ts         ← Stripe webhook handler
+│   ├── auth/callback/route.ts       ← OAuth callback → redirect /
+│   ├── login/page.tsx               ← Login (email + Google OAuth)
+│   ├── signup/page.tsx              ← Signup
+│   ├── share/[token]/page.tsx       ← Public shareable pack
+│   ├── privacy/page.tsx             ← Privacy Policy
+│   └── terms/page.tsx               ← Terms of Service
+├── components/
+│   ├── MobileNav.tsx                ← Nav with auth state (uses useAuth)
+│   ├── HeroCta.tsx                  ← Smart CTA (4 states based on auth)
+│   └── FooterAccount.tsx            ← Footer with dynamic auth state
+└── lib/
+    ├── supabase.ts                  ← Supabase client singleton
+    └── AuthProvider.tsx             ← Global auth context (useAuth hook)
 
-## Database (Supabase)
-Tables: profiles, projects, meetings, tasks
-- meetings.pack = JSONB: { decisions, actions, questions, risks, email, slack, agenda, tasks[] }
-- meetings.share_token = string (nullable) — for public share links
-- profiles.plan = 'free' | 'pro' | 'team'
-- profiles.uses_this_month = integer (reset monthly)
-- tasks: { user_id, meeting_id, text, owner, deadline, priority, status }
-- IMPORTANT: webhook uses SUPABASE_SERVICE_ROLE_KEY (not anon key) to bypass RLS
+---
 
-## Pricing
-- Free: 3 packs/month
-- Pro: $12/month (or $8/month billed annually at $96/yr)
-- Team: $25/month for 5 seats (or $20/month billed annually at $240/yr)
+## Important Decisions
 
-## Stripe Integration
-- Env vars needed: STRIPE_SECRET_KEY, STRIPE_WEBHOOK_SECRET,
-  NEXT_PUBLIC_STRIPE_PRO_PRICE_ID, NEXT_PUBLIC_STRIPE_TEAM_PRICE_ID
-- TODO: Annual pricing not wired yet — needs NEXT_PUBLIC_STRIPE_PRO_ANNUAL_PRICE_ID
-  and NEXT_PUBLIC_STRIPE_TEAM_ANNUAL_PRICE_ID, then update checkout onClick
-  in page.tsx to pass annual price ID when annual === true
-- Webhook handles: checkout.session.completed, customer.subscription.deleted,
-  invoice.payment_failed
-- Customer metadata stores userId for reliable webhook lookups
+### Authentication
+- Handled via Supabase Auth (Google OAuth + email/password)
+- Global session managed by `AuthProvider.tsx` — most components use `useAuth()`
+- **EXCEPTION:** `src/app/app/page.tsx` (flash tool) does NOT use `useAuth()` — it has its own `supabase.auth.getSession()` + `onAuthStateChange` directly, with local `isLoggedIn` state. Do not refactor this without careful testing.
+- After login/signup: redirect to `/` (not `/dashboard`)
+- OAuth callback route: `src/app/auth/callback/route.ts`
+- `AuthProvider` calls both `getSession()` AND `onAuthStateChange` — both can call `loadProfile` simultaneously (known race condition in prod, do not change without testing)
+- `signOut` in AuthProvider: `async`, awaits `supabase.auth.signOut()`, then does `window.location.replace('/')` — full page reload to clear state
 
-## API: /api/flash
-- In-memory rate limit: 10 requests/minute per IP
+### Database (Supabase PostgreSQL)
+Tables: `profiles`, `projects`, `meetings`, `tasks`
+
+Key schema:
+- `meetings.pack` = JSONB with keys: `decisions`, `actions`, `questions`,
+  `risks`, `email`, `slack`, `agenda`, `tasks[]`
+- `meetings.share_token` = string (nullable) — for public share links
+- `profiles.plan` = `'free'` | `'pro'` | `'team'`
+- `profiles.uses_this_month` = integer (reset monthly)
+- `tasks` = `{ user_id, meeting_id, text, owner, deadline, priority, status }`
+- RLS enabled on all tables
+- Auto-profile creation via `handle_new_user()` trigger
+- **IMPORTANT:** webhook uses `SUPABASE_SERVICE_ROLE_KEY` (not anon key) to bypass RLS
+
+### AI — /api/flash
+- Model: `claude-sonnet-4-20250514`
 - max_tokens: 4000
-- Prompt caching enabled (saves ~80% on system prompt cost)
-- Saves meeting + tasks to DB if Authorization header present
-- Calls supabase RPC increment_uses after each successful flash
+- Called via direct `fetch('https://api.anthropic.com/v1/messages')` — NOT the Anthropic SDK
+- Headers: `x-api-key`, `anthropic-version: 2023-06-01`, `anthropic-beta: prompt-caching-2024-07-31`
+- System message has `cache_control: { type: 'ephemeral' }` for prompt caching
+- Rate limiting: 10 requests/minute per IP (in-memory Map, resets on server restart)
+- Response format: raw JSON (no markdown, no backticks) — strips ```json if present
+- Pack includes `tasks[]` array — saved separately to `tasks` table with `status: 'todo'`
+- Tasks insert uses meeting ID from `.select('id').single()` on the meetings insert
+- Saves meeting + tasks to DB if `Authorization: Bearer <token>` header present
+- Supabase client in this route: created per-request with user's auth header, uses `NEXT_PUBLIC_SUPABASE_ANON_KEY`
+- Calls `supabase.rpc('increment_uses', { user_id: user.id })` after each successful flash
 
-## Auth
-- Google OAuth via Supabase
-- Email/password
-- Auth callback: /auth/callback
-- After login: redirect to /
+### Payments (Stripe)
+- Pro: $12/month or $8/month billed annually ($96/yr)
+- Team: $25/month for 5 seats or $20/month billed annually ($240/yr)
+- Checkout sends `metadata: { userId, priceId }` — both are needed
+- Checkout: `success_url` → `/dashboard?upgraded=true`, `cancel_url` → `/#pricing`
+- Webhook uses `SUPABASE_SERVICE_ROLE_KEY` (bypasses RLS) — client created fresh per request
+- Webhook Pro vs Team detection: `priceId === process.env.STRIPE_TEAM_PRICE_ID` → 'team', else 'pro'
+  - Note: webhook uses `STRIPE_TEAM_PRICE_ID` (no NEXT_PUBLIC_ prefix — server only)
+- On `checkout.session.completed`: updates plan + saves userId to Stripe customer metadata
+- On `customer.subscription.deleted` / `invoice.payment_failed`: looks up by userId from customer metadata, falls back to email
+- Annual pricing toggle is **UI-only** — not yet wired to Stripe annual price IDs
 
-## App Logic (src/app/app/page.tsx)
-- Guest users: 1 free pack (tracked in localStorage mf_guest_used)
-- Free plan users: 3 packs/month (tracked in profiles.uses_this_month)
-- Upgrade modal shown when limit hit (for both guest and logged-in free users)
-- Project selector visible when logged in (create project inline)
-- copy() uses navigator.clipboard.writeText()
+### Free Trial Logic
+- Guest (not logged in): 1 free pack via `localStorage('mf_guest_used')`
+- Free plan: 3 packs/month tracked in `profiles.uses_this_month`
+- When limit reached: show upgrade modal (not just an error message)
 
-## Dashboard Features
-- Recent packs tab + Projects tab
-- Select mode for bulk delete
-- Rename meetings and projects (modal)
-- Share meeting: generates random token, copies link to clipboard
-- Pack summary shown on hover
-- Auto-creates profile row if missing on first login
+### HeroCta Labels (src/components/HeroCta.tsx)
+- Guest, no pack used → `'Try with sample notes →'`
+- Guest, pack used → `'Continue Flashing →'`
+- Logged in, 0 meetings → `'Try with sample notes →'` (queries DB)
+- Logged in, has meetings → `'Continue →'` (queries DB)
 
-## Current Status
-- MVP complete with all core bugs fixed
-- Stripe fully integrated and webhook handling complete
-- Annual pricing toggle is UI-only (not wired to Stripe annual price IDs yet)
-- Deployed to Vercel
+---
+
+## Environment Variables
+NEXT_PUBLIC_SUPABASE_URL
+NEXT_PUBLIC_SUPABASE_ANON_KEY
+SUPABASE_SERVICE_ROLE_KEY               ← used in webhook to bypass RLS
+ANTHROPIC_API_KEY
+NEXT_PUBLIC_APP_URL
+STRIPE_SECRET_KEY
+STRIPE_WEBHOOK_SECRET
+NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY
+NEXT_PUBLIC_STRIPE_PRO_PRICE_ID
+NEXT_PUBLIC_STRIPE_TEAM_PRICE_ID
+NEXT_PUBLIC_STRIPE_PRO_ANNUAL_PRICE_ID  ← TODO: create in Stripe dashboard
+NEXT_PUBLIC_STRIPE_TEAM_ANNUAL_PRICE_ID ← TODO: create in Stripe dashboard
+
+---
+
+## Features Completed ✅
+- Google OAuth + email/password auth
+- Flash tool — 7 outputs via Claude API
+- Auto-save packs if logged in
+- Guest free trial (1 pack without account)
+- Dashboard — recent packs + projects tabs
+- Pack hover preview (summary from decisions + actions)
+- Task tracker — todo/in_progress/done per pack
+- Project memory — decisions + tasks across meetings
+- Smart search — full-text across all meetings
+- Shareable recap — public link per meeting
+- Export PDF via window.print()
+- Templates — sprint, client, standup, product
+- Real usage counter from Supabase
+- New project inline in /app
+- Rename/delete/share on packs and projects
+- Multi-select for batch delete
+- Settings page — profile, plan, usage, delete account
+- Mobile responsive — hamburger nav
+- MobileNav + FooterAccount with auth state via useAuth
+- Stripe checkout + webhook (all 3 events handled)
+- Rate limiting on /api/flash (10 req/min per IP)
+- Prompt caching on Claude API (~80% cost reduction)
+- Upgrade modal when free limit reached
+- Annual/monthly pricing toggle (UI only)
+- SEO meta tags + OpenGraph in layout.tsx
+
+## Visual Changes Deployed (not yet pushed)
+- Ambient glow blobs: opacity 0.12 → 0.22, larger and more vivid
+- Pricing featured card: elevated + double glow
+- Logo bar: label + tools updated (meeting tools only)
+- Nav logo: 28px → 36px
+
+## Features Pending ⏳
+- Wire annual pricing to Stripe annual Price IDs
+- Reminders email (needs Resend)
+- Slack integration
+- Notion integration
+- Google Calendar integration
+- Vercel Analytics
+- Dark/light mode toggle
+- SEO blog articles
+
+---
+
+*Last updated: April 2026*
+*Primary AI assistant: Claude (claude.ai + Claude Code)*
