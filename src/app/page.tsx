@@ -25,7 +25,7 @@ const OUTPUTS = [
   { type: 'risk',     color: 'amber', icon: '⚠',  text: 'Interview timeline tight' },
 ]
 
-const LOGOS = ['Notion', 'Slack', 'Linear', 'Figma', 'Vercel', 'Stripe', 'Loom', 'Asana', 'Jira', 'Zoom']
+const LOGOS = ['Notion', 'Slack', 'Linear', 'Figma', 'Loom', 'Asana', 'Jira', 'Zoom', 'Google Meet', 'Teams']
 
 const TESTIMONIALS = [
   {
@@ -263,7 +263,7 @@ export default function Home() {
 
       {/* ── LOGOS ── */}
       <div className={s.logoBar}>
-        <div className={s.logoBarLabel}>Trusted by teams using</div>
+        <div className={s.logoBarLabel}>Works alongside your existing stack</div>
         <div className={s.logoTrack}>
           <div className={s.logoInner}>
             {[...LOGOS, ...LOGOS].map((l, i) => (
