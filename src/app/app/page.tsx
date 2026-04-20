@@ -117,6 +117,7 @@ export default function AppPage() {
   const [showCreateProject, setShowCreateProject] = useState(false)
   const [newProjectName, setNewProjectName]       = useState('')
   const [creatingProject, setCreatingProject]     = useState(false)
+  const [showUpgradeModal, setShowUpgradeModal]   = useState(false)
 
   useEffect(() => {
   if (!isLoggedIn) return
@@ -170,16 +171,18 @@ export default function AppPage() {
   async function flash() {
     // Guest limit check
     if (isLoggedIn && usesLeft === 0) {
-      setError('You have used all your packs this month. Upgrade to Pro for unlimited access.')
+      setShowUpgradeModal(true)
       return
     }
     if (!isLoggedIn && guestUsed) {
+      setShowUpgradeModal(true)
+      return
+    }
 
     if (text.trim().length < 40) return setError('Please paste a meeting transcript first.')
     setError('')
     setLoading(true)
     setPack(null)
-    } 
 
     let i = 0
     setLoaderMsg(LOADER_MSGS[0])
@@ -286,7 +289,10 @@ async function createProject() {
   ] : []
 
   function copy(id: string, content: string): void {
-    throw new Error('Function not implemented.')
+    navigator.clipboard.writeText(content).then(() => {
+      setCopied(id)
+      setTimeout(() => setCopied(null), 2000)
+    })
   }
 
   return (
@@ -294,7 +300,7 @@ async function createProject() {
       {/* NAV */}
       <nav className={styles.nav}>
         <Link href="/" className={styles.navLogo}>
-          <div className={styles.logoMark}><div className={styles.logoInner}/></div>
+          <img src="/logo.png" alt="MeetingFlash" width={28} height={28} style={{ borderRadius: 6 }} />
           MeetingFlash
         </Link>
         <div className={styles.navRight}>
@@ -481,22 +487,6 @@ async function createProject() {
             )}
           </div>
 
-          {isLoggedIn && projects.length > 0 && (
-            <div className={styles.field}>
-              <div className={styles.fieldLabel}>Assign to project (optional)</div>
-              <select
-                className={styles.select}
-                value={projectId || ''}
-                onChange={e => setProjectId(e.target.value || null)}
-              >
-                <option value="">No project</option>
-                {projects.map(p => (
-                  <option key={p.id} value={p.id}>{p.name}</option>
-                ))}
-              </select>
-            </div>
-          )}
-
           {pack && !isLoggedIn && (
             <div className={styles.guestBanner}>
               <div className={styles.guestBannerText}>
@@ -560,6 +550,51 @@ async function createProject() {
           )}
         </div>
       </main>
+
+      {showUpgradeModal && (
+        <div style={{ position:'fixed', inset:0, background:'rgba(0,0,0,0.7)', display:'flex', alignItems:'center', justifyContent:'center', zIndex:1000 }}
+          onClick={() => setShowUpgradeModal(false)}>
+          <div style={{ background:'#0d1117', border:'1px solid #1e2a3a', borderRadius:16, padding:40, maxWidth:420, width:'90%', textAlign:'center' }}
+            onClick={e => e.stopPropagation()}>
+            <div style={{ fontSize:36, marginBottom:12 }}>⚡</div>
+            <h2 style={{ color:'#f0ede8', fontSize:22, fontWeight:700, marginBottom:8 }}>
+              {isLoggedIn ? "You're out of packs" : 'Free pack used'}
+            </h2>
+            <p style={{ color:'#7a7870', fontSize:15, marginBottom:28, lineHeight:1.6 }}>
+              {isLoggedIn
+                ? 'Upgrade to Pro for unlimited packs, project memory, full history and more.'
+                : 'Create a free account to get 3 packs per month — or go Pro for unlimited access.'}
+            </p>
+            <div style={{ display:'flex', flexDirection:'column', gap:10 }}>
+              <button
+                style={{ background:'#2563EB', color:'#fff', border:'none', borderRadius:8, padding:'13px 24px', fontSize:15, fontWeight:600, cursor:'pointer' }}
+                onClick={async () => {
+                  const res = await fetch('/api/checkout', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ priceId: process.env.NEXT_PUBLIC_STRIPE_PRO_PRICE_ID, email: '' }),
+                  })
+                  const { url } = await res.json()
+                  if (url) window.location.href = url
+                }}
+              >
+                Go Pro — $12/month →
+              </button>
+              {!isLoggedIn && (
+                <Link href="/signup" style={{ background:'#1a2230', color:'#f0ede8', border:'1px solid #1e2a3a', borderRadius:8, padding:'13px 24px', fontSize:15, fontWeight:500, textDecoration:'none' }}>
+                  Create free account →
+                </Link>
+              )}
+              <button
+                style={{ background:'none', border:'none', color:'#7a7870', fontSize:13, cursor:'pointer', marginTop:4 }}
+                onClick={() => setShowUpgradeModal(false)}
+              >
+                Maybe later
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }

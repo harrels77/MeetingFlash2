@@ -34,12 +34,6 @@
   letter-spacing: -0.3px;
 }
 
-.logoMark {
-  width: 22px; height: 22px;
-  background: var(--blue);
-  border-radius: 6px;
-  flex-shrink: 0;
-}
 
 .navRight {
   display: flex;

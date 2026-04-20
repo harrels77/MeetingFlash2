@@ -10,7 +10,6 @@
 - [x] Sauvegarde des packs  
 - [x] Historique dans le dashboard  
 - [x] Page détail d'un pack  
-- [x] Essai gratuit sans compte  
 - [x] Pages légales Privacy + Terms  
 
 ---
@@ -20,10 +19,11 @@
 - [x] Task tracker — statut todo / in progress / done  
 - [x] Project memory — associer un pack à un projet  
 - [x] Smart search — chercher dans tous les meetings  
-- [ ] Shareable recap — lien public par meeting  
-- [ ] Export PDF  
-- [ ] Templates — sprint, client, standup  
-- [ ] Compteur d’usage réel (Supabase)  
+- [x] Shareable recap — lien public par meeting  
+- [x] Essai gratuit sans compte 
+- [x] Export PDF  
+- [x] Templates — sprint, client, standup  
+- [x] Compteur d’usage réel (Supabase)  
 
 ---
 
@@ -31,7 +31,7 @@
 
 - [ ] Reminders email — tâche non faite  
 - [ ] Meeting recap auto par email  
-- [ ] Agenda builder automatique  
+- [x] Agenda builder automatique  
 
 ---
 
@@ -69,7 +69,7 @@
 - [ ] Refonte auth pages  
 - [ ] Animations & micro-interactions  
 - [ ] Responsive mobile complet  
-- [ ] Menu mobile  
+- [x] Menu mobile  
 - [ ] Témoignages / preuve sociale  
 - [ ] Email personnalisé (nom domaine)  
 

@@ -36,7 +36,7 @@ export default function MobileNav() {
     <>
       <nav className={styles.nav}>
         <Link href="/" className={styles.logo}>
-          <div className={styles.logoMark}><div className={styles.logoInner}/></div>
+          <img src="/logo.png" alt="MeetingFlash" width={28} height={28} style={{ borderRadius: 6 }} />
           MeetingFlash
         </Link>
 
@@ -45,6 +45,7 @@ export default function MobileNav() {
           <Link href="/" className={styles.navLink}>Home</Link>
           <Link href="#features" className={styles.navLink}>Features</Link>
           <Link href="#pricing"  className={styles.navLink}>Pricing</Link>
+          
           
 
           {loading ? (

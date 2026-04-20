@@ -153,6 +153,7 @@ function LiveDemo() {
 
 export default function Home() {
   const revealRef = useRef<IntersectionObserver | null>(null)
+  const [annual, setAnnual] = useState(false)
 
   useEffect(() => {
     revealRef.current = new IntersectionObserver(
@@ -395,6 +396,19 @@ export default function Home() {
         <h2 className={`${s.sectionTitle} ${s.reveal}`}>Simple. Honest. No surprises.</h2>
         <p className={`${s.pricingSub} ${s.reveal}`}>Start free. Upgrade when you're ready.</p>
 
+        <div className={`${s.reveal}`} style={{ display:'flex', alignItems:'center', justifyContent:'center', gap:12, marginBottom:32 }}>
+          <span style={{ color: !annual ? '#f0ede8' : '#7a7870', fontSize:14, fontWeight:500 }}>Monthly</span>
+          <button
+            onClick={() => setAnnual(a => !a)}
+            style={{ position:'relative', width:44, height:24, borderRadius:12, background: annual ? '#2563EB' : '#1e2a3a', border:'none', cursor:'pointer', transition:'background 0.2s' }}
+          >
+            <span style={{ position:'absolute', top:3, left: annual ? 22 : 3, width:18, height:18, borderRadius:'50%', background:'#fff', transition:'left 0.2s' }} />
+          </button>
+          <span style={{ color: annual ? '#f0ede8' : '#7a7870', fontSize:14, fontWeight:500 }}>
+            Annual <span style={{ color:'#4ade80', fontSize:12, fontWeight:600 }}>Save 20%</span>
+          </span>
+        </div>
+
         <div className={`${s.pricingGrid} ${s.reveal}`}>
           <div className={s.priceCard}>
             <div className={s.planName}>Free</div>
@@ -411,26 +425,58 @@ export default function Home() {
           <div className={`${s.priceCard} ${s.priceCardFeatured}`}>
             <div className={s.planBadge}>Most popular</div>
             <div className={s.planName}>Pro</div>
-            <div className={s.planPrice}>$10</div>
-            <div className={s.planPeriod}>per month · cancel anytime</div>
+            <div className={s.planPrice}>{annual ? '$8' : '$12'}</div>
+            <div className={s.planPeriod}>{annual ? 'per month · billed $96/yr' : 'per month · cancel anytime'}</div>
             <ul className={s.planFeats}>
               {['Unlimited packs', 'Project memory', 'Full history + search', 'All languages', 'PDF + Notion export', 'Priority processing'].map(f => (
                 <li key={f}><span className={s.featCheck}>✓</span>{f}</li>
               ))}
             </ul>
-            <Link href="/signup" className={s.planBtnPro}>Go Pro →</Link>
+              <button
+                className={s.planBtnPro}
+                onClick={async () => {
+                  const res = await fetch('/api/checkout', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                      priceId: process.env.NEXT_PUBLIC_STRIPE_PRO_PRICE_ID,
+                      email: '',
+                    })
+                  })
+                  const { url } = await res.json()
+                  if (url) window.location.href = url
+                }}
+              >
+                Go Pro →
+              </button>
           </div>
 
           <div className={s.priceCard}>
             <div className={s.planName}>Team</div>
-            <div className={s.planPrice}>$25</div>
-            <div className={s.planPeriod}>5 seats · per month</div>
+            <div className={s.planPrice}>{annual ? '$20' : '$25'}</div>
+            <div className={s.planPeriod}>{annual ? '5 seats · billed $240/yr' : '5 seats · per month'}</div>
             <ul className={s.planFeats}>
               {['Everything in Pro', 'Shared project memory', 'Team dashboard', 'Slack + Notion sync', 'Priority support'].map(f => (
                 <li key={f}><span className={s.featCheck}>✓</span>{f}</li>
               ))}
             </ul>
-            <Link href="/signup" className={s.planBtnFree}>Start team trial →</Link>
+            <button
+              className={s.planBtnPro}
+              onClick={async () => {
+                const res = await fetch('/api/checkout', {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({
+                    priceId: process.env.NEXT_PUBLIC_STRIPE_TEAM_PRICE_ID,
+                    email: '',
+                  })
+                })
+                const { url } = await res.json()
+                if (url) window.location.href = url
+              }}
+            >
+              Go Team →
+            </button>
           </div>
         </div>
       </section>

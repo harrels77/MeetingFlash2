@@ -5,6 +5,7 @@ import Link from 'next/link'
 import { supabase } from '@/lib/supabase'
 import styles from './dashboard.module.css'
 
+
 interface Profile {
   id: string
   email: string
@@ -178,6 +179,7 @@ export default function Dashboard() {
       {/* SIDEBAR */}
       <aside className={styles.sidebar}>
         <Link href="/" className={styles.sidebarLogo}>
+          <img src="/logo.png" alt="MeetingFlash" width={28} height={28} style={{ borderRadius: 6 }} />
           <div className={styles.logoMark}><div className={styles.logoInner}/></div>
           meetingflash
         </Link>

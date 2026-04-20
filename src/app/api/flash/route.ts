@@ -1,7 +1,28 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 
+const rateLimit = new Map<string, { count: number; resetAt: number }>()
+const RATE_LIMIT = 10
+const RATE_WINDOW_MS = 60 * 1000
+
+function checkRateLimit(ip: string): boolean {
+  const now = Date.now()
+  const entry = rateLimit.get(ip)
+  if (!entry || now > entry.resetAt) {
+    rateLimit.set(ip, { count: 1, resetAt: now + RATE_WINDOW_MS })
+    return true
+  }
+  if (entry.count >= RATE_LIMIT) return false
+  entry.count++
+  return true
+}
+
 export async function POST(req: NextRequest) {
+  const ip = req.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ?? 'unknown'
+  if (!checkRateLimit(ip)) {
+    return NextResponse.json({ error: 'Too many requests. Please wait a minute.' }, { status: 429 })
+  }
+
   try {
     const { text, lang, style, projectId } = await req.json()
 
@@ -56,10 +77,18 @@ ${text}`
         'Content-Type': 'application/json',
         'x-api-key': apiKey,
         'anthropic-version': '2023-06-01',
+        'anthropic-beta': 'prompt-caching-2024-07-31',
       },
       body: JSON.stringify({
         model: 'claude-sonnet-4-20250514',
-        max_tokens: 2000,
+        max_tokens: 4000,
+        system: [
+          {
+            type: 'text',
+            text: 'You are MeetingFlash, a professional post-meeting execution assistant. Return ONLY valid JSON — no markdown, no explanation.',
+            cache_control: { type: 'ephemeral' },
+          }
+        ],
         messages: [{ role: 'user', content: prompt }],
       }),
     })
@@ -92,7 +121,7 @@ ${text}`
         const { data: { user } } = await supabase.auth.getUser()
 
         if (user) {
-          await supabase.from('meetings').insert({
+          const { data: savedMeeting } = await supabase.from('meetings').insert({
             user_id: user.id,
             project_id: projectId || null,
             title: pack.title || 'Untitled Meeting',
@@ -100,36 +129,24 @@ ${text}`
             pack,
             lang,
             style,
-          })
-        
-          // Save tasks
-        if (pack.tasks && Array.isArray(pack.tasks) && pack.tasks.length > 0) {
-             const savedMeeting = await supabase
-               .from('meetings')
-               .select('id')
-               .eq('user_id', user.id)
-               .order('created_at', { ascending: false })
-               .limit(1)
-               .single()
-            
-            if (savedMeeting.data) {
-              const tasksToInsert = pack.tasks.map((t: {
-                text: string
-                owner: string
-                deadline: string | null
-                priority: string
-              }) => ({
-                user_id: user.id,
-                meeting_id: savedMeeting.data.id,
-                text: t.text,
-                owner: t.owner || 'Team',
-                deadline: t.deadline || null,
-                priority: t.priority || 'medium',
-                status: 'todo',
-              }))
-            
+          }).select('id').single()
+
+          if (savedMeeting && pack.tasks && Array.isArray(pack.tasks) && pack.tasks.length > 0) {
+            const tasksToInsert = pack.tasks.map((t: {
+              text: string
+              owner: string
+              deadline: string | null
+              priority: string
+            }) => ({
+              user_id: user.id,
+              meeting_id: savedMeeting.id,
+              text: t.text,
+              owner: t.owner || 'Team',
+              deadline: t.deadline || null,
+              priority: t.priority || 'medium',
+              status: 'todo',
+            }))
             await supabase.from('tasks').insert(tasksToInsert)
-            }
           }
 
           // Increment usage count
