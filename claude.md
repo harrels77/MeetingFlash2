@@ -22,7 +22,7 @@ Target: agencies, freelancers, small product teams who want to eliminate
 post-meeting admin work. Key differentiator vs ChatGPT: zero prompts required,
 persistent project memory, structured ready-to-use outputs.
 
-**Current status:** MVP deployed on Vercel. Stripe fully integrated. Auth working.
+**Current status:** MVP deployed on Vercel. Stripe fully integrated. Auth working. Blog live.
 
 ---
 
@@ -33,6 +33,7 @@ persistent project memory, structured ready-to-use outputs.
 - **Database:** Supabase PostgreSQL + RLS
 - **AI:** Anthropic Claude API (claude-sonnet-4-20250514) with prompt caching
 - **Payments:** Stripe (subscriptions) — apiVersion: 2026-03-25.dahlia
+- **Email:** Resend — routes exist but **blocked until custom domain acquired**
 - **Deployment:** Vercel
 
 ---
@@ -47,11 +48,12 @@ persistent project memory, structured ready-to-use outputs.
 - Muted: `#94A3B8`
 - Fonts: Plus Jakarta Sans + Instrument Serif + JetBrains Mono
 - All CSS variables defined in `src/styles/globals.css`
+- Dark/light theme via `[data-theme="light"]` on `<html>` — CSS vars override in globals.css
 
 ### Design Decisions (do not revert)
 - Ambient glow blobs: opacity ~0.22 (NOT 0.12 — was too subtle, intentionally bolder)
 - Pricing featured card: elevated with `translateY(-4px)` + double box-shadow glow
-- Logo bar label: "Works alongside your existing stack" (NOT "Trusted by teams using" — old text implied integrations that don't exist yet)
+- Logo bar label: "Works alongside your existing stack" (NOT "Trusted by teams using")
 - Logo bar tools: meeting tools only (Zoom, Teams, Google Meet, Loom, etc.) — no Stripe/Vercel
 - Nav logo: 36px (NOT 28px — was too small)
 
@@ -61,8 +63,11 @@ persistent project memory, structured ready-to-use outputs.
 src/
 ├── app/
 │   ├── page.tsx                     ← Landing page (hero, demo, features, testimonials, pricing)
-│   ├── layout.tsx                   ← Root layout + AuthProvider + SEO metadata
+│   ├── layout.tsx                   ← Root layout + AuthProvider + Analytics + theme FOUC script
 │   ├── app/page.tsx                 ← Flash tool (main product)
+│   ├── blog/
+│   │   ├── page.tsx                 ← Blog index (4 articles)
+│   │   └── [slug]/page.tsx          ← Article page (static)
 │   ├── dashboard/
 │   │   ├── page.tsx                 ← Dashboard (recent packs + projects tabs)
 │   │   ├── pack/[id]/page.tsx       ← Pack detail + task tracker
@@ -72,20 +77,26 @@ src/
 │   ├── api/
 │   │   ├── flash/route.ts           ← Core AI route (Claude API)
 │   │   ├── checkout/route.ts        ← Stripe checkout session
-│   │   └── webhook/route.ts         ← Stripe webhook handler
+│   │   ├── webhook/route.ts         ← Stripe webhook handler
+│   │   ├── email/
+│   │   │   ├── welcome/route.ts     ← Welcome email via Resend (new accounts)
+│   │   │   └── nudge/route.ts       ← Upgrade nudge email (free limit reached)
+│   │   └── cron/
+│   │       └── reset-uses/route.ts  ← Monthly reset of uses_this_month (Vercel cron)
 │   ├── auth/callback/route.ts       ← OAuth callback → redirect /
 │   ├── login/page.tsx               ← Login (email + Google OAuth)
 │   ├── signup/page.tsx              ← Signup
-│   ├── share/[token]/page.tsx       ← Public shareable pack
+│   ├── share/[token]/page.tsx       ← Public shareable pack + sticky CTA banner
 │   ├── privacy/page.tsx             ← Privacy Policy
 │   └── terms/page.tsx               ← Terms of Service
 ├── components/
-│   ├── MobileNav.tsx                ← Nav with auth state (uses useAuth)
+│   ├── MobileNav.tsx                ← Nav with auth state + dark/light toggle
 │   ├── HeroCta.tsx                  ← Smart CTA (4 states based on auth)
 │   └── FooterAccount.tsx            ← Footer with dynamic auth state
 └── lib/
     ├── supabase.ts                  ← Supabase client singleton
-    └── AuthProvider.tsx             ← Global auth context (useAuth hook)
+    ├── AuthProvider.tsx             ← Global auth context (useAuth hook)
+    └── blog.ts                      ← Blog articles data (4 articles, static)
 
 ---
 
@@ -99,6 +110,7 @@ src/
 - OAuth callback route: `src/app/auth/callback/route.ts`
 - `AuthProvider` calls both `getSession()` AND `onAuthStateChange` — both can call `loadProfile` simultaneously (known race condition in prod, do not change without testing)
 - `signOut` in AuthProvider: `async`, awaits `supabase.auth.signOut()`, then does `window.location.replace('/')` — full page reload to clear state
+- **Welcome email trigger:** when `loadProfile` creates a new profile (first time, no existing row), it calls `fetch('/api/email/welcome', ...)` fire-and-forget. Currently fails silently (no domain yet).
 
 ### Database (Supabase PostgreSQL)
 Tables: `profiles`, `projects`, `meetings`, `tasks`
@@ -108,11 +120,11 @@ Key schema:
   `risks`, `email`, `slack`, `agenda`, `tasks[]`
 - `meetings.share_token` = string (nullable) — for public share links
 - `profiles.plan` = `'free'` | `'pro'` | `'team'`
-- `profiles.uses_this_month` = integer (reset monthly)
+- `profiles.uses_this_month` = integer (reset monthly via Vercel cron)
 - `tasks` = `{ user_id, meeting_id, text, owner, deadline, priority, status }`
 - RLS enabled on all tables
 - Auto-profile creation via `handle_new_user()` trigger
-- **IMPORTANT:** webhook uses `SUPABASE_SERVICE_ROLE_KEY` (not anon key) to bypass RLS
+- **IMPORTANT:** webhook + cron use `SUPABASE_SERVICE_ROLE_KEY` (not anon key) to bypass RLS
 
 ### AI — /api/flash
 - Model: `claude-sonnet-4-20250514`
@@ -127,23 +139,50 @@ Key schema:
 - Saves meeting + tasks to DB if `Authorization: Bearer <token>` header present
 - Supabase client in this route: created per-request with user's auth header, uses `NEXT_PUBLIC_SUPABASE_ANON_KEY`
 - Calls `supabase.rpc('increment_uses', { user_id: user.id })` after each successful flash
+- After increment, fetches profile to check if free user hit 3 uses → sends nudge email (fire-and-forget)
 
 ### Payments (Stripe)
 - Pro: $12/month or $8/month billed annually ($96/yr)
 - Team: $25/month for 5 seats or $20/month billed annually ($240/yr)
+- Monthly price IDs: `NEXT_PUBLIC_STRIPE_PRO_PRICE_ID`, `NEXT_PUBLIC_STRIPE_TEAM_PRICE_ID`
+- Annual price IDs: `NEXT_PUBLIC_STRIPE_PRO_ANNUAL_PRICE_ID`, `NEXT_PUBLIC_STRIPE_TEAM_ANNUAL_PRICE_ID`
 - Checkout sends `metadata: { userId, priceId }` — both are needed
 - Checkout: `success_url` → `/dashboard?upgraded=true`, `cancel_url` → `/#pricing`
 - Webhook uses `SUPABASE_SERVICE_ROLE_KEY` (bypasses RLS) — client created fresh per request
-- Webhook Pro vs Team detection: `priceId === process.env.STRIPE_TEAM_PRICE_ID` → 'team', else 'pro'
-  - Note: webhook uses `STRIPE_TEAM_PRICE_ID` (no NEXT_PUBLIC_ prefix — server only)
+- **Webhook team detection:** checks if priceId is in `[NEXT_PUBLIC_STRIPE_TEAM_PRICE_ID, NEXT_PUBLIC_STRIPE_TEAM_ANNUAL_PRICE_ID]` — covers both monthly and annual
 - On `checkout.session.completed`: updates plan + saves userId to Stripe customer metadata
 - On `customer.subscription.deleted` / `invoice.payment_failed`: looks up by userId from customer metadata, falls back to email
-- Annual pricing toggle is **UI-only** — not yet wired to Stripe annual price IDs
 
 ### Free Trial Logic
 - Guest (not logged in): 1 free pack via `localStorage('mf_guest_used')`
 - Free plan: 3 packs/month tracked in `profiles.uses_this_month`
+- Reset: Vercel cron job hits `GET /api/cron/reset-uses` on the 1st of each month at midnight
+- Cron protected by `Authorization: Bearer CRON_SECRET` header
 - When limit reached: show upgrade modal (not just an error message)
+
+### Email (Resend) — BLOCKED until domain acquired
+- Routes exist: `/api/email/welcome` and `/api/email/nudge`
+- Both use `from: 'MeetingFlash <hello@meetingflash.app>'` — requires verified domain in Resend
+- **Resend does NOT work with `vercel.app` domain** — custom domain required
+- All email calls are fire-and-forget with `.catch(() => {})` — fail silently in prod
+- When domain is ready: add `RESEND_API_KEY` to Vercel env vars + verify domain in Resend dashboard
+- Welcome triggers: `AuthProvider.loadProfile` when inserting new profile
+- Nudge triggers: `/api/flash` after `increment_uses` when `plan === 'free' && uses_this_month >= 3`
+
+### Dark / Light Mode
+- Toggle button (☀/☾) in MobileNav, desktop and mobile
+- State persisted in `localStorage('mf_theme')`
+- Applied via `document.documentElement.setAttribute('data-theme', ...)` 
+- FOUC prevention: inline script in `<head>` in layout.tsx reads localStorage and sets attribute before paint
+- Light theme CSS vars defined in `[data-theme="light"]` block in globals.css
+
+### Blog
+- 4 static articles in `src/lib/blog.ts` (Article[] data array)
+- SEO slugs: `how-to-write-effective-meeting-notes`, `post-meeting-workflow-for-teams`, `how-to-write-follow-up-email-after-meeting`, `meeting-action-items-best-practices`
+- Blog index at `/blog`, articles at `/blog/[slug]`
+- `generateStaticParams()` used — pre-rendered at build time
+- Each article ends with a CTA block linking to `/app`
+- "Blog" link added to MobileNav (desktop + mobile)
 
 ### HeroCta Labels (src/components/HeroCta.tsx)
 - Guest, no pack used → `'Try with sample notes →'`
@@ -151,21 +190,28 @@ Key schema:
 - Logged in, 0 meetings → `'Try with sample notes →'` (queries DB)
 - Logged in, has meetings → `'Continue →'` (queries DB)
 
+### Share Page
+- Public read-only pack view at `/share/[token]`
+- Sticky banner fixed at bottom: "Turn your own meeting notes into an Execution Pack — Try free →"
+- Banner links to `/app`
+
 ---
 
 ## Environment Variables
 NEXT_PUBLIC_SUPABASE_URL
 NEXT_PUBLIC_SUPABASE_ANON_KEY
-SUPABASE_SERVICE_ROLE_KEY               ← used in webhook to bypass RLS
+SUPABASE_SERVICE_ROLE_KEY               ← used in webhook + cron to bypass RLS
 ANTHROPIC_API_KEY
-NEXT_PUBLIC_APP_URL
+NEXT_PUBLIC_APP_URL                     ← used in email links
 STRIPE_SECRET_KEY
 STRIPE_WEBHOOK_SECRET
 NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY
-NEXT_PUBLIC_STRIPE_PRO_PRICE_ID
-NEXT_PUBLIC_STRIPE_TEAM_PRICE_ID
-NEXT_PUBLIC_STRIPE_PRO_ANNUAL_PRICE_ID  ← TODO: create in Stripe dashboard
-NEXT_PUBLIC_STRIPE_TEAM_ANNUAL_PRICE_ID ← TODO: create in Stripe dashboard
+NEXT_PUBLIC_STRIPE_PRO_PRICE_ID         ← price_xxx (monthly)
+NEXT_PUBLIC_STRIPE_TEAM_PRICE_ID        ← price_xxx (monthly)
+NEXT_PUBLIC_STRIPE_PRO_ANNUAL_PRICE_ID  ← price_xxx (annual)
+NEXT_PUBLIC_STRIPE_TEAM_ANNUAL_PRICE_ID ← price_xxx (annual)
+CRON_SECRET                             ← random string, protects /api/cron/reset-uses
+RESEND_API_KEY                          ← get from resend.com (needs custom domain to work)
 
 ---
 
@@ -179,7 +225,7 @@ NEXT_PUBLIC_STRIPE_TEAM_ANNUAL_PRICE_ID ← TODO: create in Stripe dashboard
 - Task tracker — todo/in_progress/done per pack
 - Project memory — decisions + tasks across meetings
 - Smart search — full-text across all meetings
-- Shareable recap — public link per meeting
+- Shareable recap — public link per meeting + sticky CTA banner
 - Export PDF via window.print()
 - Templates — sprint, client, standup, product
 - Real usage counter from Supabase
@@ -189,28 +235,24 @@ NEXT_PUBLIC_STRIPE_TEAM_ANNUAL_PRICE_ID ← TODO: create in Stripe dashboard
 - Settings page — profile, plan, usage, delete account
 - Mobile responsive — hamburger nav
 - MobileNav + FooterAccount with auth state via useAuth
-- Stripe checkout + webhook (all 3 events handled)
+- Stripe checkout + webhook (all 3 events handled, team detection covers monthly + annual)
 - Rate limiting on /api/flash (10 req/min per IP)
 - Prompt caching on Claude API (~80% cost reduction)
 - Upgrade modal when free limit reached
-- Annual/monthly pricing toggle (UI only)
+- Annual/monthly pricing toggle — wired to Stripe annual Price IDs
 - SEO meta tags + OpenGraph in layout.tsx
-
-## Visual Changes Deployed (not yet pushed)
-- Ambient glow blobs: opacity 0.12 → 0.22, larger and more vivid
-- Pricing featured card: elevated + double glow
-- Logo bar: label + tools updated (meeting tools only)
-- Nav logo: 28px → 36px
+- Vercel Analytics (`<Analytics />` in layout.tsx)
+- Monthly usage reset — Vercel cron job (1st of month, midnight)
+- Dark/light mode toggle — nav button, localStorage, FOUC-free
+- Blog — 4 SEO articles, static, linked from nav
+- Email routes (Resend) — built, blocked until custom domain
 
 ## Features Pending ⏳
-- Wire annual pricing to Stripe annual Price IDs
-- Reminders email (needs Resend)
+- Activate email (Resend) — needs custom domain (no `vercel.app` support)
 - Slack integration
 - Notion integration
 - Google Calendar integration
-- Vercel Analytics
-- Dark/light mode toggle
-- SEO blog articles
+- SEO: add more blog articles over time
 
 ---
 
