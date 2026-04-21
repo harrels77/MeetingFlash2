@@ -44,6 +44,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         .select()
         .single()
       data = newProf
+      // Send welcome email for new accounts (fire and forget)
+      fetch('/api/email/welcome', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, name: data?.full_name || '' }),
+      }).catch(() => {})
     }
 
     if (data) setProfile(data)

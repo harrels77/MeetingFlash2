@@ -26,6 +26,21 @@
   --mono:      'JetBrains Mono', monospace;
 }
 
+[data-theme="light"] {
+  --bg:        #F8FAFC;
+  --bg2:       #F1F5F9;
+  --surface:   #FFFFFF;
+  --surface2:  #F8FAFC;
+  --lift:      #EFF4FF;
+  --border:    rgba(0,0,0,0.08);
+  --border2:   rgba(0,0,0,0.12);
+  --border3:   rgba(0,0,0,0.20);
+  --blue-glow: rgba(37,99,235,0.12);
+  --text:      #0F172A;
+  --muted:     #475569;
+  --faint:     #94A3B8;
+}
+
 html { scroll-behavior: smooth; }
 
 body {

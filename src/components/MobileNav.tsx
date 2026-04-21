@@ -8,6 +8,19 @@ export default function MobileNav() {
   const { user, profile, loading, signOut } = useAuth()
   const [open, setOpen]               = useState(false)
   const [accountOpen, setAccountOpen] = useState(false)
+  const [theme, setTheme]             = useState<'dark' | 'light'>('dark')
+
+  useEffect(() => {
+    const saved = localStorage.getItem('mf_theme') as 'dark' | 'light' | null
+    if (saved) setTheme(saved)
+  }, [])
+
+  function toggleTheme() {
+    const next = theme === 'dark' ? 'light' : 'dark'
+    setTheme(next)
+    localStorage.setItem('mf_theme', next)
+    document.documentElement.setAttribute('data-theme', next)
+  }
 
   useEffect(() => {
     if (open) document.body.style.overflow = 'hidden'
@@ -45,6 +58,7 @@ export default function MobileNav() {
           <Link href="/" className={styles.navLink}>Home</Link>
           <Link href="#features" className={styles.navLink}>Features</Link>
           <Link href="#pricing"  className={styles.navLink}>Pricing</Link>
+          <Link href="/blog"     className={styles.navLink}>Blog</Link>
           
           
 
@@ -94,6 +108,15 @@ export default function MobileNav() {
             </>
           )}
         </div>
+
+        {/* THEME TOGGLE */}
+        <button
+          className={styles.themeToggle}
+          onClick={toggleTheme}
+          aria-label="Toggle theme"
+        >
+          {theme === 'dark' ? '☀' : '☾'}
+        </button>
 
         {/* BURGER — visible uniquement sur mobile via CSS */}
         <button

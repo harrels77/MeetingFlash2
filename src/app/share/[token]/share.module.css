@@ -178,8 +178,57 @@
 }
 .footerCta:hover { background: #d6f84a; }
 
+.stickyBanner {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: rgba(6, 6, 8, 0.95);
+  backdrop-filter: blur(20px);
+  border-top: 1px solid rgba(200, 240, 60, 0.2);
+  padding: 16px 40px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  z-index: 200;
+}
+
+.stickyBannerLeft {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.stickyBannerTitle {
+  font-size: 14px;
+  font-weight: 600;
+  color: #f0ede8;
+}
+
+.stickyBannerSub {
+  font-size: 12px;
+  color: #7a7870;
+}
+
+.stickyBannerCta {
+  background: #c8f03c;
+  color: #060608;
+  padding: 10px 22px;
+  font-size: 13px;
+  font-weight: 700;
+  border-radius: 8px;
+  text-decoration: none;
+  white-space: nowrap;
+  transition: background 0.15s;
+  flex-shrink: 0;
+}
+.stickyBannerCta:hover { background: #d6f84a; }
+
 @media (max-width: 680px) {
   .content { padding: 32px 20px 80px; }
   .nav { padding: 0 20px; }
   .title { font-size: 36px; }
+  .stickyBanner { padding: 14px 20px; flex-direction: column; align-items: flex-start; gap: 12px; }
+  .stickyBannerCta { width: 100%; text-align: center; }
 }

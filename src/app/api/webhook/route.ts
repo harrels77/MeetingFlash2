@@ -30,7 +30,11 @@ export async function POST(req: NextRequest) {
 
     if (userId) {
       const priceId = session.metadata?.priceId
-      const plan = priceId === process.env.STRIPE_TEAM_PRICE_ID ? 'team' : 'pro'
+      const teamPriceIds = [
+        process.env.NEXT_PUBLIC_STRIPE_TEAM_PRICE_ID,
+        process.env.NEXT_PUBLIC_STRIPE_TEAM_ANNUAL_PRICE_ID,
+      ]
+      const plan = teamPriceIds.includes(priceId) ? 'team' : 'pro'
 
       await supabase.from('profiles').update({ plan }).eq('id', userId)
 

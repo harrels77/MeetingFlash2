@@ -151,6 +151,20 @@ ${text}`
 
           // Increment usage count
           await supabase.rpc('increment_uses', { user_id: user.id })
+
+          // Send nudge email when free user hits their limit
+          const { data: prof } = await supabase
+            .from('profiles')
+            .select('plan, uses_this_month, email, full_name')
+            .eq('id', user.id)
+            .single()
+          if (prof?.plan === 'free' && prof.uses_this_month >= 3) {
+            fetch(`${process.env.NEXT_PUBLIC_APP_URL}/api/email/nudge`, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ email: prof.email, name: prof.full_name }),
+            }).catch(() => {})
+          }
         }
       } catch (saveError) {
         console.error('Save error:', saveError)

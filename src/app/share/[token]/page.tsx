@@ -45,7 +45,7 @@ export default async function SharePage({ params }: { params: { token: string } 
         <div className={styles.navBadge}>Shared pack · Read only</div>
       </nav>
 
-      <div className={styles.content}>
+      <div className={styles.content} style={{ paddingBottom: 120 }}>
         <div className={styles.header}>
           <div className={styles.meta}>
             <span>{new Date(meeting.created_at).toLocaleDateString('en-GB', { day:'numeric', month:'long', year:'numeric' })}</span>
@@ -83,6 +83,15 @@ export default async function SharePage({ params }: { params: { token: string } 
             Create your free account →
           </Link>
         </div>
+      </div>
+
+      {/* STICKY BANNER */}
+      <div className={styles.stickyBanner}>
+        <div className={styles.stickyBannerLeft}>
+          <span className={styles.stickyBannerTitle}>Turn your own meeting notes into an Execution Pack.</span>
+          <span className={styles.stickyBannerSub}>3 free packs per month. No credit card.</span>
+        </div>
+        <Link href="/app" className={styles.stickyBannerCta}>Try free →</Link>
       </div>
     </div>
   )

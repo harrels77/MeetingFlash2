@@ -181,6 +181,24 @@
 .accountMenuSignOut { color: rgba(252,165,165,0.8) !important; }
 .accountMenuSignOut:hover { color: #FCA5A5 !important; background: rgba(239,68,68,0.08) !important; }
 
+/* THEME TOGGLE */
+.themeToggle {
+  background: none;
+  border: 1px solid rgba(255,255,255,0.1);
+  color: var(--muted, #94A3B8);
+  font-size: 15px;
+  width: 34px;
+  height: 34px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: border-color 0.15s, color 0.15s;
+  flex-shrink: 0;
+}
+.themeToggle:hover { border-color: rgba(255,255,255,0.25); color: var(--text, #F8FAFC); }
+
 /* BURGER */
 .burger {
   display: none;
