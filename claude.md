@@ -162,8 +162,9 @@ Key schema:
 
 ### Email (Resend) — BLOCKED until domain acquired
 - Routes exist: `/api/email/welcome` and `/api/email/nudge`
-- Both use `from: 'MeetingFlash <hello@meetingflash.app>'` — requires verified domain in Resend
-- **Resend does NOT work with `vercel.app` domain** — custom domain required
+- Both use `from: 'MeetingFlash <hello@meeetingflash.work>'`
+- Domain `meeetingflash.work` is purchased and connected to Vercel
+- **Still requires:** domain verified in Resend (DNS records) + `RESEND_API_KEY` in Vercel
 - All email calls are fire-and-forget with `.catch(() => {})` — fail silently in prod
 - When domain is ready: add `RESEND_API_KEY` to Vercel env vars + verify domain in Resend dashboard
 - Welcome triggers: `AuthProvider.loadProfile` when inserting new profile
