@@ -33,7 +33,7 @@ persistent project memory, structured ready-to-use outputs.
 - **Database:** Supabase PostgreSQL + RLS
 - **AI:** Anthropic Claude API (claude-sonnet-4-20250514) with prompt caching
 - **Payments:** Stripe (subscriptions) — apiVersion: 2026-03-25.dahlia
-- **Email:** Resend — routes exist but **blocked until custom domain acquired**
+- **Email:** Resend — `hello@meetingflash.work` — blocked until domain verified in Resend + API key added
 - **Deployment:** Vercel
 
 ---
@@ -162,11 +162,10 @@ Key schema:
 
 ### Email (Resend) — BLOCKED until domain acquired
 - Routes exist: `/api/email/welcome` and `/api/email/nudge`
-- Both use `from: 'MeetingFlash <hello@meeetingflash.work>'`
-- Domain `meeetingflash.work` is purchased and connected to Vercel
-- **Still requires:** domain verified in Resend (DNS records) + `RESEND_API_KEY` in Vercel
-- All email calls are fire-and-forget with `.catch(() => {})` — fail silently in prod
-- When domain is ready: add `RESEND_API_KEY` to Vercel env vars + verify domain in Resend dashboard
+- Both use `from: 'MeetingFlash <hello@meetingflash.work>'`
+- Domain `meetingflash.work` purchased and connected to Vercel
+- All email calls are fire-and-forget with `.catch(() => {})` — fail silently until activated
+- To activate: verify `meetingflash.work` in Resend dashboard (add DNS records) + add `RESEND_API_KEY` to Vercel env vars
 - Welcome triggers: `AuthProvider.loadProfile` when inserting new profile
 - Nudge triggers: `/api/flash` after `increment_uses` when `plan === 'free' && uses_this_month >= 3`
 

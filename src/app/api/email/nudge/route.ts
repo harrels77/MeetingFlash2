@@ -11,7 +11,7 @@ export async function POST(req: NextRequest) {
 
   try {
     await resend.emails.send({
-      from: 'MeetingFlash <hello@meeetingflash.work>',
+      from: 'MeetingFlash <hello@meetingflash.work>',
       to: email,
       subject: "You've used all 3 free packs this month ⚡",
       html: `
