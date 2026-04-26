@@ -10,7 +10,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: 'MeetingFlash — Turn meeting notes into execution instantly',
     description: 'Paste your notes. Get decisions, tasks, follow-up email and Slack message in 20 seconds.',
-    url: 'https://meetingflash.vercel.app',
+    url: 'https://meetingflash.work',
     siteName: 'MeetingFlash',
     type: 'website',
   },
