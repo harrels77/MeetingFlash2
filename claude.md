@@ -104,6 +104,7 @@ src/
 
 ### Authentication
 - Handled via Supabase Auth (Google OAuth + email/password)
+- Google OAuth consent screen branded as "MeetingFlash" (verified, in production) — authorized domains include `meetingflash.work`, `supabase.co`, and Vercel preview domains
 - Global session managed by `AuthProvider.tsx` — most components use `useAuth()`
 - **EXCEPTION:** `src/app/app/page.tsx` (flash tool) does NOT use `useAuth()` — it has its own `supabase.auth.getSession()` + `onAuthStateChange` directly, with local `isLoggedIn` state. Do not refactor this without careful testing.
 - After login/signup: redirect to `/` (not `/dashboard`)
