@@ -7,9 +7,9 @@
   align-items: center;
   justify-content: space-between;
   padding: 0 32px;
-  background: rgba(6,12,24,0.88);
+  background: var(--nav-bg);
   backdrop-filter: blur(20px);
-  border-bottom: 1px solid rgba(255,255,255,0.07);
+  border-bottom: 1px solid var(--border);
 }
 
 .logo {
@@ -18,7 +18,7 @@
   gap: 10px;
   font-size: 16px;
   font-weight: 700;
-  color: #F8FAFC;
+  color: var(--text);
   text-decoration: none;
   letter-spacing: -0.3px;
 }
@@ -43,17 +43,17 @@
   padding: 7px 14px;
   font-size: 14px;
   font-weight: 500;
-  color: rgba(248,250,252,0.55);
+  color: var(--muted);
   border-radius: 8px;
   transition: all 0.15s;
   text-decoration: none;
 }
-.navLink:hover { color: #F8FAFC; background: rgba(255,255,255,0.06); }
+.navLink:hover { color: var(--text); background: var(--lift); }
 
 .navCta {
   margin-left: 8px;
   padding: 8px 18px;
-  background: #2563EB;
+  background: var(--blue);
   color: #fff;
   font-size: 14px;
   font-weight: 600;
@@ -61,7 +61,7 @@
   transition: all 0.2s;
   text-decoration: none;
 }
-.navCta:hover { background: #3B82F6; transform: translateY(-1px); box-shadow: 0 6px 20px rgba(37,99,235,0.35); }
+.navCta:hover { background: var(--blue2); transform: translateY(-1px); box-shadow: 0 6px 20px rgba(37,99,235,0.35); }
 
 /* ACCOUNT DROPDOWN */
 .accountWrap {
@@ -73,14 +73,14 @@
   display: flex;
   align-items: center;
   gap: 8px;
-  background: rgba(255,255,255,0.06);
-  border: 1px solid rgba(255,255,255,0.1);
+  background: var(--lift);
+  border: 1px solid var(--border2);
   border-radius: 10px;
   padding: 6px 12px;
   cursor: pointer;
   transition: all 0.15s;
 }
-.accountBtn:hover { background: rgba(255,255,255,0.1); border-color: rgba(255,255,255,0.18); }
+.accountBtn:hover { background: var(--surface2); border-color: var(--border3); }
 
 .accountAvatar {
   width: 26px; height: 26px;
@@ -90,14 +90,14 @@
   display: flex; align-items: center; justify-content: center;
   font-size: 12px;
   font-weight: 700;
-  color: #60A5FA;
+  color: var(--blue3);
   flex-shrink: 0;
 }
 
 .accountName {
   font-size: 13px;
   font-weight: 500;
-  color: rgba(248,250,252,0.85);
+  color: var(--text);
   max-width: 120px;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -106,20 +106,20 @@
 
 .accountChevron {
   font-size: 10px;
-  color: rgba(248,250,252,0.4);
+  color: var(--faint);
 }
 
 .accountMenu {
   position: absolute;
   top: calc(100% + 8px);
   right: 0;
-  background: #111D35;
-  border: 1px solid rgba(255,255,255,0.1);
+  background: var(--surface);
+  border: 1px solid var(--border2);
   border-radius: 12px;
   overflow: hidden;
   z-index: 600;
   min-width: 220px;
-  box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+  box-shadow: 0 20px 60px rgba(0,0,0,0.25);
   animation: menuIn 0.15s ease forwards;
 }
 
@@ -130,20 +130,20 @@
 
 .accountMenuHeader {
   padding: 16px;
-  border-bottom: 1px solid rgba(255,255,255,0.07);
+  border-bottom: 1px solid var(--border);
 }
 
 .accountMenuName {
   font-size: 14px;
   font-weight: 600;
-  color: #F8FAFC;
+  color: var(--text);
   margin-bottom: 3px;
   letter-spacing: -0.2px;
 }
 
 .accountMenuEmail {
   font-size: 12px;
-  color: rgba(248,250,252,0.4);
+  color: var(--faint);
   margin-bottom: 8px;
 }
 
@@ -153,7 +153,7 @@
   font-weight: 600;
   letter-spacing: 0.06em;
   text-transform: uppercase;
-  color: #60A5FA;
+  color: var(--blue3);
   background: rgba(37,99,235,0.15);
   border: 1px solid rgba(37,99,235,0.3);
   padding: 2px 9px;
@@ -166,26 +166,26 @@
   padding: 11px 16px;
   font-size: 13px;
   font-weight: 500;
-  color: rgba(248,250,252,0.65);
+  color: var(--muted);
   background: none;
   border: none;
-  border-bottom: 1px solid rgba(255,255,255,0.05);
+  border-bottom: 1px solid var(--border);
   cursor: pointer;
   transition: all 0.15s;
   text-align: left;
   text-decoration: none;
 }
 .accountMenuItem:last-child { border-bottom: none; }
-.accountMenuItem:hover { background: rgba(255,255,255,0.05); color: #F8FAFC; }
+.accountMenuItem:hover { background: var(--lift); color: var(--text); }
 
-.accountMenuSignOut { color: rgba(252,165,165,0.8) !important; }
-.accountMenuSignOut:hover { color: #FCA5A5 !important; background: rgba(239,68,68,0.08) !important; }
+.accountMenuSignOut { color: rgba(220,38,38,0.85) !important; }
+.accountMenuSignOut:hover { color: #DC2626 !important; background: rgba(239,68,68,0.08) !important; }
 
 /* THEME TOGGLE */
 .themeToggle {
   background: none;
-  border: 1px solid rgba(255,255,255,0.1);
-  color: var(--muted, #94A3B8);
+  border: 1px solid var(--border2);
+  color: var(--muted);
   font-size: 15px;
   width: 34px;
   height: 34px;
@@ -197,7 +197,7 @@
   transition: border-color 0.15s, color 0.15s;
   flex-shrink: 0;
 }
-.themeToggle:hover { border-color: rgba(255,255,255,0.25); color: var(--text, #F8FAFC); }
+.themeToggle:hover { border-color: var(--border3); color: var(--text); }
 
 /* BURGER */
 .burger {
@@ -214,7 +214,7 @@
   display: block;
   width: 22px;
   height: 1.5px;
-  background: #F8FAFC;
+  background: var(--text);
   border-radius: 2px;
   transition: all 0.25s ease;
   transform-origin: center;
@@ -228,13 +228,13 @@
 .mobileMenu {
   position: fixed;
   top: 60px; left: 0; right: 0; bottom: 0;
-  background: #060C18;
+  background: var(--bg);
   z-index: 490;
   display: flex;
   flex-direction: column;
   overflow-y: auto;
   animation: slideDown 0.2s ease forwards;
-  border-top: 1px solid rgba(255,255,255,0.07);
+  border-top: 1px solid var(--border);
 }
 
 @keyframes slideDown {
@@ -246,8 +246,8 @@
   padding: 18px 24px;
   font-size: 16px;
   font-weight: 500;
-  color: rgba(248,250,252,0.7);
-  border-bottom: 1px solid rgba(255,255,255,0.06);
+  color: var(--muted);
+  border-bottom: 1px solid var(--border);
   transition: all 0.15s;
   text-decoration: none;
   background: none;
@@ -259,14 +259,14 @@
   width: 100%;
   display: block;
 }
-.mobileLink:hover { color: #F8FAFC; background: rgba(255,255,255,0.03); }
+.mobileLink:hover { color: var(--text); background: var(--lift); }
 
-.mobileSignOut { color: rgba(252,165,165,0.8) !important; }
+.mobileSignOut { color: rgba(220,38,38,0.85) !important; }
 .mobileSignOut:hover { background: rgba(239,68,68,0.06) !important; }
 
 .mobileDivider {
   height: 1px;
-  background: rgba(255,255,255,0.08);
+  background: var(--border2);
   margin: 4px 0;
 }
 
@@ -275,7 +275,7 @@
   align-items: center;
   gap: 14px;
   padding: 20px 24px;
-  background: rgba(255,255,255,0.02);
+  background: var(--surface2);
 }
 
 .mobileAvatar {
@@ -286,26 +286,26 @@
   display: flex; align-items: center; justify-content: center;
   font-size: 18px;
   font-weight: 700;
-  color: #60A5FA;
+  color: var(--blue3);
   flex-shrink: 0;
 }
 
 .mobileProfileName {
   font-size: 15px;
   font-weight: 600;
-  color: #F8FAFC;
+  color: var(--text);
   margin-bottom: 3px;
 }
 
 .mobileProfileEmail {
   font-size: 12px;
-  color: rgba(248,250,252,0.4);
+  color: var(--faint);
 }
 
 .mobileCta {
   margin: 20px 24px;
   padding: 16px;
-  background: #2563EB;
+  background: var(--blue);
   color: #fff;
   font-size: 15px;
   font-weight: 600;
@@ -315,7 +315,7 @@
   text-decoration: none;
   display: block;
 }
-.mobileCta:hover { background: #3B82F6; }
+.mobileCta:hover { background: var(--blue2); }
 
 @media (min-width: 769px) {
   .burger { display: none !important; }
