@@ -22,7 +22,7 @@ Target: agencies, freelancers, small product teams who want to eliminate
 post-meeting admin work. Key differentiator vs ChatGPT: zero prompts required,
 persistent project memory, structured ready-to-use outputs.
 
-**Current status:** MVP deployed on Vercel. Stripe fully integrated. Auth working. Blog live. Domain `meetingflash.work` active. Email pending (Resend account flagged, awaiting resolution).
+**Current status:** MVP deployed on Vercel. Stripe live mode active. Auth working. Blog live. Domain `meetingflash.work` active. Email pending (Resend account flagged, awaiting resolution).
 
 ---
 
@@ -146,6 +146,7 @@ Key schema:
 - Team: $25/month for 5 seats or $20/month billed annually ($240/yr)
 - Monthly price IDs: `NEXT_PUBLIC_STRIPE_PRO_PRICE_ID`, `NEXT_PUBLIC_STRIPE_TEAM_PRICE_ID`
 - Annual price IDs: `NEXT_PUBLIC_STRIPE_PRO_ANNUAL_PRICE_ID`, `NEXT_PUBLIC_STRIPE_TEAM_ANNUAL_PRICE_ID`
+- **All keys are LIVE mode** (`sk_live_`, `pk_live_`) — real payments active
 - Checkout sends `metadata: { userId, priceId }` — both are needed
 - Checkout: `success_url` → `/dashboard?upgraded=true`, `cancel_url` → `/#pricing`
 - Webhook uses `SUPABASE_SERVICE_ROLE_KEY` (bypasses RLS) — client created fresh per request
