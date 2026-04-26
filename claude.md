@@ -22,7 +22,7 @@ Target: agencies, freelancers, small product teams who want to eliminate
 post-meeting admin work. Key differentiator vs ChatGPT: zero prompts required,
 persistent project memory, structured ready-to-use outputs.
 
-**Current status:** MVP deployed on Vercel. Stripe fully integrated. Auth working. Blog live.
+**Current status:** MVP deployed on Vercel. Stripe fully integrated. Auth working. Blog live. Domain `meetingflash.work` active. Email pending (Resend account flagged, awaiting resolution).
 
 ---
 
@@ -33,7 +33,7 @@ persistent project memory, structured ready-to-use outputs.
 - **Database:** Supabase PostgreSQL + RLS
 - **AI:** Anthropic Claude API (claude-sonnet-4-20250514) with prompt caching
 - **Payments:** Stripe (subscriptions) — apiVersion: 2026-03-25.dahlia
-- **Email:** Resend — `hello@meetingflash.work` — blocked until domain verified in Resend + API key added
+- **Email:** Resend — `hello@meetingflash.work` — domain verified, API key set, but Resend account flagged (awaiting support response)
 - **Deployment:** Vercel
 
 ---
@@ -165,7 +165,7 @@ Key schema:
 - Both use `from: 'MeetingFlash <hello@meetingflash.work>'`
 - Domain `meetingflash.work` purchased and connected to Vercel
 - All email calls are fire-and-forget with `.catch(() => {})` — fail silently until activated
-- To activate: verify `meetingflash.work` in Resend dashboard (add DNS records) + add `RESEND_API_KEY` to Vercel env vars
+- Domain verified in Resend, `RESEND_API_KEY` added to Vercel — but account flagged by Resend, awaiting support resolution
 - Welcome triggers: `AuthProvider.loadProfile` when inserting new profile
 - Nudge triggers: `/api/flash` after `increment_uses` when `plan === 'free' && uses_this_month >= 3`
 
@@ -248,7 +248,7 @@ RESEND_API_KEY                          ← get from resend.com (needs custom do
 - Email routes (Resend) — built, blocked until custom domain
 
 ## Features Pending ⏳
-- Activate email (Resend) — needs custom domain (no `vercel.app` support)
+- Activate email (Resend) — account flagged, awaiting Resend support response
 - Slack integration
 - Notion integration
 - Google Calendar integration
