@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { supabase } from '@/lib/supabase'
+import { useAuth } from '@/lib/AuthProvider'
 import ThemeToggle from '@/components/ThemeToggle'
 import styles from './settings.module.css'
 
@@ -17,6 +18,7 @@ interface Profile {
 
 export default function Settings() {
   const router = useRouter()
+  const { user, loading: authLoading } = useAuth()
   const [profile, setProfile]     = useState<Profile | null>(null)
   const [loading, setLoading]     = useState(true)
   const [name, setName]           = useState('')
@@ -26,24 +28,35 @@ export default function Settings() {
   const [confirmDelete, setConfirmDelete] = useState(false)
 
   useEffect(() => {
+    if (authLoading) return
+    if (!user) { router.replace('/login'); return }
+
+    // Safety net: never let the spinner spin more than 8s
+    const timeout = setTimeout(() => setLoading(false), 8000)
+
     async function load() {
-      const { data: { session } } = await supabase.auth.getSession()
-      if (!session) { router.push('/login'); return }
+      try {
+        const { data } = await supabase
+          .from('profiles')
+          .select('*')
+          .eq('id', user!.id)
+          .single()
 
-      const { data } = await supabase
-        .from('profiles')
-        .select('*')
-        .eq('id', session.user.id)
-        .single()
-
-      if (data) {
-        setProfile(data)
-        setName(data.full_name || '')
+        if (data) {
+          setProfile(data)
+          setName(data.full_name || '')
+        }
+      } catch (err) {
+        console.error('Settings load error:', err)
+      } finally {
+        clearTimeout(timeout)
+        setLoading(false)
       }
-      setLoading(false)
     }
     load()
-  }, [router])
+
+    return () => clearTimeout(timeout)
+  }, [user, authLoading, router])
 
   async function saveName() {
     if (!profile) return
