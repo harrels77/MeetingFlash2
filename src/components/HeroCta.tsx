@@ -6,7 +6,7 @@ import { supabase } from '@/lib/supabase'
 
 export default function HeroCta({ className }: { className?: string }) {
   const { user, loading } = useAuth()
-  const [label, setLabel] = useState('Get your first pack free')
+  const [label, setLabel] = useState('Try with sample notes →')
   const ref = useRef<HTMLAnchorElement>(null)
 
   useEffect(() => {
