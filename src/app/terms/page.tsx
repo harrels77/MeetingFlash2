@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import ThemeToggle from '@/components/ThemeToggle'
 import styles from '../legal.module.css'
 
 export default function Terms() {
@@ -6,6 +7,7 @@ export default function Terms() {
     <div className={styles.page}>
       <nav className={styles.nav}>
         <Link href="/" className={styles.back}>← MeetingFlash</Link>
+        <ThemeToggle />
       </nav>
 
       <div className={styles.content}>

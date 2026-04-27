@@ -23,15 +23,11 @@
 }
 
 .backLink {
-  position: fixed;
-  top: 20px;
-  left: 28px;
   font-size: 13px;
   font-weight: 500;
   color: var(--muted);
   text-decoration: none;
   transition: color 0.15s;
-  z-index: 10;
 }
 .backLink:hover { color: var(--text); }
 

@@ -142,6 +142,9 @@ export default function MobileNav() {
           <Link href="#pricing" className={styles.mobileLink} onClick={() => setOpen(false)}>
             Pricing
           </Link>
+          <Link href="/blog" className={styles.mobileLink} onClick={() => setOpen(false)}>
+            Blog
+          </Link>
 
         {user ? (
           <>

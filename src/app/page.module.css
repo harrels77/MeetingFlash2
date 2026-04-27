@@ -920,7 +920,7 @@
   color: var(--muted);
 }
 .planFeats li:last-child { border-bottom: none; }
-.priceCardFeatured .planFeats li { color: rgba(248,250,252,0.75); }
+.priceCardFeatured .planFeats li { color: var(--muted); }
 
 .featCheck {
   color: var(--green);

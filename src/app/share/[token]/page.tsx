@@ -29,9 +29,9 @@ export default async function SharePage({ params }: { params: { token: string } 
   const meeting = await getMeeting(params.token)
 
   if (!meeting) return (
-    <div style={{ minHeight:'100vh', background:'#060608', color:'#f0ede8', display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', fontFamily:'monospace', gap:16 }}>
-      <div style={{ fontSize:12, letterSpacing:'0.14em', textTransform:'uppercase', color:'#7a7870' }}>Pack not found</div>
-      <Link href="/" style={{ color:'#c8f03c', fontSize:12, textDecoration:'none' }}>← MeetingFlash</Link>
+    <div className={styles.notFound}>
+      <div className={styles.notFoundLabel}>Pack not found</div>
+      <Link href="/" className={styles.notFoundLink}>← MeetingFlash</Link>
     </div>
   )
 

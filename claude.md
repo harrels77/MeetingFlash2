@@ -15,9 +15,11 @@ This project is assisted by AI coding agents (Claude Code + Claude.ai).
 
 **Theme / CSS**
 - ❌ Never hardcode colors (`#060C18`, `rgba(255,255,255,0.07)`, etc.) — they don't adapt to light mode and the user has to ask for a fix every time. Always use CSS vars from `globals.css`: `--bg`, `--surface`, `--text`, `--muted`, `--border`, `--blue`, `--blue3`, `--nav-bg`, etc.
-- ❌ Never invent new CSS vars (`--paper`, `--wire`, `--spark`, `--font-mono`, `--ash`, `--void`) — they aren't defined anywhere and break silently. Use the canonical ones already in `globals.css`.
+- ❌ Never invent new CSS vars (`--paper`, `--wire`, `--spark`, `--font-mono`, `--ash`, `--void`) — they aren't defined anywhere and break silently. Use the canonical ones already in `globals.css`. Same for non-loaded fonts (e.g. `'Fragment Mono'`, `'Cormorant Garamond'`) — only `--font` (Plus Jakarta Sans), `--serif` (Instrument Serif), `--mono` (JetBrains Mono) are loaded.
 - ❌ Don't apply blue-tinted text via `--blue3` (#60A5FA) on light backgrounds without checking contrast — light mode overrides darken it to #1E40AF.
-- When adding a top nav with back-button + ThemeToggle, use `display: flex; justify-content: space-between` so the toggle sits at the right edge, not glued to the back arrow.
+- ❌ Watch for hardcoded near-white text inside *featured/elevated cards* (e.g. `color: rgba(248,250,252,0.75)`). Looks fine in dark mode, becomes invisible on the light-blue gradient in light mode. Use `var(--muted)` instead.
+- When adding a top nav with back-button + ThemeToggle, use `display: flex; justify-content: space-between` so the toggle sits at the right edge, not glued to the back arrow. **And** make sure `.backLink` is NOT `position: fixed` — fixed positioning yanks it out of the flex flow and the toggle drops below it. Either drop `position:fixed`, or position both via the wrapper instead.
+- For the share page (`/share/[token]`) and any nav strip on a sub-page (e.g. `blog/blog.module.css .nav`), use `var(--nav-bg)` + `var(--nav-text)` — never `rgba(6,12,24,…)` or `var(--text)` on the nav, which goes invisible in light mode.
 
 **Supabase free tier hangs (root cause of most "infinite loading" bugs)**
 - The Supabase free instance sleeps after inactivity → `supabase.auth.getSession()` and queries can stay pending forever (no error thrown).
@@ -242,6 +244,7 @@ Key schema:
 - Public read-only pack view at `/share/[token]`
 - Sticky banner fixed at bottom: "Turn your own meeting notes into an Execution Pack — Try free →"
 - Banner links to `/app`
+- Theme: uses canonical CSS vars (`--bg`, `--surface`, `--nav-bg`, `--blue`, `--amber`, `--red`, `--muted`) and the project fonts (`--font` / `--serif`). Adapts to light/dark. Block category accents = decisions/agenda blue, actions amber, risks red, questions/email/slack muted. Pack-not-found state lives in `.notFound` styles, not inline.
 
 ---
 
