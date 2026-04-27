@@ -221,7 +221,7 @@ function DashboardMockup() {
               <div className={s.planBadge}>PRO</div>
               <div className={s.planUses}>Unlimited</div>
             </div>
-            <div className={s.email}>adrienharrel@gmail.com</div>
+            <div className={s.email}>googlemail@gmail.com</div>
           </div>
         </div>
 
