@@ -9,6 +9,42 @@ This project is assisted by AI coding agents (Claude Code + Claude.ai).
 - If context is unclear, ask before modifying core logic
 - Update this file when new decisions are made
 - This file is the single source of truth
+- **Plan mode default**: for any non-trivial change (CSS rewrite, multiple files, auth/payments touch), present a short plan before editing. Don't speculate-and-fix.
+
+### Mistakes to NOT repeat (learned the hard way)
+
+**Theme / CSS**
+- ❌ Never hardcode colors (`#060C18`, `rgba(255,255,255,0.07)`, etc.) — they don't adapt to light mode and the user has to ask for a fix every time. Always use CSS vars from `globals.css`: `--bg`, `--surface`, `--text`, `--muted`, `--border`, `--blue`, `--blue3`, `--nav-bg`, etc.
+- ❌ Never invent new CSS vars (`--paper`, `--wire`, `--spark`, `--font-mono`, `--ash`, `--void`) — they aren't defined anywhere and break silently. Use the canonical ones already in `globals.css`.
+- ❌ Don't apply blue-tinted text via `--blue3` (#60A5FA) on light backgrounds without checking contrast — light mode overrides darken it to #1E40AF.
+- When adding a top nav with back-button + ThemeToggle, use `display: flex; justify-content: space-between` so the toggle sits at the right edge, not glued to the back arrow.
+
+**Supabase free tier hangs (root cause of most "infinite loading" bugs)**
+- The Supabase free instance sleeps after inactivity → `supabase.auth.getSession()` and queries can stay pending forever (no error thrown).
+- ✅ `AuthProvider.tsx` already has a 4s timeout that releases `loading=false` even if Supabase doesn't reply. Don't remove it.
+- ✅ `signOut` is fire-and-forget (`window.location.replace('/')` runs immediately, doesn't wait for `supabase.auth.signOut()`). Don't `await` it.
+- ✅ Pages that fetch user data (dashboard, settings, pack, project) should:
+  1. Use `useAuth()` from AuthProvider — never call `supabase.auth.getSession()` directly inside a page useEffect.
+  2. `if (authLoading) return` early.
+  3. `if (!user) router.replace('/login')` — never spinner-on-no-session.
+  4. Add an 8s `setTimeout` safety to force `setLoading(false)` even if data fetch hangs.
+- ✅ `/api/ping` exists to keep Supabase warm; user has UptimeRobot hitting it every 5 minutes.
+
+**Stripe**
+- Test-mode and live-mode subscriptions DO NOT cross over. Switching the keys from `sk_test_` → `sk_live_` invalidates all test-mode subscriptions silently.
+- Don't compare `priceId` against `STRIPE_TEAM_PRICE_ID` (which holds a `prod_` ID in `.env.local`). Use `NEXT_PUBLIC_STRIPE_TEAM_PRICE_ID` (real `price_` ID) and include the annual variant in the check.
+
+**Auth Provider**
+- `getSession()` AND `onAuthStateChange` both run on mount and can both call `loadProfile`. This is intentional (race condition that resolves itself in prod). Don't "optimize" it.
+- The flash tool (`src/app/app/page.tsx`) does NOT use `useAuth()` — it has its own auth pattern. Refactoring it has broken things twice. Leave alone unless explicitly asked.
+
+**Email (Resend)**
+- All email sends are fire-and-forget with `.catch(() => {})`. They must not block UI. The Resend SDK is lazy-instantiated inside the route handler — never at module top-level (build fails when `RESEND_API_KEY` is missing in CI).
+
+**Workflow**
+- After non-trivial changes, run `npx tsc --noEmit` before committing. Never skip it.
+- Always commit with HEREDOC for the message body. Never use `--no-verify` or `--amend` on pushed commits.
+- The user is non-coder. Explain in plain language *what* changed and *why*, not *how*. Avoid jargon ("Promise.race") in user-facing replies.
 
 ---
 
