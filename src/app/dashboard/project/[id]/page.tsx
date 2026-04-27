@@ -3,6 +3,7 @@ import { useState, useEffect, useCallback } from 'react'
 import { useRouter, useParams } from 'next/navigation'
 import Link from 'next/link'
 import { supabase } from '@/lib/supabase'
+import ThemeToggle from '@/components/ThemeToggle'
 import styles from './project.module.css'
 
 interface Project {
@@ -113,6 +114,7 @@ export default function ProjectDetail() {
     <div className={styles.page}>
       <nav className={styles.nav}>
         <Link href="/dashboard" className={styles.back}>← Dashboard</Link>
+        <ThemeToggle />
       </nav>
 
       <div className={styles.content}>

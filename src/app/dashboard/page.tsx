@@ -3,6 +3,8 @@ import { useState, useEffect, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { supabase } from '@/lib/supabase'
+import { useAuth } from '@/lib/AuthProvider'
+import ThemeToggle from '@/components/ThemeToggle'
 import styles from './dashboard.module.css'
 
 
@@ -30,6 +32,7 @@ interface Meeting {
 
 export default function Dashboard() {
   const router = useRouter()
+  const { user, loading: authLoading } = useAuth()
   const [profile, setProfile]   = useState<Profile | null>(null)
   const [projects, setProjects] = useState<Project[]>([])
   const [meetings, setMeetings] = useState<Meeting[]>([])
@@ -64,17 +67,26 @@ export default function Dashboard() {
       if (prof) setProfile(prof)
       setProjects(projResult.data || [])
       setMeetings(meetsResult.data || [])
+    } catch (err) {
+      console.error('Dashboard load error:', err)
     } finally {
       setLoading(false)
     }
   }, [])
 
   useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      if (!session) { router.push('/login'); return }
-      loadData(session.user.id, session.user.email ?? '')
-    })
-  }, [router, loadData])
+    // Wait for AuthProvider to finish its initial check (instant from React context)
+    if (authLoading) return
+
+    // Not signed in → redirect to login immediately, no spinner
+    if (!user) { router.replace('/login'); return }
+
+    // Safety net: never let the spinner run more than 8s
+    const timeout = setTimeout(() => setLoading(false), 8000)
+    loadData(user.id, user.email ?? '').finally(() => clearTimeout(timeout))
+
+    return () => clearTimeout(timeout)
+  }, [user, authLoading, router, loadData])
 
   // Close menu when clicking outside
   useEffect(() => {
@@ -229,6 +241,7 @@ export default function Dashboard() {
             }
           </div>
           <div className={styles.mainHeaderRight}>
+            <ThemeToggle />
             {selectMode && selected.length > 0 && (
               <button
                 className={styles.deleteSelectedBtn}

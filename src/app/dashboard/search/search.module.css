@@ -1,8 +1,8 @@
 .page {
   min-height: 100vh;
   background: var(--void);
-  color: var(--text);
-  font-family: var(--mono);
+  color: var(--paper);
+  font-family: var(--font-mono);
 }
 
 .nav {
@@ -10,8 +10,8 @@
   display: flex;
   align-items: center;
   padding: 0 40px;
-  border-bottom: 1px solid var(--border);
-  background: var(--nav-bg);
+  border-bottom: 1px solid var(--wire);
+  background: rgba(6,6,8,0.9);
   backdrop-filter: blur(20px);
   position: sticky;
   top: 0;
@@ -24,7 +24,7 @@
   transition: color 0.15s;
   letter-spacing: 0.04em;
 }
-.back:hover { color: var(--text); }
+.back:hover { color: var(--paper); }
 
 .content {
   max-width: 800px;
@@ -52,9 +52,9 @@
   background: transparent;
   border: none;
   outline: none;
-  font-family: var(--mono);
+  font-family: var(--font-mono);
   font-size: 20px;
-  color: var(--text);
+  color: var(--paper);
   letter-spacing: -0.5px;
 }
 
@@ -72,7 +72,7 @@
   padding: 4px;
   transition: color 0.15s;
 }
-.clearBtn:hover { color: var(--text); }
+.clearBtn:hover { color: var(--paper); }
 
 .status {
   font-size: 12px;
@@ -98,7 +98,7 @@
 
 .result {
   padding: 20px 24px;
-  border: 1px solid var(--border);
+  border: 1px solid var(--wire);
   border-radius: 8px;
   text-decoration: none;
   transition: all 0.2s;
@@ -106,7 +106,7 @@
 }
 
 .result:hover {
-  border-color: var(--border2);
+  border-color: var(--wire2);
   background: var(--border);
   transform: translateX(4px);
 }
@@ -121,7 +121,7 @@
 
 .resultTitle {
   font-size: 15px;
-  color: var(--text);
+  color: var(--paper);
   letter-spacing: -0.2px;
 }
 

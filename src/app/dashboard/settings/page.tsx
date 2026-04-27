@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { supabase } from '@/lib/supabase'
+import ThemeToggle from '@/components/ThemeToggle'
 import styles from './settings.module.css'
 
 interface Profile {
@@ -85,6 +86,7 @@ export default function Settings() {
     <div className={styles.page}>
       <nav className={styles.nav}>
         <Link href="/dashboard" className={styles.back}>← Dashboard</Link>
+        <ThemeToggle />
       </nav>
 
       <div className={styles.content}>

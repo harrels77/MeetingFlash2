@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react'
 import { useRouter, useParams } from 'next/navigation'
 import Link from 'next/link'
 import { supabase } from '@/lib/supabase'
+import ThemeToggle from '@/components/ThemeToggle'
 import styles from './pack.module.css'
 
 interface Task {
@@ -156,6 +157,7 @@ export default function PackDetail() {
       <nav className={styles.nav}>
         <Link href="/dashboard" className={styles.back}>← Dashboard</Link>
         <div className={styles.navRight}>
+          <ThemeToggle />
           <button className={styles.copyAllBtn} onClick={copyAll}>
             {copied === 'all' ? '✓ Copied' : 'Copy all'}
           </button>

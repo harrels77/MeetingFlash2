@@ -3,6 +3,7 @@ import { useState } from 'react'
 import Link from 'next/link'
 import styles from './app.module.css'
 import { supabase } from '@/lib/supabase'
+import ThemeToggle from '@/components/ThemeToggle'
 import { useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 
@@ -306,6 +307,7 @@ async function createProject() {
         <div className={styles.navRight}>
           <Link href="/dashboard" className={styles.navLink}>Dashboard</Link>
           <Link href="/" className={styles.navLink}>← Back</Link>
+          <ThemeToggle />
         </div>
       </nav>
 

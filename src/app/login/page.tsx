@@ -3,6 +3,7 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { supabase } from '@/lib/supabase'
+import ThemeToggle from '@/components/ThemeToggle'
 import styles from './auth.module.css'
 
 export default function LoginPage() {
@@ -35,7 +36,10 @@ export default function LoginPage() {
 
   return (
     <div className={styles.page}>
-      <Link href="/" className={styles.backLink}>← meetingflash</Link>
+      <div style={{ position: 'absolute', top: 24, left: 24, right: 24, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <Link href="/" className={styles.backLink}>← meetingflash</Link>
+        <ThemeToggle />
+      </div>
 
       <div className={styles.card}>
         <div className={styles.cardHeader}>
