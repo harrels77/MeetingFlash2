@@ -92,6 +92,7 @@ src/
 ├── components/
 │   ├── MobileNav.tsx                ← Nav with auth state + dark/light toggle
 │   ├── HeroCta.tsx                  ← Smart CTA (4 states based on auth)
+│   ├── ProductShowcase.tsx          ← 3-tab static mockups on landing page (App / Dashboard / Pack)
 │   └── FooterAccount.tsx            ← Footer with dynamic auth state
 └── lib/
     ├── supabase.ts                  ← Supabase client singleton
@@ -174,9 +175,18 @@ Key schema:
 ### Dark / Light Mode
 - Toggle button (☀/☾) in MobileNav, desktop and mobile
 - State persisted in `localStorage('mf_theme')`
-- Applied via `document.documentElement.setAttribute('data-theme', ...)` 
+- Applied via `document.documentElement.setAttribute('data-theme', ...)`
 - FOUC prevention: inline script in `<head>` in layout.tsx reads localStorage and sets attribute before paint
 - Light theme CSS vars defined in `[data-theme="light"]` block in globals.css
+- **In light mode, blue accents are darkened**: `--blue` → #1D4ED8, `--blue2` → #2563EB, `--blue3` → #1E40AF (otherwise blue3 #60A5FA had poor contrast on white)
+- **Nav-specific vars**: `--nav-bg` and `--nav-text` adapt to theme so the nav doesn't stay dark in light mode
+- All hardcoded colors in MobileNav.module.css were replaced with CSS variables
+
+### Product Showcase
+- `src/components/ProductShowcase.tsx` — 3-tab static mockup on the landing page (after the Live Demo section)
+- Tabs: Flash tool / Dashboard / Pack + Tasks
+- All visuals built with theme variables — adapts to dark/light mode automatically
+- Responsive: stacks columns on mobile, hides sidebar on dashboard mockup, tighter padding
 
 ### Blog
 - 4 static articles in `src/lib/blog.ts` (Article[] data array)
@@ -247,7 +257,11 @@ RESEND_API_KEY                          ← get from resend.com (needs custom do
 - Monthly usage reset — Vercel cron job (1st of month, midnight)
 - Dark/light mode toggle — nav button, localStorage, FOUC-free
 - Blog — 4 SEO articles, static, linked from nav
-- Email routes (Resend) — built, blocked until custom domain
+- Email routes (Resend) — built, blocked (Resend account flagged, awaiting support)
+- Sitemap + robots.txt for SEO indexing (`src/app/sitemap.ts`, `src/app/robots.ts`)
+- Favicon tight-cropped (was 1536×1024 with 70% whitespace, now 512×512 transparent)
+- Light-mode contrast fix on blue accents + nav (was hardcoded dark)
+- Product showcase section on landing page — 3 interactive mockups
 
 ## Features Pending ⏳
 - Activate email (Resend) — account flagged, awaiting Resend support response

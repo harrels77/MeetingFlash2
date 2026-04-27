@@ -4,6 +4,7 @@ import Link from 'next/link'
 import MobileNav from '@/components/MobileNav'
 import HeroCta from '@/components/HeroCta'
 import FooterAccount from '@/components/FooterAccount'
+import ProductShowcase from '@/components/ProductShowcase'
 import s from './page.module.css'
 
 // ── LIVE DEMO DATA ──────────────────────────────────────────
@@ -260,6 +261,9 @@ export default function Home() {
           <LiveDemo />
         </div>
       </section>
+
+      {/* ── PRODUCT SHOWCASE ── */}
+      <ProductShowcase />
 
       {/* ── LOGOS ── */}
       <div className={s.logoBar}>
