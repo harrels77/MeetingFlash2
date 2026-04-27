@@ -16,7 +16,7 @@
   justify-content: space-between;
   padding: 0 32px;
   border-bottom: 1px solid var(--border);
-  background: rgba(6,12,24,0.9);
+  background: var(--nav-bg);
   backdrop-filter: blur(20px);
   position: sticky;
   top: 0;
@@ -163,7 +163,7 @@
   width: 100%;
 }
 .templateMenuItem:last-child { border-bottom: none; }
-.templateMenuItem:hover { background: rgba(255,255,255,0.04); color: var(--text); }
+.templateMenuItem:hover { background: var(--surface2); color: var(--text); }
 
 /* ── FIELDS ── */
 .field { display: flex; flex-direction: column; gap: 8px; }

@@ -83,7 +83,7 @@
   text-decoration: none;
   border-radius: 8px;
 }
-.navItem:hover { color: var(--text); background: rgba(255,255,255,0.05); }
+.navItem:hover { color: var(--text); background: var(--border); }
 .navActive { color: var(--text); background: rgba(37,99,235,0.12); }
 
 .navDot {
@@ -354,7 +354,7 @@
   transition: background 0.15s;
   gap: 12px;
 }
-.meetingRow:hover { background: rgba(255,255,255,0.02); }
+.meetingRow:hover { background: var(--border); }
 .meetingRowSelected { background: rgba(37,99,235,0.06) !important; }
 
 .meetingLeft {
@@ -449,7 +449,7 @@
   text-align: left;
 }
 .contextMenuItem:last-child { border-bottom: none; }
-.contextMenuItem:hover { background: rgba(255,255,255,0.04); color: var(--text); }
+.contextMenuItem:hover { background: var(--border); color: var(--text); }
 .contextMenuItemDanger { color: #FCA5A5 !important; }
 .contextMenuItemDanger:hover { background: rgba(239,68,68,0.08) !important; }
 

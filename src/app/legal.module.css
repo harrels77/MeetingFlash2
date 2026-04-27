@@ -8,7 +8,7 @@
 .nav {
   padding: 18px 40px;
   border-bottom: 1px solid var(--border);
-  background: rgba(6,12,24,0.9);
+  background: var(--nav-bg);
   position: sticky;
   top: 0;
   backdrop-filter: blur(20px);

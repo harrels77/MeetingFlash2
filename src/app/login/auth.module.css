@@ -85,7 +85,7 @@
   width: calc(100% - 72px);
   margin: 24px 36px 0;
   padding: 12px;
-  background: rgba(255,255,255,0.05);
+  background: var(--surface2);
   border: 1px solid var(--border2);
   border-radius: 10px;
   font-family: var(--font);
@@ -95,7 +95,7 @@
   cursor: pointer;
   transition: all 0.2s;
 }
-.googleBtn:hover { background: rgba(255,255,255,0.09); color: var(--text); border-color: var(--border3); }
+.googleBtn:hover { background: var(--lift); color: var(--text); border-color: var(--border3); }
 
 .divider {
   display: flex;

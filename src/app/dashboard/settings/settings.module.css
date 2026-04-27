@@ -28,7 +28,7 @@
   align-items: center;
   padding: 0 32px;
   border-bottom: 1px solid var(--border);
-  background: rgba(6,12,24,0.9);
+  background: var(--nav-bg);
   backdrop-filter: blur(20px);
   position: sticky;
   top: 0;
