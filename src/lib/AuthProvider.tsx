@@ -56,15 +56,24 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }
 
   useEffect(() => {
+    // Hard safety: if Supabase doesn't respond in 4s, stop blocking the UI.
+    // Treat as "no session" — onAuthStateChange will correct it later if needed.
+    const timeout = setTimeout(() => setLoading(false), 4000)
+
     // Charge la session initiale
     supabase.auth.getSession().then(({ data: { session } }) => {
       setUser(session?.user ?? null)
       if (session?.user) {
         loadProfile(session.user.id, session.user.email || '')
-          .finally(() => setLoading(false))
+          .finally(() => { clearTimeout(timeout); setLoading(false) })
       } else {
+        clearTimeout(timeout)
         setLoading(false)
       }
+    }).catch(err => {
+      console.error('Auth getSession error:', err)
+      clearTimeout(timeout)
+      setLoading(false)
     })
 
     // Écoute tous les changements
@@ -72,7 +81,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       async (event, session) => {
         setUser(session?.user ?? null)
         if (session?.user) {
-          await loadProfile(session.user.id, session.user.email || '')
+          await loadProfile(session.user.id, session.user.email || '').catch(() => {})
         } else {
           setProfile(null)
         }
@@ -80,11 +89,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
     )
 
-    return () => subscription.unsubscribe()
+    return () => {
+      clearTimeout(timeout)
+      subscription.unsubscribe()
+    }
   }, [])
 
   const signOut = async () => {
-    await supabase.auth.signOut()
+    // Fire-and-forget — don't block the UI if Supabase hangs.
+    supabase.auth.signOut().catch(() => {})
     setUser(null)
     setProfile(null)
     window.location.replace('/')
