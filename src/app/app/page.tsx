@@ -36,68 +36,109 @@ Tom: Understood.
 
 Sarah: Next sync Monday morning.`
 
-const TEMPLATES = {
-  sprint: `SPRINT PLANNING MEETING
+const TEMPLATES: Record<string, string> = {
+  'Discovery call (agency → prospect)': `DISCOVERY CALL — [Prospect company]
 Date: [Date]
-Team: [Names]
+Attendees: [You], [Prospect name + role]
 
-Agenda:
-- Review last sprint velocity
-- Demo completed stories
-- Retrospective: what went well / what didn't
-- Plan next sprint backlog
-- Assign story points and owners
+What I asked:
+- What's the problem you're trying to solve, in your own words?
+- What have you tried already and why didn't it stick?
+- Who else is involved in this decision?
+- What does "success" look like in 90 days?
+- What's the budget range you're working with?
+- When do you need this delivered by?
 
-Notes:
-[Paste your meeting notes here]`,
+What they said:
+[Paste their responses here — quotes are fine]
 
-  client: `CLIENT MEETING
-Date: [Date]
-Client: [Client name]
-Attendees: [Names]
+Felt vs unsaid:
+[Anything you sensed that wasn't on the agenda — hesitation, urgency, internal politics]
 
-Agenda:
-- Project status update
-- Review deliverables
-- Client feedback
-- Next steps and timeline
-- Open questions
+Next step proposed:
+[E.g. send proposal by Friday / second call with their CMO / scope doc]`,
 
-Notes:
-[Paste your meeting notes here]`,
-
-  standup: `DAILY STANDUP
-Date: [Date]
-Team: [Names]
-
-Format:
-- Yesterday: what did each person complete?
-- Today: what is each person working on?
-- Blockers: what is blocking progress?
-
-Notes:
-[Paste your meeting notes here]`,
-
-  product: `PRODUCT MEETING
+  'Client status update': `CLIENT STATUS UPDATE — [Client name]
 Date: [Date]
 Attendees: [Names]
 
-Agenda:
-- Review metrics and KPIs
-- Product roadmap updates
-- Feature prioritization
-- User feedback review
-- Technical dependencies
+Since last meeting we shipped:
+- [Item 1]
+- [Item 2]
+
+In progress this week:
+- [Item 1] — [owner]
+- [Item 2] — [owner]
+
+Blockers / things we need from the client:
+- [Item 1]
+- [Item 2]
+
+Client feedback raised:
+[Paste their feedback verbatim — good and bad]
+
+Decisions made today:
+[Anything that was confirmed during the call]
+
+Next sync: [Date]`,
+
+  'Sprint retro (product team)': `SPRINT RETRO — Sprint [#]
+Date: [Date]
+Team: [Names]
+
+Sprint goal: [What we set out to do]
+Did we hit it? [Yes / No / Partial — and why]
+
+What worked:
+- [Thing 1 — who/what made it work]
+- [Thing 2]
+
+What didn't:
+- [Thing 1 — what was the actual cause, not the symptom]
+- [Thing 2]
+
+Carry-over from last sprint:
+- [Item 1] → still owned by [name], why it slipped
+- [Item 2]
+
+Decisions for next sprint:
+[Process changes, priorities, scope cuts]
 
 Notes:
-[Paste your meeting notes here]`,
+[Anything else that came up — interpersonal, strategic, off-topic-but-important]`,
+
+  '1-on-1 (manager ↔ IC)': `1-ON-1 — [IC name]
+Date: [Date]
+Manager: [Name]
+
+How are you, really?
+[Their answer — energy level, mood, anything outside-work they shared]
+
+What did you ship since last 1:1?
+[Their list]
+
+What's blocking you right now?
+[Specific things — tools, people, decisions, context]
+
+What do you need from me?
+[Concrete asks]
+
+Career / growth conversation:
+[Anything they raised about role, scope, comp, learning]
+
+What I'm committing to before next 1:1:
+[Manager's action items]
+
+What they're committing to:
+[IC's action items]`,
 }
 
 const LOADER_MSGS = [
-  'Analyzing transcript—',
-  'Extracting decisions—',
-  'Building action items—',
-  'Generating your pack—',
+  'Reading your notes—',
+  'Identifying decisions—',
+  'Mapping owners to actions—',
+  'Drafting your follow-up email—',
+  'Building the next agenda—',
 ]
 
 export default function AppPage() {
@@ -118,6 +159,7 @@ export default function AppPage() {
   const [usesLeft, setUsesLeft] = useState<number | null>(null)
   const [showCreateProject, setShowCreateProject] = useState(false)
   const [newProjectName, setNewProjectName]       = useState('')
+  const [timeSavedToast, setTimeSavedToast]       = useState<number | null>(null)
   const [creatingProject, setCreatingProject]     = useState(false)
   const [showUpgradeModal, setShowUpgradeModal]   = useState(false)
 
@@ -222,6 +264,12 @@ export default function AppPage() {
         if (isLoggedIn && usesLeft !== null && usesLeft !== Infinity) {
         setUsesLeft(prev => prev !== null ? Math.max(0, prev - 1) : null)
       }
+
+      // Estimate time saved: ~3 min per action item + 8 min for the email + 2 min for slack/agenda formatting
+      const actionsCount = (data.pack?.actions || '').split('\n').filter((l: string) => l.trim().startsWith('•')).length
+      const estimatedMinutes = Math.max(15, actionsCount * 3 + 10)
+      setTimeSavedToast(estimatedMinutes)
+      setTimeout(() => setTimeSavedToast(null), 6000)
     } catch (err) {
       console.error(err)
       setError('Something went wrong. Please try again.')
@@ -305,6 +353,37 @@ async function createProject() {
 
   return (
     <div className={styles.page}>
+      {/* Time-saved toast — celebrates the wow moment */}
+      {timeSavedToast !== null && (
+        <div style={{
+          position: 'fixed',
+          top: 80,
+          right: 24,
+          zIndex: 1000,
+          background: 'linear-gradient(135deg, var(--blue), var(--blue2))',
+          color: '#fff',
+          padding: '14px 20px',
+          borderRadius: 12,
+          boxShadow: '0 12px 40px rgba(37,99,235,0.35)',
+          display: 'flex',
+          alignItems: 'center',
+          gap: 12,
+          maxWidth: 320,
+          animation: 'mfToastIn 0.4s ease',
+        }}>
+          <div style={{ fontSize: 22 }}>⚡</div>
+          <div>
+            <div style={{ fontWeight: 700, fontSize: 14, lineHeight: 1.3 }}>
+              ~{timeSavedToast} minutes back
+            </div>
+            <div style={{ fontSize: 12, opacity: 0.9, lineHeight: 1.4 }}>
+              That&apos;s how long this would&apos;ve taken to write by hand.
+            </div>
+          </div>
+        </div>
+      )}
+      <style jsx>{`@keyframes mfToastIn { from { opacity: 0; transform: translateY(-12px) } to { opacity: 1; transform: translateY(0) } }`}</style>
+
       {/* NAV */}
       <nav className={styles.nav}>
         <Link href="/" className={styles.navLogo}>
@@ -344,10 +423,7 @@ async function createProject() {
                           setShowTemplates(false)
                         }}
                       >
-                        {key === 'sprint'   ? '⚡ Sprint planning' :
-                        key === 'client'  ? '👤 Client meeting'  :
-                        key === 'standup' ? '☀️ Daily standup'   :
-                        '📦 Product meeting'}
+                        {key}
                       </button>
                     ))}
                   </div>

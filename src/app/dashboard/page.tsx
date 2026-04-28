@@ -47,13 +47,15 @@ export default function Dashboard() {
   const [selected, setSelected]             = useState<string[]>([])
   const [selectMode, setSelectMode]         = useState(false)
   const [hovered, setHovered]               = useState<string | null>(null)
+  const [openTasks, setOpenTasks]           = useState<{ id: string; text: string; owner: string | null; deadline: string | null; meeting_id: string; meeting_title: string }[]>([])
 
   const loadData = useCallback(async (userId: string, userEmail: string) => {
     try {
-      const [profResult, projResult, meetsResult] = await Promise.all([
+      const [profResult, projResult, meetsResult, tasksResult] = await Promise.all([
         supabase.from('profiles').select('*').eq('id', userId).single(),
         supabase.from('projects').select('*').eq('user_id', userId).order('created_at', { ascending: false }),
-        supabase.from('meetings').select('*').eq('user_id', userId).order('created_at', { ascending: false }).limit(50)
+        supabase.from('meetings').select('*').eq('user_id', userId).order('created_at', { ascending: false }).limit(50),
+        supabase.from('tasks').select('id, text, owner, deadline, meeting_id, status').eq('user_id', userId).neq('status', 'done').order('created_at', { ascending: false }).limit(20)
       ])
 
       let prof = profResult.data
@@ -67,6 +69,18 @@ export default function Dashboard() {
       if (prof) setProfile(prof)
       setProjects(projResult.data || [])
       setMeetings(meetsResult.data || [])
+
+      const allMeetings = meetsResult.data || []
+      const meetingTitleById = new Map(allMeetings.map(m => [m.id, m.title]))
+      const enrichedTasks = (tasksResult.data || []).map(t => ({
+        id: t.id,
+        text: t.text,
+        owner: t.owner,
+        deadline: t.deadline,
+        meeting_id: t.meeting_id,
+        meeting_title: meetingTitleById.get(t.meeting_id) || 'Untitled meeting',
+      }))
+      setOpenTasks(enrichedTasks)
     } catch (err) {
       console.error('Dashboard load error:', err)
     } finally {
@@ -286,6 +300,66 @@ export default function Dashboard() {
               Cancel
             </button>
           </form>
+        )}
+
+        {/* OPEN ACTIONS WIDGET — sticky reason to come back */}
+        {tab === 'recent' && openTasks.length > 0 && (
+          <div style={{
+            background: 'linear-gradient(135deg, rgba(245,158,11,0.10), rgba(245,158,11,0.03))',
+            border: '1px solid rgba(245,158,11,0.25)',
+            borderRadius: 14,
+            padding: '20px 24px',
+            marginBottom: 28,
+          }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 14 }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                <span style={{ fontSize: 18 }}>📋</span>
+                <span style={{ fontWeight: 700, fontSize: 15, color: 'var(--text)' }}>
+                  {openTasks.length} open action{openTasks.length > 1 ? 's' : ''} across your meetings
+                </span>
+              </div>
+              <span style={{ fontSize: 12, color: 'var(--muted)' }}>Pick one and close it ↓</span>
+            </div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+              {openTasks.slice(0, 5).map(t => (
+                <Link
+                  key={t.id}
+                  href={`/dashboard/pack/${t.meeting_id}`}
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 12,
+                    padding: '10px 14px',
+                    background: 'var(--surface)',
+                    border: '1px solid var(--border)',
+                    borderRadius: 10,
+                    textDecoration: 'none',
+                    color: 'var(--text)',
+                    fontSize: 13,
+                  }}
+                >
+                  <span style={{ width: 8, height: 8, borderRadius: '50%', background: 'var(--amber)', flexShrink: 0 }} />
+                  <span style={{ flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                    {t.text}
+                  </span>
+                  {t.owner && t.owner !== 'Team' && (
+                    <span style={{ fontSize: 11, color: 'var(--muted)', flexShrink: 0 }}>{t.owner}</span>
+                  )}
+                  {t.deadline && (
+                    <span style={{ fontSize: 11, color: 'var(--amber)', fontWeight: 600, flexShrink: 0 }}>{t.deadline}</span>
+                  )}
+                  <span style={{ fontSize: 11, color: 'var(--muted)', flexShrink: 0, fontStyle: 'italic' }}>
+                    {t.meeting_title}
+                  </span>
+                </Link>
+              ))}
+            </div>
+            {openTasks.length > 5 && (
+              <div style={{ marginTop: 10, fontSize: 12, color: 'var(--muted)', textAlign: 'right' }}>
+                +{openTasks.length - 5} more — open a pack to mark them done
+              </div>
+            )}
+          </div>
         )}
 
         {/* RECENT PACKS */}
