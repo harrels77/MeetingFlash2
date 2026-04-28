@@ -45,6 +45,7 @@ export default function PackDetail() {
   const [shareUrl, setShareUrl] = useState<string | null>(null)
   const [sharing, setSharing]   = useState(false)
   const [showShareMenu, setShowShareMenu] = useState(false)
+  const [plan, setPlan] = useState<'free' | 'pro' | 'team'>('free')
 
   useEffect(() => {
     if (!params?.id) return
@@ -61,6 +62,13 @@ export default function PackDetail() {
 
       if (!data) { router.push('/dashboard'); return }
       setMeeting(data as Meeting)
+
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('plan')
+        .eq('id', session.user.id)
+        .single()
+      if (profile?.plan) setPlan(profile.plan as 'free' | 'pro' | 'team')
       const { data: taskData } = await supabase
         .from('tasks')
         .select('*')
@@ -161,9 +169,15 @@ export default function PackDetail() {
           <button className={styles.copyAllBtn} onClick={copyAll}>
             {copied === 'all' ? '✓ Copied' : 'Copy all'}
           </button>
-          <button className={styles.pdfBtn} onClick={exportPDF}>
-            Export PDF
-          </button>
+          {plan === 'pro' || plan === 'team' ? (
+            <button className={styles.pdfBtn} onClick={exportPDF}>
+              Export PDF
+            </button>
+          ) : (
+            <Link href="/#pricing" className={styles.pdfBtn} style={{ opacity: 0.7, textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: 6 }}>
+              🔒 Export PDF
+            </Link>
+          )}
         </div>
         <div className={styles.shareWrap}>
           <button

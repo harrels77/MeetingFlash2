@@ -194,9 +194,19 @@ Key schema:
 - On `checkout.session.completed`: updates plan + saves userId to Stripe customer metadata
 - On `customer.subscription.deleted` / `invoice.payment_failed`: looks up by userId from customer metadata, falls back to email
 
+### Plan Gates (truth-in-advertising — every Pro bullet on the landing must hold)
+- **Free** (`profiles.plan === 'free'`):
+  - 5 Execution Packs / month (enforced in `/api/flash` and surfaced in app/settings/dashboard)
+  - **English output only** — UI greys out FR/ES/DE with 🔒 and opens upgrade modal; `/api/flash` server-side overrides `lang` to `EN` for free users (`effectiveLang` in route.ts).
+  - **1 project max** — checked in `dashboard/page.tsx:handleCreateProject` and `app/page.tsx:createProject`; over-limit creation routes user to `/#pricing`.
+  - **No smart search** — `/dashboard/search` checks plan and renders an "Upgrade to Pro" lock screen instead of the search UI.
+  - **No PDF export** — pack page swaps the Export PDF button for a 🔒 link to pricing.
+- **Pro / Team** (`plan === 'pro' || 'team'`): all gates above lift. There is currently no Team-only feature in code; Team is hidden as "Coming soon" on the landing.
+- **DON'T** silently revert any of these gates without also rewriting the corresponding landing-page bullet — they are paired by design (the user explicitly rejected misleading bullets).
+
 ### Free Trial Logic
 - Guest (not logged in): 1 free pack via `localStorage('mf_guest_used')`
-- Free plan: 3 packs/month tracked in `profiles.uses_this_month`
+- Free plan: 5 packs/month tracked in `profiles.uses_this_month`
 - Reset: Vercel cron job hits `GET /api/cron/reset-uses` on the 1st of each month at midnight
 - Cron protected by `Authorization: Bearer CRON_SECRET` header
 - When limit reached: show upgrade modal (not just an error message)

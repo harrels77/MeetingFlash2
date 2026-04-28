@@ -49,7 +49,7 @@ export default function SignupPage() {
       </div>
       <div className={styles.card}>
         <div className={styles.cardHeader}>
-          <div className={styles.glyph} />
+          <img src="/logo.png" alt="MeetingFlash" className={styles.glyph} />
           <h1 className={styles.title}>Check your email</h1>
           <p className={styles.sub}>We sent a confirmation link to <strong>{email}</strong>. Click it to activate your account.</p>
         </div>
@@ -69,9 +69,9 @@ export default function SignupPage() {
 
       <div className={styles.card}>
         <div className={styles.cardHeader}>
-          <div className={styles.glyph} />
+          <img src="/logo.png" alt="MeetingFlash" className={styles.glyph} />
           <h1 className={styles.title}>Create account</h1>
-          <p className={styles.sub}>3 free Execution Packs per month. No credit card.</p>
+          <p className={styles.sub}>5 free Execution Packs per month. No credit card.</p>
         </div>
 
         <button className={styles.googleBtn} onClick={handleGoogle}>

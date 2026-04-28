@@ -27,11 +27,24 @@ export default function Search() {
   const [results, setResults] = useState<Result[]>([])
   const [all, setAll]         = useState<MeetingRaw[]>([])
   const [loading, setLoading] = useState(true)
+  const [locked, setLocked]   = useState(false)
 
   useEffect(() => {
     async function load() {
       const { data: { session } } = await supabase.auth.getSession()
       if (!session) { router.push('/login'); return }
+
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('plan')
+        .eq('id', session.user.id)
+        .single()
+
+      if (profile?.plan !== 'pro' && profile?.plan !== 'team') {
+        setLocked(true)
+        setLoading(false)
+        return
+      }
 
       const { data } = await supabase
         .from('meetings')
@@ -98,6 +111,25 @@ export default function Search() {
     }
     return ''
   }
+
+  if (locked) return (
+    <div className={styles.page}>
+      <nav className={styles.nav}>
+        <Link href="/dashboard" className={styles.back}>← Dashboard</Link>
+        <ThemeToggle />
+      </nav>
+      <div className={styles.content} style={{ textAlign: 'center', paddingTop: 80 }}>
+        <div style={{ fontSize: 48, marginBottom: 16 }}>🔍</div>
+        <h1 style={{ fontSize: 28, fontWeight: 700, color: 'var(--text)', marginBottom: 12 }}>Smart Search is a Pro feature</h1>
+        <p style={{ color: 'var(--muted)', fontSize: 15, maxWidth: 480, margin: '0 auto 28px' }}>
+          Search across every decision, action, and follow-up you&apos;ve ever flashed. Available on the Pro plan.
+        </p>
+        <Link href="/#pricing" style={{ display: 'inline-block', background: 'var(--blue)', color: '#fff', padding: '12px 28px', borderRadius: 10, fontWeight: 600, textDecoration: 'none' }}>
+          Upgrade to Pro →
+        </Link>
+      </div>
+    </div>
+  )
 
   return (
     <div className={styles.page}>

@@ -7,150 +7,7 @@ import FooterAccount from '@/components/FooterAccount'
 import ProductShowcase from '@/components/ProductShowcase'
 import s from './page.module.css'
 
-// ── LIVE DEMO DATA ──────────────────────────────────────────
-const RAW_NOTES = [
-  "Sarah: Launch pushed to April 28th",
-  "Tom: I'll send feature list by Friday",
-  "Lisa: Press release draft by Wednesday",
-  "Decision: freeze tool subscriptions Q2",
-  "David: budget projection by Thursday",
-  "Interviews start April 22nd",
-]
-
-const OUTPUTS = [
-  { type: 'decision', color: 'blue',  icon: '📌', text: 'Launch set for April 28th' },
-  { type: 'action',   color: 'green', icon: '✓',  text: 'Tom → Feature list (by Friday)' },
-  { type: 'action',   color: 'green', icon: '✓',  text: 'Lisa → Press release (by Wed)' },
-  { type: 'decision', color: 'blue',  icon: '📌', text: 'Tool subscriptions frozen Q2' },
-  { type: 'action',   color: 'green', icon: '✓',  text: 'David → Budget projection (Thu)' },
-  { type: 'risk',     color: 'amber', icon: '⚠',  text: 'Interview timeline tight' },
-]
-
 const LOGOS = ['Notion', 'Slack', 'Linear', 'Figma', 'Loom', 'Asana', 'Jira', 'Zoom', 'Google Meet', 'Teams']
-
-const TESTIMONIALS = [
-  {
-    text: "We cut post-meeting admin time by 80%. The follow-up email alone saves us 20 minutes per meeting.",
-    name: "Sarah K.",
-    role: "Ops Lead · SaaS startup"
-  },
-  {
-    text: "Finally a tool that actually does something useful with meeting notes. Not just a summary — actual deliverables.",
-    name: "Marcus T.",
-    role: "Product Manager · Fintech"
-  },
-  {
-    text: "The project memory feature is a game changer. I can search across 3 months of meetings in seconds.",
-    name: "Lena R.",
-    role: "Agency founder"
-  },
-  {
-    text: "My clients get a professional recap within minutes of the call ending. It changed how they perceive my work.",
-    name: "David M.",
-    role: "Freelance consultant"
-  },
-  {
-    text: "We used to spend 30 minutes writing meeting notes. Now it's done before we leave the room.",
-    name: "Priya S.",
-    role: "Engineering Lead · Series B"
-  },
-  {
-    text: "The Slack message output alone is worth the subscription. Exactly what I'd write, instantly.",
-    name: "James L.",
-    role: "CEO · Remote-first startup"
-  },
-]
-
-function LiveDemo() {
-  const [step, setStep] = useState(0)
-  const [running, setRunning] = useState(false)
-  const [done, setDone] = useState(false)
-
-  function start() {
-    if (running) return
-    setRunning(true)
-    setDone(false)
-    setStep(0)
-    let i = 0
-    const t = setInterval(() => {
-      i++
-      setStep(i)
-      if (i >= OUTPUTS.length) {
-        clearInterval(t)
-        setDone(true)
-        setRunning(false)
-      }
-    }, 400)
-  }
-
-  function reset() {
-    setStep(0)
-    setDone(false)
-    setRunning(false)
-  }
-
-  return (
-    <div className={s.demo}>
-      <div className={s.demoLeft}>
-        <div className={s.demoLabel}>
-          <div className={s.demoDot} />
-          Raw meeting notes
-        </div>
-        <div className={s.demoNotes}>
-          {RAW_NOTES.map((note, i) => (
-            <div
-              key={i}
-              className={`${s.demoNote} ${step > i ? s.demoNoteProcessed : ''}`}
-            >
-              {step > i && <span className={s.demoNoteCheck}>✓</span>}
-              {note}
-            </div>
-          ))}
-        </div>
-      </div>
-
-      <div className={s.demoCenter}>
-        <button
-          className={`${s.demoRunBtn} ${running ? s.demoRunBtnActive : ''}`}
-          onClick={done ? reset : start}
-          disabled={running}
-        >
-          {running ? (
-            <span className={s.demoSpinner} />
-          ) : done ? (
-            '↺ Reset'
-          ) : (
-            <>
-              <span className={s.demoFlashIcon} />
-              Flash
-            </>
-          )}
-        </button>
-        {running && (
-          <div className={s.demoProcessing}>Processing…</div>
-        )}
-      </div>
-
-      <div className={s.demoRight}>
-        <div className={s.demoLabel}>
-          <div className={`${s.demoDot} ${s.demoDotBlue}`} />
-          Execution Pack
-        </div>
-        <div className={s.demoOutputs}>
-          {OUTPUTS.map((out, i) => (
-            <div
-              key={i}
-              className={`${s.demoOutput} ${step > i ? s.demoOutputVisible : ''} ${s[`demoOutput_${out.color}`]}`}
-            >
-              <span className={s.demoOutputIcon}>{out.icon}</span>
-              <span className={s.demoOutputText}>{out.text}</span>
-            </div>
-          ))}
-        </div>
-      </div>
-    </div>
-  )
-}
 
 export default function Home() {
   const revealRef = useRef<IntersectionObserver | null>(null)
@@ -211,23 +68,23 @@ export default function Home() {
       <section className={s.hero}>
         <div className={s.heroBadge}>
           <span className={s.heroBadgeDot} />
-          Post-meeting execution layer
+          For agencies, freelancers & small teams
         </div>
 
         <h1 className={s.h1}>
-          Turn meeting notes into<br />
-          <span className={s.h1Accent}>execution — instantly.</span>
+          Send a client-ready meeting recap<br />
+          <span className={s.h1Accent}>before they finish their coffee.</span>
         </h1>
 
         <p className={s.heroSub}>
           Paste your notes. Get decisions, tasks, follow-up email,
           Slack message and next agenda in under 20 seconds.
-          No prompts. No setup.
+          No prompts, no setup, no recordings stored.
         </p>
 
         <div className={s.heroActions}>
           <HeroCta className={s.btnPrimary} />
-          <Link href="#demo" className={s.btnGhost}>See it live ↓</Link>
+          <Link href="#features" className={s.btnGhost}>See how it works ↓</Link>
         </div>
 
         <div className={s.heroStats}>
@@ -247,18 +104,6 @@ export default function Home() {
             <span className={s.heroStatN}>0</span>
             <span className={s.heroStatL}>setup needed</span>
           </div>
-        </div>
-      </section>
-
-      {/* ── LIVE DEMO ── */}
-      <section className={s.demoSection} id="demo">
-        <div className={`${s.demoWrap} ${s.reveal}`}>
-          <div className={s.demoHeader}>
-            <div className={s.sectionPill}>Live demo</div>
-            <h2 className={s.demoTitle}>Watch it work</h2>
-            <p className={s.demoSub}>Click Flash and watch raw notes become an Execution Pack in real time.</p>
-          </div>
-          <LiveDemo />
         </div>
       </section>
 
@@ -369,29 +214,38 @@ export default function Home() {
         </div>
       </section>
 
-{/* ── TESTIMONIALS ── */}
+{/* ── OUTCOMES ── */}
 <section className={s.testimonials}>
-  <div className={`${s.sectionPill} ${s.reveal}`}>What teams say</div>
+  <div className={`${s.sectionPill} ${s.reveal}`}>What changes</div>
   <h2 className={`${s.sectionTitle} ${s.reveal}`}>
-    Loved by teams who run<br />back-to-back meetings.
+    What changes when you stop<br />writing recaps yourself.
   </h2>
-  <div className={`${s.testimonialsTrack} ${s.reveal}`}>
-    <div className={s.testimonialsInner}>
-      {[...TESTIMONIALS, ...TESTIMONIALS].map((t, i) => (
-        <div key={i} className={s.testimonialCard}>
-          <div className={s.testimonialStars}>{'★'.repeat(5)}</div>
-          <p className={s.testimonialText}>{t.text}</p>
-          <div className={s.testimonialAuthor}>
-            <div className={s.testimonialAvatar}>{t.name[0]}</div>
-            <div>
-              <div className={s.testimonialName}>{t.name}</div>
-              <div className={s.testimonialRole}>{t.role}</div>
-            </div>
-          </div>
-        </div>
-      ))}
+  <div className={`${s.bento} ${s.reveal}`} style={{ maxWidth: 1100, margin: '40px auto 0' }}>
+    <div className={`${s.bentoCard} ${s.bentoCardBlue}`}>
+      <div className={s.bentoIcon}>⏱</div>
+      <h3 className={s.bentoTitle}>20 minutes back per meeting</h3>
+      <p className={s.bentoDesc}>
+        That's the time it takes most people to type a recap, format an email, and copy actions into Slack. You stop doing it.
+      </p>
+    </div>
+    <div className={`${s.bentoCard} ${s.bentoCardGreen}`}>
+      <div className={s.bentoIcon}>🎯</div>
+      <h3 className={s.bentoTitle}>Every action has an owner</h3>
+      <p className={s.bentoDesc}>
+        No more "who was supposed to do this?" three weeks later. Tasks come out with name, deadline, priority — by default.
+      </p>
+    </div>
+    <div className={`${s.bentoCard} ${s.bentoCardAmber}`}>
+      <div className={s.bentoIcon}>📤</div>
+      <h3 className={s.bentoTitle}>Recap sent before the next meeting</h3>
+      <p className={s.bentoDesc}>
+        The follow-up email goes out the same minute the call ends. Clients perceive you differently when you respond at machine speed.
+      </p>
     </div>
   </div>
+  <p className={`${s.reveal}`} style={{ textAlign: 'center', color: 'var(--muted)', fontSize: 13, marginTop: 32, maxWidth: 600, margin: '32px auto 0' }}>
+    Built solo and shipping fast. No fake quotes here — try it on your next meeting and tell me what you think.
+  </p>
 </section>
 
       {/* ── PRICING ── */}
@@ -401,15 +255,15 @@ export default function Home() {
         <p className={`${s.pricingSub} ${s.reveal}`}>Start free. Upgrade when you're ready.</p>
 
         <div className={`${s.reveal}`} style={{ display:'flex', alignItems:'center', justifyContent:'center', gap:12, marginBottom:32 }}>
-          <span style={{ color: !annual ? '#f0ede8' : '#7a7870', fontSize:14, fontWeight:500 }}>Monthly</span>
+          <span style={{ color: !annual ? 'var(--text)' : 'var(--muted)', fontSize:14, fontWeight:500 }}>Monthly</span>
           <button
             onClick={() => setAnnual(a => !a)}
-            style={{ position:'relative', width:44, height:24, borderRadius:12, background: annual ? '#2563EB' : '#1e2a3a', border:'none', cursor:'pointer', transition:'background 0.2s' }}
+            style={{ position:'relative', width:44, height:24, borderRadius:12, background: annual ? 'var(--blue)' : 'var(--surface2)', border:'1px solid var(--border)', cursor:'pointer', transition:'background 0.2s' }}
           >
             <span style={{ position:'absolute', top:3, left: annual ? 22 : 3, width:18, height:18, borderRadius:'50%', background:'#fff', transition:'left 0.2s' }} />
           </button>
-          <span style={{ color: annual ? '#f0ede8' : '#7a7870', fontSize:14, fontWeight:500 }}>
-            Annual <span style={{ color:'#4ade80', fontSize:12, fontWeight:600 }}>Save 20%</span>
+          <span style={{ color: annual ? 'var(--text)' : 'var(--muted)', fontSize:14, fontWeight:500 }}>
+            Annual <span style={{ color:'var(--green)', fontSize:12, fontWeight:600 }}>Save 20%</span>
           </span>
         </div>
 
@@ -419,7 +273,7 @@ export default function Home() {
             <div className={s.planPrice}>€0</div>
             <div className={s.planPeriod}>Forever</div>
             <ul className={s.planFeats}>
-              {['3 Execution Packs / month', 'All 7 outputs', 'EN + FR + ES', 'Copy to clipboard'].map(f => (
+              {['5 Execution Packs / month', 'All 7 outputs', 'English output', '1 project', 'Copy to clipboard'].map(f => (
                 <li key={f}><span className={s.featCheck}>✓</span>{f}</li>
               ))}
             </ul>
@@ -432,7 +286,7 @@ export default function Home() {
             <div className={s.planPrice}>{annual ? '$8' : '$12'}</div>
             <div className={s.planPeriod}>{annual ? 'per month · billed $96/yr' : 'per month · cancel anytime'}</div>
             <ul className={s.planFeats}>
-              {['Unlimited packs', 'Project memory', 'Full history + search', 'All languages', 'PDF + Notion export', 'Priority processing'].map(f => (
+              {['Unlimited Execution Packs', 'Unlimited projects + project memory', 'Smart search across meetings', 'Output in EN, FR, ES, DE', 'PDF export', 'Priority email support'].map(f => (
                 <li key={f}><span className={s.featCheck}>✓</span>{f}</li>
               ))}
             </ul>
@@ -457,30 +311,20 @@ export default function Home() {
 
           <div className={s.priceCard}>
             <div className={s.planName}>Team</div>
-            <div className={s.planPrice}>{annual ? '$20' : '$25'}</div>
-            <div className={s.planPeriod}>{annual ? '5 seats · billed $240/yr' : '5 seats · per month'}</div>
+            <div className={s.planPrice} style={{ fontSize: 28, color: 'var(--muted)', fontWeight: 600 }}>Coming soon</div>
+            <div className={s.planPeriod}>Shared workspaces & seats</div>
             <ul className={s.planFeats}>
-              {['Everything in Pro', 'Shared project memory', 'Team dashboard', 'Slack + Notion sync', 'Priority support'].map(f => (
-                <li key={f}><span className={s.featCheck}>✓</span>{f}</li>
+              {['Shared project memory', 'Team workspace', 'Per-seat billing', 'Get notified on launch'].map(f => (
+                <li key={f}><span className={s.featCheck}>·</span>{f}</li>
               ))}
             </ul>
-            <button
-              className={s.planBtnPro}
-              onClick={async () => {
-                const priceId = annual
-                  ? process.env.NEXT_PUBLIC_STRIPE_TEAM_ANNUAL_PRICE_ID
-                  : process.env.NEXT_PUBLIC_STRIPE_TEAM_PRICE_ID
-                const res = await fetch('/api/checkout', {
-                  method: 'POST',
-                  headers: { 'Content-Type': 'application/json' },
-                  body: JSON.stringify({ priceId, email: '' })
-                })
-                const { url } = await res.json()
-                if (url) window.location.href = url
-              }}
+            <a
+              href="mailto:hello@meetingflash.work?subject=Team%20plan%20interest"
+              className={s.planBtnFree}
+              style={{ textAlign: 'center' }}
             >
-              Go Team →
-            </button>
+              Notify me →
+            </a>
           </div>
         </div>
       </section>

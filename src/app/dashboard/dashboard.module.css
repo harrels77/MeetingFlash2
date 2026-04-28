@@ -50,9 +50,9 @@
 }
 
 .logoMark {
-  width: 22px; height: 22px;
-  background: var(--blue);
+  width: 26px; height: 26px;
   border-radius: 6px;
+  object-fit: contain;
   flex-shrink: 0;
 }
 

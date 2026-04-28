@@ -110,6 +110,7 @@ export default function AppPage() {
   const [error, setError]   = useState('')
   const [copied, setCopied] = useState<string | null>(null)
   const [isLoggedIn, setIsLoggedIn] = useState<boolean | null>(null)
+  const [plan, setPlan] = useState<'free' | 'pro' | 'team'>('free')
   const [guestUsed, setGuestUsed]   = useState(false)
   const [projectId, setProjectId] = useState<string | null>(null)
   const [projects, setProjects]   = useState<{id: string, name: string}[]>([])
@@ -139,8 +140,9 @@ export default function AppPage() {
           .eq('id', session.user.id)
           .single()
         if (profile) {
-          const limit = profile.plan === 'free' ? 3 : Infinity
+          const limit = profile.plan === 'free' ? 5 : Infinity
           setUsesLeft(Math.max(0, limit - profile.uses_this_month))
+          setPlan(profile.plan as 'free' | 'pro' | 'team')
         }
          {
           const { data } = await supabase
@@ -237,6 +239,11 @@ export default function AppPage() {
 
 async function createProject() {
   if (!newProjectName.trim()) return
+  if (plan === 'free' && projects.length >= 1) {
+    setShowUpgradeModal(true)
+    setShowCreateProject(false)
+    return
+  }
   setCreatingProject(true)
   try {
     const { data: { session } } = await supabase.auth.getSession()
@@ -414,15 +421,28 @@ async function createProject() {
           </div>
 
           <div className={styles.field}>
-            <div className={styles.fieldLabel}>Output language</div>
+            <div className={styles.fieldLabel}>
+              Output language
+              {plan === 'free' && isLoggedIn && (
+                <span style={{ marginLeft: 8, fontSize: 11, color: 'var(--blue3)' }}>· Pro unlocks all</span>
+              )}
+            </div>
             <div className={styles.toggles}>
-              {['EN', 'FR', 'ES', 'DE'].map(k => (
-                <button
-                  key={k}
-                  className={`${styles.toggle} ${lang === k ? styles.toggleOn : ''}`}
-                  onClick={() => setLang(k)}
-                >{k}</button>
-              ))}
+              {['EN', 'FR', 'ES', 'DE'].map(k => {
+                const locked = plan === 'free' && k !== 'EN'
+                return (
+                  <button
+                    key={k}
+                    className={`${styles.toggle} ${lang === k ? styles.toggleOn : ''}`}
+                    onClick={() => {
+                      if (locked) { setShowUpgradeModal(true); return }
+                      setLang(k)
+                    }}
+                    style={locked ? { opacity: 0.5, cursor: 'pointer' } : undefined}
+                    title={locked ? 'Upgrade to Pro for all output languages' : undefined}
+                  >{locked ? `🔒 ${k}` : k}</button>
+                )
+              })}
             </div>
           </div>
 
@@ -470,7 +490,7 @@ async function createProject() {
               <>
                 <span><strong>1 free pack</strong> without account</span>
                 <span className={styles.hintDot}>·</span>
-                <Link href="/signup" className={styles.hintLink}>Sign up for 3/month →</Link>
+                <Link href="/signup" className={styles.hintLink}>Sign up for 5/month →</Link>
               </>
             )}
           </div>
@@ -492,7 +512,7 @@ async function createProject() {
           {pack && !isLoggedIn && (
             <div className={styles.guestBanner}>
               <div className={styles.guestBannerText}>
-                <strong>Pack generated.</strong> Create a free account to save it and get 3 packs per month.
+                <strong>Pack generated.</strong> Create a free account to save it and get 5 packs per month.
               </div>
               <Link href="/signup" className={styles.guestBannerBtn}>
                 Create free account →
@@ -565,7 +585,7 @@ async function createProject() {
             <p style={{ color:'#7a7870', fontSize:15, marginBottom:28, lineHeight:1.6 }}>
               {isLoggedIn
                 ? 'Upgrade to Pro for unlimited packs, project memory, full history and more.'
-                : 'Create a free account to get 3 packs per month — or go Pro for unlimited access.'}
+                : 'Create a free account to get 5 packs per month — or go Pro for unlimited access.'}
             </p>
             <div style={{ display:'flex', flexDirection:'column', gap:10 }}>
               <button

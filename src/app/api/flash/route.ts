@@ -35,6 +35,27 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'API key not configured' }, { status: 500 })
     }
 
+    // Plan-gate languages: only Pro+ may use non-English output.
+    let effectiveLang = lang
+    const authHeaderForGate = req.headers.get('authorization')
+    if (lang && lang !== 'EN') {
+      let allowed = false
+      if (authHeaderForGate) {
+        const gateClient = createClient(
+          process.env.NEXT_PUBLIC_SUPABASE_URL!,
+          process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+          { global: { headers: { Authorization: authHeaderForGate } } }
+        )
+        const { data: { user } } = await gateClient.auth.getUser()
+        if (user) {
+          const { data: gateProfile } = await gateClient
+            .from('profiles').select('plan').eq('id', user.id).single()
+          if (gateProfile?.plan === 'pro' || gateProfile?.plan === 'team') allowed = true
+        }
+      }
+      if (!allowed) effectiveLang = 'EN'
+    }
+
     const styleMap: Record<string, string> = {
       Concise:  'sharp and concise — minimum words, maximum clarity',
       Detailed: 'thorough and detailed — include all relevant context',
@@ -63,7 +84,7 @@ Analyze this meeting transcript and return ONLY a valid JSON object with exactly
   - "deadline": deadline mentioned or null
   - "priority": "high", "medium", or "low" based on context
 
-Output language: ${langMap[lang] || 'English'}
+Output language: ${langMap[effectiveLang] || 'English'}
 Style: ${styleMap[style] || styleMap.Concise}
 
 Return ONLY raw JSON. No markdown. No explanation.
@@ -127,7 +148,7 @@ ${text}`
             title: pack.title || 'Untitled Meeting',
             raw_notes: text,
             pack,
-            lang,
+            lang: effectiveLang,
             style,
           }).select('id').single()
 

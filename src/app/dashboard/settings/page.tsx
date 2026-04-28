@@ -18,7 +18,7 @@ interface Profile {
 
 export default function Settings() {
   const router = useRouter()
-  const { user, loading: authLoading } = useAuth()
+  const { user, loading: authLoading, signOut } = useAuth()
   const [profile, setProfile]     = useState<Profile | null>(null)
   const [loading, setLoading]     = useState(true)
   const [name, setName]           = useState('')
@@ -70,23 +70,17 @@ export default function Settings() {
     setTimeout(() => setSaved(false), 2000)
   }
 
-  async function signOut() {
-    await supabase.auth.signOut()
-    router.push('/')
-  }
-
   async function deleteAccount() {
     if (!profile) return
     setDeleting(true)
     await supabase.from('meetings').delete().eq('user_id', profile.id)
     await supabase.from('projects').delete().eq('user_id', profile.id)
     await supabase.from('profiles').delete().eq('id', profile.id)
-    await supabase.auth.signOut()
-    router.push('/')
+    signOut()
   }
 
   const usesLeft = profile?.plan === 'free'
-    ? Math.max(0, 3 - (profile?.uses_this_month ?? 0))
+    ? Math.max(0, 5 - (profile?.uses_this_month ?? 0))
     : Infinity
 
   if (loading) return (
@@ -140,7 +134,7 @@ export default function Settings() {
                 <div className={styles.planName}>{profile?.plan === 'free' ? 'Free plan' : profile?.plan === 'pro' ? 'Pro plan' : 'Team plan'}</div>
                 <div className={styles.planDetail}>
                   {profile?.plan === 'free'
-                    ? `${usesLeft} of 3 packs remaining this month`
+                    ? `${usesLeft} of 5 packs remaining this month`
                     : 'Unlimited packs per month'
                   }
                 </div>
@@ -154,12 +148,12 @@ export default function Settings() {
             <div className={styles.usageBar}>
               <div
                 className={styles.usageBarFill}
-                style={{ width: `${profile?.plan === 'free' ? ((profile?.uses_this_month ?? 0) / 3) * 100 : 100}%` }}
+                style={{ width: `${profile?.plan === 'free' ? ((profile?.uses_this_month ?? 0) / 5) * 100 : 100}%` }}
               />
             </div>
             <div className={styles.usageLabel}>
               {profile?.plan === 'free'
-                ? `${profile?.uses_this_month ?? 0} / 3 packs used this month`
+                ? `${profile?.uses_this_month ?? 0} / 5 packs used this month`
                 : 'Unlimited'
               }
             </div>

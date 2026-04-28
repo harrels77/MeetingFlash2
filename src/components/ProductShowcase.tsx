@@ -42,7 +42,7 @@ function TopBar({ right }: { right: React.ReactNode }) {
   return (
     <div className={s.topbar}>
       <div className={s.logo}>
-        <div className={s.logoMark} />
+        <img src="/logo.png" alt="" className={s.logoMark} />
         MeetingFlash
       </div>
       <div className={s.topbarRight}>{right}</div>
@@ -108,7 +108,7 @@ function AppMockup() {
           </div>
 
           <div className={s.appFootnote}>
-            3 free packs / month · <span>Sign up to save history</span>
+            5 free packs / month · <span>Sign up to save history</span>
           </div>
         </div>
 
@@ -200,7 +200,7 @@ function DashboardMockup() {
       <div className={s.dashRoot}>
         <div className={s.sidebar}>
           <div className={s.sidebarLogo}>
-            <div className={s.logoMark} />
+            <img src="/logo.png" alt="" className={s.logoMark} />
             meetingflash
           </div>
           <div className={s.sidebarNav}>

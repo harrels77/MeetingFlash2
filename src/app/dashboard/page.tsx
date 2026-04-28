@@ -116,14 +116,14 @@ export default function Dashboard() {
     setSelected([]); setSelectMode(false)
   }
 
-  async function signOut() {
-    await supabase.auth.signOut()
-    router.push('/')
-  }
-
   async function handleCreateProject(e: React.FormEvent) {
     e.preventDefault()
     if (!newProject.trim() || !profile) return
+    if (profile.plan === 'free' && projects.length >= 1) {
+      alert('Free plan is limited to 1 project. Upgrade to Pro for unlimited projects.')
+      window.location.href = '/#pricing'
+      return
+    }
     setCreating(true)
     const { data } = await supabase
       .from('projects')
@@ -177,7 +177,7 @@ export default function Dashboard() {
   }
 
   const usesLeft = profile?.plan === 'free'
-    ? Math.max(0, 3 - (profile?.uses_this_month ?? 0))
+    ? Math.max(0, 5 - (profile?.uses_this_month ?? 0))
     : Infinity
 
   if (loading) return (
@@ -191,8 +191,7 @@ export default function Dashboard() {
       {/* SIDEBAR */}
       <aside className={styles.sidebar}>
         <Link href="/" className={styles.sidebarLogo}>
-          <img src="/logo.png" alt="MeetingFlash" width={28} height={28} style={{ borderRadius: 6 }} />
-          <div className={styles.logoMark}><div className={styles.logoInner}/></div>
+          <img src="/logo.png" alt="MeetingFlash" width={28} height={28} style={{ borderRadius: 6, objectFit: 'contain' }} />
           meetingflash
         </Link>
 
@@ -218,7 +217,7 @@ export default function Dashboard() {
           <div className={styles.planBadge}>
             <span className={styles.planName}>{profile?.plan ?? 'free'}</span>
             <span className={styles.planUses}>
-              {profile?.plan === 'free' ? `${usesLeft} / 3 left` : 'Unlimited'}
+              {profile?.plan === 'free' ? `${usesLeft} / 5 left` : 'Unlimited'}
             </span>
           </div>
           {profile?.plan === 'free' && (

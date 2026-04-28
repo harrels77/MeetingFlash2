@@ -43,7 +43,7 @@ export default function LoginPage() {
 
       <div className={styles.card}>
         <div className={styles.cardHeader}>
-          <div className={styles.glyph} />
+          <img src="/logo.png" alt="MeetingFlash" className={styles.glyph} />
           <h1 className={styles.title}>Sign in</h1>
           <p className={styles.sub}>Welcome back. Your packs are waiting.</p>
         </div>

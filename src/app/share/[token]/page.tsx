@@ -39,7 +39,7 @@ export default async function SharePage({ params }: { params: { token: string } 
     <div className={styles.page}>
       <nav className={styles.nav}>
         <Link href="/" className={styles.logo}>
-          <div className={styles.logoMark}><div className={styles.logoInner}/></div>
+          <img src="/logo.png" alt="" className={styles.logoMark} />
           MeetingFlash
         </Link>
         <div className={styles.navBadge}>Shared pack · Read only</div>
@@ -89,7 +89,7 @@ export default async function SharePage({ params }: { params: { token: string } 
       <div className={styles.stickyBanner}>
         <div className={styles.stickyBannerLeft}>
           <span className={styles.stickyBannerTitle}>Turn your own meeting notes into an Execution Pack.</span>
-          <span className={styles.stickyBannerSub}>3 free packs per month. No credit card.</span>
+          <span className={styles.stickyBannerSub}>5 free packs per month. No credit card.</span>
         </div>
         <Link href="/app" className={styles.stickyBannerCta}>Try free →</Link>
       </div>
