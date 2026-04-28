@@ -243,9 +243,18 @@ export default function Home() {
       </p>
     </div>
   </div>
-  <p className={`${s.reveal}`} style={{ textAlign: 'center', color: 'var(--muted)', fontSize: 13, marginTop: 32, maxWidth: 600, margin: '32px auto 0' }}>
-    Built solo and shipping fast. No fake quotes here — try it on your next meeting and tell me what you think.
-  </p>
+  <div className={`${s.reveal}`} style={{ textAlign: 'center', maxWidth: 620, margin: '40px auto 0', padding: '24px 28px', background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 14 }}>
+    <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.12em', color: 'var(--muted)', textTransform: 'uppercase', marginBottom: 10 }}>From the maker</div>
+    <p style={{ color: 'var(--text)', fontSize: 15, lineHeight: 1.65, marginBottom: 12 }}>
+      I built MeetingFlash because I was tired of writing the same recap email three times a week.
+      I&apos;m Simon — solo founder, no VC, no growth-hacking nonsense. If something breaks or you have an idea,
+      reply to <a href="mailto:hello@meetingflash.work" style={{ color: 'var(--blue3)', textDecoration: 'none', fontWeight: 600 }}>hello@meetingflash.work</a>{' '}
+      and you&apos;ll get me directly.
+    </p>
+    <div style={{ fontSize: 13, color: 'var(--muted)' }}>
+      No fake quotes here — try it on your next meeting and tell me what you think.
+    </div>
+  </div>
 </section>
 
       {/* ── PRICING ── */}
@@ -270,7 +279,7 @@ export default function Home() {
         <div className={`${s.pricingGrid} ${s.reveal}`}>
           <div className={s.priceCard}>
             <div className={s.planName}>Free</div>
-            <div className={s.planPrice}>€0</div>
+            <div className={s.planPrice}>$0</div>
             <div className={s.planPeriod}>Forever</div>
             <ul className={s.planFeats}>
               {['5 Execution Packs / month', 'All 7 outputs', 'English output', '1 project', 'Copy to clipboard'].map(f => (
@@ -326,6 +335,73 @@ export default function Home() {
               Notify me →
             </a>
           </div>
+        </div>
+      </section>
+
+      {/* ── FAQ ── */}
+      <section className={s.testimonials} id="faq" style={{ paddingBottom: 40 }}>
+        <div className={`${s.sectionPill} ${s.reveal}`}>FAQ</div>
+        <h2 className={`${s.sectionTitle} ${s.reveal}`}>Honest answers,<br />before you ask.</h2>
+        <div className={`${s.reveal}`} style={{ maxWidth: 760, margin: '40px auto 0', display: 'flex', flexDirection: 'column', gap: 12 }}>
+          {[
+            {
+              q: 'How accurate is it on messy notes?',
+              a: 'It handles bullet points, half-sentences, and "Sarah said launch April 28" style fragments well. If your notes don\'t mention a deadline, MeetingFlash won\'t invent one — it leaves the field blank rather than guessing. Garbage-in still produces a structured pack, just with fewer details.'
+            },
+            {
+              q: 'Where do my notes go?',
+              a: 'Transcripts are sent to Anthropic\'s Claude API, processed in-memory, and discarded — never stored on Anthropic\'s side or used for training. The generated Pack (decisions, actions, etc.) is stored in your account on Supabase (EU region) so you can come back to it. You can delete any pack in one click, and your full account from Settings.'
+            },
+            {
+              q: 'Which languages work?',
+              a: 'Input can be in any language. Output is currently English (Free plan) or English / French / Spanish / German (Pro). More languages coming as users request them.'
+            },
+            {
+              q: 'What happens if I cancel?',
+              a: 'You drop back to the Free plan: your account, all past packs, and projects stay accessible. You\'re just capped to 5 packs/month again. No data deletion, no lockout. Cancel from your Stripe portal in two clicks.'
+            },
+            {
+              q: 'Is "Built solo" a problem for reliability?',
+              a: 'It means MeetingFlash runs on the same infra as much bigger products — Vercel, Supabase, Stripe, Anthropic. The site itself is small enough that it doesn\'t go down for the reasons big SaaS does. If it ever does, email me and I\'ll have eyes on it within hours.'
+            },
+            {
+              q: 'Why no Team plan yet?',
+              a: 'Because building shared workspaces, per-seat billing, and Slack/Notion sync the right way takes weeks of focused work. I\'d rather ship a Pro plan that works than a Team plan that half-works. If you need Team features now, email me — I\'ll prioritize based on what real users actually want.'
+            },
+          ].map((item, i) => (
+            <details
+              key={i}
+              style={{
+                background: 'var(--surface)',
+                border: '1px solid var(--border)',
+                borderRadius: 12,
+                padding: '18px 22px',
+                cursor: 'pointer',
+              }}
+            >
+              <summary style={{
+                listStyle: 'none',
+                fontSize: 15,
+                fontWeight: 600,
+                color: 'var(--text)',
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+                gap: 16,
+              }}>
+                <span>{item.q}</span>
+                <span style={{ color: 'var(--muted)', fontSize: 18, flexShrink: 0 }}>+</span>
+              </summary>
+              <p style={{
+                color: 'var(--muted)',
+                fontSize: 14,
+                lineHeight: 1.7,
+                marginTop: 14,
+                paddingTop: 14,
+                borderTop: '1px solid var(--border)',
+              }}>{item.a}</p>
+            </details>
+          ))}
         </div>
       </section>
 

@@ -512,10 +512,10 @@ async function createProject() {
           {pack && !isLoggedIn && (
             <div className={styles.guestBanner}>
               <div className={styles.guestBannerText}>
-                <strong>Pack generated.</strong> Create a free account to save it and get 5 packs per month.
+                <strong>That took 20 seconds.</strong> Save this pack, and get 4 more like it this month — free, no credit card.
               </div>
               <Link href="/signup" className={styles.guestBannerBtn}>
-                Create free account →
+                Save this pack →
               </Link>
             </div>
           )}
