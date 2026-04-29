@@ -9,6 +9,84 @@ import s from './page.module.css'
 
 const LOGOS = ['Notion', 'Slack', 'Linear', 'Figma', 'Loom', 'Asana', 'Jira', 'Zoom', 'Google Meet', 'Teams']
 
+const FAQ_ITEMS = [
+  {
+    q: 'How accurate is it on messy notes?',
+    a: 'It handles bullet points, half-sentences, and "Sarah said launch April 28" style fragments well. If your notes don\'t mention a deadline, MeetingFlash won\'t invent one — it leaves the field blank rather than guessing. Garbage-in still produces a structured pack, just with fewer details.',
+  },
+  {
+    q: 'Where do my notes go?',
+    a: 'Transcripts are sent to Anthropic\'s Claude API, processed in-memory, and discarded — never stored on Anthropic\'s side or used for training. The generated Pack (decisions, actions, etc.) is stored in your account on Supabase (EU region) so you can come back to it. You can delete any pack in one click, and your full account from Settings.',
+  },
+  {
+    q: 'Which languages work?',
+    a: 'Input can be in any language. Output is currently English (Free plan) or English / French / Spanish / German (Pro). More languages coming as users request them.',
+  },
+  {
+    q: 'What happens if I cancel?',
+    a: 'You drop back to the Free plan: your account, all past packs, and projects stay accessible. You\'re just capped to 5 packs/month again. No data deletion, no lockout. Cancel from your Stripe portal in two clicks.',
+  },
+  {
+    q: 'Is "Built solo" a problem for reliability?',
+    a: 'It means MeetingFlash runs on the same infra as much bigger products — Vercel, Supabase, Stripe, Anthropic. The site itself is small enough that it doesn\'t go down for the reasons big SaaS does. If it ever does, email me and I\'ll have eyes on it within hours.',
+  },
+  {
+    q: 'Why no Team plan yet?',
+    a: 'Because building shared workspaces, per-seat billing, and Slack/Notion sync the right way takes weeks of focused work. I\'d rather ship a Pro plan that works than a Team plan that half-works. If you need Team features now, email me — I\'ll prioritize based on what real users actually want.',
+  },
+]
+
+const HOME_JSON_LD = [
+  {
+    '@context': 'https://schema.org',
+    '@type': 'WebSite',
+    name: 'MeetingFlash',
+    url: 'https://meetingflash.work',
+    potentialAction: {
+      '@type': 'SearchAction',
+      target: 'https://meetingflash.work/blog?q={search_term_string}',
+      'query-input': 'required name=search_term_string',
+    },
+  },
+  {
+    '@context': 'https://schema.org',
+    '@type': 'SoftwareApplication',
+    name: 'MeetingFlash',
+    description: 'AI-powered post-meeting execution tool. Paste raw meeting notes, get decisions, action items, follow-up email, Slack message, and next agenda in under 20 seconds.',
+    url: 'https://meetingflash.work',
+    applicationCategory: 'BusinessApplication',
+    operatingSystem: 'Web',
+    offers: [
+      {
+        '@type': 'Offer',
+        name: 'Free',
+        price: '0',
+        priceCurrency: 'USD',
+        description: '5 Execution Packs per month, English output, 1 project',
+      },
+      {
+        '@type': 'Offer',
+        name: 'Pro',
+        price: '12',
+        priceCurrency: 'USD',
+        description: 'Unlimited packs, project memory, smart search, EN/FR/ES/DE output, PDF export',
+      },
+    ],
+  },
+  {
+    '@context': 'https://schema.org',
+    '@type': 'FAQPage',
+    mainEntity: FAQ_ITEMS.map(item => ({
+      '@type': 'Question',
+      name: item.q,
+      acceptedAnswer: {
+        '@type': 'Answer',
+        text: item.a,
+      },
+    })),
+  },
+]
+
 export default function Home() {
   const revealRef = useRef<IntersectionObserver | null>(null)
   const [annual, setAnnual] = useState(false)
@@ -56,6 +134,10 @@ export default function Home() {
 
   return (
     <div className={s.root}>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(HOME_JSON_LD) }}
+      />
       {/* AMBIENT */}
       <div className={s.ambient}>
         <div className={s.ambientBlob1} />
@@ -424,32 +506,7 @@ export default function Home() {
         <div className={`${s.sectionPill} ${s.reveal}`}>FAQ</div>
         <h2 className={`${s.sectionTitle} ${s.reveal}`}>Honest answers,<br />before you ask.</h2>
         <div className={`${s.reveal}`} style={{ maxWidth: 760, margin: '40px auto 0', display: 'flex', flexDirection: 'column', gap: 12 }}>
-          {[
-            {
-              q: 'How accurate is it on messy notes?',
-              a: 'It handles bullet points, half-sentences, and "Sarah said launch April 28" style fragments well. If your notes don\'t mention a deadline, MeetingFlash won\'t invent one — it leaves the field blank rather than guessing. Garbage-in still produces a structured pack, just with fewer details.'
-            },
-            {
-              q: 'Where do my notes go?',
-              a: 'Transcripts are sent to Anthropic\'s Claude API, processed in-memory, and discarded — never stored on Anthropic\'s side or used for training. The generated Pack (decisions, actions, etc.) is stored in your account on Supabase (EU region) so you can come back to it. You can delete any pack in one click, and your full account from Settings.'
-            },
-            {
-              q: 'Which languages work?',
-              a: 'Input can be in any language. Output is currently English (Free plan) or English / French / Spanish / German (Pro). More languages coming as users request them.'
-            },
-            {
-              q: 'What happens if I cancel?',
-              a: 'You drop back to the Free plan: your account, all past packs, and projects stay accessible. You\'re just capped to 5 packs/month again. No data deletion, no lockout. Cancel from your Stripe portal in two clicks.'
-            },
-            {
-              q: 'Is "Built solo" a problem for reliability?',
-              a: 'It means MeetingFlash runs on the same infra as much bigger products — Vercel, Supabase, Stripe, Anthropic. The site itself is small enough that it doesn\'t go down for the reasons big SaaS does. If it ever does, email me and I\'ll have eyes on it within hours.'
-            },
-            {
-              q: 'Why no Team plan yet?',
-              a: 'Because building shared workspaces, per-seat billing, and Slack/Notion sync the right way takes weeks of focused work. I\'d rather ship a Pro plan that works than a Team plan that half-works. If you need Team features now, email me — I\'ll prioritize based on what real users actually want.'
-            },
-          ].map((item, i) => (
+          {FAQ_ITEMS.map((item, i) => (
             <details
               key={i}
               style={{

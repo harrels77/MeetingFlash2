@@ -263,11 +263,20 @@ The user is non-coder, motivated, and worried about retention. These three piece
 - Responsive: stacks columns on mobile, hides sidebar on dashboard mockup, tighter padding
 
 ### Blog
-- 4 static articles in `src/lib/blog.ts` (Article[] data array)
-- SEO slugs: `how-to-write-effective-meeting-notes`, `post-meeting-workflow-for-teams`, `how-to-write-follow-up-email-after-meeting`, `meeting-action-items-best-practices`
+- **9 static articles** in `src/lib/blog.ts` (Article[] data array). Slugs:
+  - `how-to-write-effective-meeting-notes`
+  - `post-meeting-workflow-for-teams`
+  - `how-to-write-follow-up-email-after-meeting`
+  - `meeting-action-items-best-practices`
+  - `how-to-summarize-meeting-notes-with-ai` (AI/automation, broad)
+  - `best-ai-meeting-recap-tools-for-agencies` (comparison, agency ICP)
+  - `discovery-call-recap-template` (agency ICP — links to /app discovery template)
+  - `sprint-retrospective-template` (product team ICP)
+  - `client-status-update-email-template` (agency ICP)
 - Blog index at `/blog`, articles at `/blog/[slug]`
 - `generateStaticParams()` used — pre-rendered at build time
-- Each article ends with a CTA block linking to `/app`
+- Each article ends with a CTA block linking to `/app`, then a 3-card "Related reading" block (`getRelatedArticles()` in blog.ts: same-category first, then fill) — that's the internal-linking surface for SEO
+- Article renderer (`blog/[slug]/page.tsx:parseInline`) supports `[text](url)` markdown links — internal links use Next `<Link>`, external use `<a rel="noopener">`. Inline `**bold**` still works alongside links. Whole-line `**bold**` becomes an emphasized paragraph.
 - "Blog" link added to MobileNav (desktop + mobile)
 
 ### HeroCta Labels (src/components/HeroCta.tsx)
@@ -333,7 +342,11 @@ RESEND_API_KEY                          ← get from resend.com (needs custom do
 - Dark/light mode toggle — nav button, localStorage, FOUC-free
 - Blog — 4 SEO articles, static, linked from nav
 - Email routes (Resend) — built, blocked (Resend account flagged, awaiting support)
-- Sitemap + robots.txt for SEO indexing (`src/app/sitemap.ts`, `src/app/robots.ts`)
+- Sitemap + robots.txt for SEO indexing (`src/app/sitemap.ts`, `src/app/robots.ts`) — `/login`, `/signup`, `/share/` are explicitly disallowed and noindex'd
+- Dynamic OpenGraph image at `/opengraph-image` (1200×630, generated edge-runtime via `next/og` in `src/app/opengraph-image.tsx`) — used by home page; blog posts reference it as their fallback image
+- Structured data (JSON-LD): `Organization` site-wide (root layout), `WebSite` + `SoftwareApplication` + `FAQPage` on home (`page.tsx` — FAQ data lives in `FAQ_ITEMS` const, used by both the JSX and the JSON-LD; keep them in sync), `BlogPosting` on each article (`blog/[slug]/page.tsx:articleJsonLd`)
+- Canonical URLs on every public page via `alternates.canonical` in metadata (root, `/app`, `/blog`, `/blog/[slug]`); `/login`, `/signup`, `/share` are `noindex` instead
+- Per-route metadata via dedicated `layout.tsx` for client pages (`/app/layout.tsx`, `/login/layout.tsx`, `/signup/layout.tsx`) — these client pages can't export metadata themselves
 - Favicon tight-cropped (was 1536×1024 with 70% whitespace, now 512×512 transparent)
 - Light-mode contrast fix on blue accents + nav (was hardcoded dark)
 - Product showcase section on landing page — 3 interactive mockups

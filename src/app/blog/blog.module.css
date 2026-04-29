@@ -211,6 +211,19 @@
   margin-bottom: 8px;
 }
 
+.articleLink {
+  color: var(--blue3);
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 2px;
+  font-weight: 500;
+  transition: color 0.15s;
+}
+.articleLink:hover {
+  color: var(--blue2);
+  text-decoration-thickness: 2px;
+}
+
 .articleLi {
   font-size: 16px;
   color: var(--muted);
@@ -317,6 +330,78 @@
 }
 .footerCta:hover { text-decoration: underline; }
 
+/* RELATED ARTICLES */
+.relatedBlock {
+  margin-top: 64px;
+  padding-top: 48px;
+  border-top: 1px solid var(--border);
+}
+
+.relatedTitle {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 24px;
+}
+
+.relatedGrid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+}
+
+.relatedCard {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 22px;
+  text-decoration: none;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  transition: transform 0.2s, border-color 0.2s, box-shadow 0.2s;
+}
+.relatedCard:hover {
+  transform: translateY(-2px);
+  border-color: var(--border2);
+  box-shadow: 0 8px 24px rgba(0,0,0,0.18);
+}
+
+.relatedCategory {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--blue3);
+}
+
+.relatedCardTitle {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--text);
+  line-height: 1.35;
+  letter-spacing: -0.2px;
+}
+
+.relatedCardDesc {
+  font-size: 13.5px;
+  color: var(--muted);
+  line-height: 1.55;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.relatedCardMore {
+  margin-top: auto;
+  color: var(--blue3);
+  font-size: 13px;
+  font-weight: 600;
+}
+
 /* RESPONSIVE */
 @media (max-width: 768px) {
   .content { padding: 40px 20px 60px; }
@@ -326,4 +411,6 @@
   .articleTitle { font-size: 26px; }
   .nav { padding: 0 20px; }
   .footer { padding: 32px 20px; }
+  .relatedGrid { grid-template-columns: 1fr; }
+  .relatedBlock { margin-top: 48px; padding-top: 36px; }
 }

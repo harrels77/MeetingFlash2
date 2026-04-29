@@ -1,6 +1,13 @@
 import { createClient } from '@supabase/supabase-js'
 import Link from 'next/link'
+import type { Metadata } from 'next'
 import styles from './share.module.css'
+
+export const metadata: Metadata = {
+  title: 'Shared meeting recap',
+  description: 'A meeting recap shared via MeetingFlash.',
+  robots: { index: false, follow: false },
+}
 
 const BLOCKS = [
   { id: 'decisions', label: 'Decisions',       color: 'spark'  },

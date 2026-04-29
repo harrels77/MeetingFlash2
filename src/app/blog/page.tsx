@@ -4,8 +4,15 @@ import { articles } from '@/lib/blog'
 import styles from './blog.module.css'
 
 export const metadata: Metadata = {
-  title: 'Blog — MeetingFlash',
+  title: 'Blog — Meeting productivity, recap workflows, and AI tips',
   description: 'Tips and best practices for running better meetings, writing effective notes, and getting more done after every call.',
+  alternates: { canonical: '/blog' },
+  openGraph: {
+    title: 'MeetingFlash Blog',
+    description: 'Practical guides for teams who want to get more done after every meeting.',
+    url: 'https://meetingflash.work/blog',
+    type: 'website',
+  },
 }
 
 export default function BlogIndex() {
