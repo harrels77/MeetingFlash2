@@ -100,7 +100,7 @@ persistent project memory, structured ready-to-use outputs.
 ## All Pages & Routes
 src/
 ├── app/
-│   ├── page.tsx                     ← Landing page (hero, demo, features, testimonials, pricing)
+│   ├── page.tsx                     ← Landing page (hero, live demo, ProductShowcase, features, compare, agencies, outcomes, pricing, FAQ, founder note)
 │   ├── layout.tsx                   ← Root layout + AuthProvider + Analytics + theme FOUC script
 │   ├── app/page.tsx                 ← Flash tool (main product)
 │   ├── blog/
@@ -150,6 +150,7 @@ src/
 - OAuth callback route: `src/app/auth/callback/route.ts`
 - `AuthProvider` calls both `getSession()` AND `onAuthStateChange` — both can call `loadProfile` simultaneously (known race condition in prod, do not change without testing)
 - `signOut` in AuthProvider: `async`, awaits `supabase.auth.signOut()`, then does `window.location.replace('/')` — full page reload to clear state
+- **Always use the canonical `useAuth().signOut`.** `dashboard/page.tsx` and `settings/page.tsx` previously had their own local sign-out that awaited `supabase.auth.signOut()` and could hang when Supabase slept. Both now call `useAuth().signOut` directly. `settings/page.tsx`'s `deleteAccount` also finishes by calling the canonical signOut. Don't reintroduce local awaiting sign-out paths.
 - **Welcome email trigger:** when `loadProfile` creates a new profile (first time, no existing row), it calls `fetch('/api/email/welcome', ...)` fire-and-forget. Currently fails silently (no domain yet).
 
 ### Database (Supabase PostgreSQL)
@@ -179,11 +180,12 @@ Key schema:
 - Saves meeting + tasks to DB if `Authorization: Bearer <token>` header present
 - Supabase client in this route: created per-request with user's auth header, uses `NEXT_PUBLIC_SUPABASE_ANON_KEY`
 - Calls `supabase.rpc('increment_uses', { user_id: user.id })` after each successful flash
-- After increment, fetches profile to check if free user hit 3 uses → sends nudge email (fire-and-forget)
+- After increment, fetches profile to check if free user hit 5 uses → sends nudge email (fire-and-forget). The nudge email's literal copy still says "3 free packs" because user said skip email infra changes; update when Resend reactivates.
+- **Server-side language gate:** at the top of the route, if `lang !== 'EN'` we look up the caller's plan via the auth header. Free users / guests get `effectiveLang = 'EN'` (cannot be bypassed by the client). Only `pro` / `team` keep their requested lang. The prompt and the `meetings.lang` insert both use `effectiveLang`, never the raw `lang`.
 
 ### Payments (Stripe)
 - Pro: $12/month or $8/month billed annually ($96/yr)
-- Team: $25/month for 5 seats or $20/month billed annually ($240/yr)
+- Team: **landing card replaced with "Coming soon" + mailto Notify-me CTA.** No checkout button on the page anymore. Stripe price IDs (`NEXT_PUBLIC_STRIPE_TEAM_PRICE_ID` / `_ANNUAL_PRICE_ID`) are still in env so the webhook keeps recognizing existing Team subscribers, but no new Team checkouts can be triggered from the site.
 - Monthly price IDs: `NEXT_PUBLIC_STRIPE_PRO_PRICE_ID`, `NEXT_PUBLIC_STRIPE_TEAM_PRICE_ID`
 - Annual price IDs: `NEXT_PUBLIC_STRIPE_PRO_ANNUAL_PRICE_ID`, `NEXT_PUBLIC_STRIPE_TEAM_ANNUAL_PRICE_ID`
 - **All keys are LIVE mode** (`sk_live_`, `pk_live_`) — real payments active
@@ -204,6 +206,30 @@ Key schema:
 - **Pro / Team** (`plan === 'pro' || 'team'`): all gates above lift. There is currently no Team-only feature in code; Team is hidden as "Coming soon" on the landing.
 - **DON'T** silently revert any of these gates without also rewriting the corresponding landing-page bullet — they are paired by design (the user explicitly rejected misleading bullets).
 
+### Landing Page Anatomy (conversion-focused — don't revert these copy decisions)
+The landing was rewritten in two pre-launch passes after external reviewer rounds. Each section earns its place; do not re-introduce removed elements without explicit ask.
+- **Hero headline**: "Send a client-ready meeting recap before they finish their coffee." Agency + privacy positioning. Badge above is serif italic with shimmer. Don't rewrite as a generic productivity headline.
+- **No fake testimonials.** Reviewer-flagged as the #1 trust killer for a solo-shipped product. The old "Sarah K. / Marcus T. / etc." block was deleted and must NOT be re-added. If real testimonials arrive, we add them with full names + verifiable links.
+- **No "Watch it work" duplicate demo section.** The Live Demo + ProductShowcase already cover this — a second demo block was reviewer-flagged as redundant.
+- **For Agencies section** (`#agencies`, between `compare` and outcomes): ICP-targeted block with three pain-points (discovery → recap, status updates, project memory) + a Discovery Pack mockup ("Discovery call · Acme Corp" with Decisions / Action Items / Follow-up Email) + CTA "Try it on a discovery call →". The mockup reuses the same premium multi-layer shadow + hover lift pattern as ProductShowcase. Don't dilute by making it generic — the section earns its place by being specific to agencies.
+- **Three outcome cards** (replaced the testimonials slot): "20 minutes back per meeting" / "Every action has an owner" / "Recap before next meeting starts". Honest, claim-based, no fake metrics.
+- **Pro card bullets (6, all backed by code)**: unlimited packs, unlimited projects + project memory, smart search, output in EN/FR/ES/DE, PDF export, priority email support. Free counter-bullets sit right next to it: 5 packs/month, English output, 1 project, copy-to-clipboard. Do not add bullets that aren't actually gated in code (see Plan Gates section).
+- **Team card** = "Coming soon" + `mailto:hello@meetingflash.work?subject=Notify me about Team` CTA. No price, no checkout. (See Payments.)
+- **FAQ section (6 entries)** addresses the most common reviewer objections: accuracy on messy notes, where the data goes, supported languages, cancellation behavior, "built solo" reliability concerns, and why Team is delayed. The "built solo" answer is the trust anchor — keep its tone direct, not defensive.
+- **"From the maker" note** (replaced the old "Built solo and shipping fast" one-liner): named founder Simon, direct `hello@meetingflash.work` email, plain-language. This adds the human/trust dimension reviewers said was missing. Don't replace with growth-hacking copy.
+- **Currency consistency**: Free is `$0` (was `€0` — mixed currencies confused users since Pro is `$12`). All prices on the landing are USD.
+- **Brand mark = `/logo.png` everywhere.** Login, signup, share page, dashboard sidebar, ProductShowcase mockups all use `<Image src="/logo.png" />`. The old "blue square" placeholder is gone — don't re-introduce it on new pages.
+
+### Post-flash Guest CTA (`src/app/app/page.tsx`)
+After a guest finishes their 1 free pack, the CTA copy below the result is: *"That took 20 seconds. Save this pack, and get 4 more like it this month — free, no credit card."* Button label: **"Save this pack"** (not "Create free account" — action-oriented beats generic). This is the conversion moment from guest → free signup; don't soften it back to a generic CTA.
+
+### Activation & Stickiness (don't remove without replacement)
+The user is non-coder, motivated, and worried about retention. These three pieces exist to anchor users into the product and are load-bearing for retention; redesigning them is fine, removing them isn't.
+- **Time-saved toast** (`src/app/app/page.tsx`): after `setPack()`, computes `actionsCount * 3 + 10` minutes (floor 15), renders a top-right gradient card "~X minutes back — That's how long this would've taken to write by hand." auto-dismisses after 6s. This is the wow moment — anchors value at the exact second the user feels it.
+- **Loader messages** rewritten to feel like cognition: "Reading your notes—", "Identifying decisions—", "Mapping owners to actions—", "Drafting your follow-up email—", "Building the next agenda—". Cycles every 1.1s. Don't revert to the old generic "Analyzing transcript—" set.
+- **Open-actions widget** (`src/app/dashboard/page.tsx`, top of "Recent packs" tab): loads up to 20 tasks where `status != 'done'`, renders the top 5 with owner / deadline / meeting title, each row links to the pack page. Hidden when there are zero open tasks. This is the recurring-return hook: "I have 8 open actions sitting there."
+- **ICP-targeted templates** in `app/page.tsx` `TEMPLATES` const: Discovery call (agency → prospect), Client status update, Sprint retro (product team), 1-on-1 (manager ↔ IC). Each is written as a coaching framework, not just a meeting agenda — they prompt the user to capture felt-vs-unsaid, blockers, commitments, so the resulting Pack is meaningfully richer. Don't replace with generic agenda outlines.
+
 ### Free Trial Logic
 - Guest (not logged in): 1 free pack via `localStorage('mf_guest_used')`
 - Free plan: 5 packs/month tracked in `profiles.uses_this_month`
@@ -218,7 +244,7 @@ Key schema:
 - All email calls are fire-and-forget with `.catch(() => {})` — fail silently until activated
 - Domain verified in Resend, `RESEND_API_KEY` added to Vercel — but account flagged by Resend, awaiting support resolution
 - Welcome triggers: `AuthProvider.loadProfile` when inserting new profile
-- Nudge triggers: `/api/flash` after `increment_uses` when `plan === 'free' && uses_this_month >= 3`
+- Nudge triggers: `/api/flash` after `increment_uses` when `plan === 'free' && uses_this_month >= 3` — the literal "3" mismatch with the new 5-pack limit is intentional (user said don't touch email infra). When Resend reactivates, also bump nudge threshold + the email body copy to "5".
 
 ### Dark / Light Mode
 - Toggle button (☀/☾) in MobileNav, desktop and mobile
@@ -311,6 +337,11 @@ RESEND_API_KEY                          ← get from resend.com (needs custom do
 - Favicon tight-cropped (was 1536×1024 with 70% whitespace, now 512×512 transparent)
 - Light-mode contrast fix on blue accents + nav (was hardcoded dark)
 - Product showcase section on landing page — 3 interactive mockups
+- Pre-launch landing redesign — agency-positioned hero, three outcome cards (replaced fake testimonials), 6-entry FAQ, "From the maker" founder note
+- Truthful Pro plan gates enforced server- and client-side (lang, projects, search, PDF export)
+- Time-saved toast + cognition-style loader messages + open-actions dashboard widget + ICP-targeted templates (retention/stickiness pass)
+- Sharper post-flash guest CTA ("Save this pack") on `/app`
+- Canonical `useAuth().signOut` everywhere — no more local awaiting sign-out paths in dashboard/settings
 
 ## Features Pending ⏳
 - Activate email (Resend) — account flagged, awaiting Resend support response

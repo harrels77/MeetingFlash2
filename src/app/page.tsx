@@ -214,6 +214,87 @@ export default function Home() {
         </div>
       </section>
 
+{/* ── FOR AGENCIES ── */}
+<section className={s.agencySection} id="agencies">
+  <div className={`${s.sectionPill} ${s.reveal}`}>For agencies</div>
+  <h2 className={`${s.sectionTitle} ${s.reveal}`}>
+    Built for the way<br />agencies actually work.
+  </h2>
+  <p className={`${s.agencyLede} ${s.reveal}`}>
+    Discovery calls, client status updates, sprint retros — turned into a client-ready recap before you leave the meeting room.
+  </p>
+
+  <div className={`${s.agencyGrid} ${s.reveal}`}>
+    <div className={s.agencyPainList}>
+      <div className={s.agencyPain}>
+        <div className={s.agencyPainIcon}>🎯</div>
+        <div>
+          <div className={s.agencyPainTitle}>Discovery → recap, instantly.</div>
+          <div className={s.agencyPainDesc}>
+            No more &quot;I&apos;ll send a summary tomorrow.&quot; Every prospect call ends with a polished recap in their inbox before they leave the meeting.
+          </div>
+        </div>
+      </div>
+      <div className={s.agencyPain}>
+        <div className={s.agencyPainIcon}>📋</div>
+        <div>
+          <div className={s.agencyPainTitle}>Status updates without the admin.</div>
+          <div className={s.agencyPainDesc}>
+            Paste your weekly notes — get a client-ready update with decisions, blockers, and next steps already framed.
+          </div>
+        </div>
+      </div>
+      <div className={s.agencyPain}>
+        <div className={s.agencyPainIcon}>🔁</div>
+        <div>
+          <div className={s.agencyPainTitle}>Project memory across calls.</div>
+          <div className={s.agencyPainDesc}>
+            Decisions and action items from every meeting persist in the project — so you walk into call #4 already knowing what was promised in call #1.
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div className={s.agencyMockup}>
+      <div className={s.agencyMockupHead}>
+        <div className={s.agencyMockupDots}>
+          <span /><span /><span />
+        </div>
+        <div className={s.agencyMockupTitle}>Discovery call · Acme Corp</div>
+      </div>
+      <div className={s.agencyMockupBody}>
+        <div className={`${s.agencyBlock} ${s.agencyBlockBlue}`}>
+          <div className={s.agencyBlockLabel}>Decisions</div>
+          <div className={s.agencyBlockContent}>
+            • Scope locked: e-commerce rebuild, 12-week timeline<br />
+            • Budget approved at $48k, paid in 3 milestones<br />
+            • Kickoff scheduled for May 6th
+          </div>
+        </div>
+        <div className={`${s.agencyBlock} ${s.agencyBlockGreen}`}>
+          <div className={s.agencyBlockLabel}>Action items</div>
+          <div className={s.agencyBlockContent}>
+            ✓ <strong>You</strong> → Send SOW + first invoice (Mon)<br />
+            ✓ <strong>Sarah (Acme)</strong> → Share brand assets &amp; access (Tue)<br />
+            ✓ <strong>You</strong> → Set up Slack channel + project doc (Wed)
+          </div>
+        </div>
+        <div className={`${s.agencyBlock} ${s.agencyBlockPaper}`}>
+          <div className={s.agencyBlockLabel}>Follow-up email</div>
+          <div className={s.agencyBlockContent}>
+            Hi Sarah, great speaking today. Confirming we&apos;re aligned on the 12-week scope and $48k budget across 3 milestones. Kickoff May 6th. I&apos;ll send the SOW &amp; first invoice Monday — you&apos;ll share brand assets Tuesday…
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div className={`${s.agencyCta} ${s.reveal}`}>
+    <Link href="/app" className={s.btnPrimary}>Try it on a discovery call →</Link>
+    <span className={s.agencyCtaNote}>No signup needed for the first one.</span>
+  </div>
+</section>
+
 {/* ── OUTCOMES ── */}
 <section className={s.testimonials}>
   <div className={`${s.sectionPill} ${s.reveal}`}>What changes</div>

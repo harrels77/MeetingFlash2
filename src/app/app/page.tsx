@@ -1,5 +1,5 @@
 'use client'
-import { useState } from 'react'
+import { useState, useRef } from 'react'
 import Link from 'next/link'
 import styles from './app.module.css'
 import { supabase } from '@/lib/supabase'
@@ -161,6 +161,7 @@ export default function AppPage() {
   const [newProjectName, setNewProjectName]       = useState('')
   const [timeSavedToast, setTimeSavedToast]       = useState<number | null>(null)
   const [creatingProject, setCreatingProject]     = useState(false)
+  const outputRef = useRef<HTMLDivElement>(null)
   const [showUpgradeModal, setShowUpgradeModal]   = useState(false)
 
   useEffect(() => {
@@ -270,6 +271,13 @@ export default function AppPage() {
       const estimatedMinutes = Math.max(15, actionsCount * 3 + 10)
       setTimeSavedToast(estimatedMinutes)
       setTimeout(() => setTimeSavedToast(null), 6000)
+
+      // On mobile, the output is below the fold — scroll the user to it so they see the result
+      if (typeof window !== 'undefined' && window.innerWidth < 900) {
+        setTimeout(() => {
+          outputRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+        }, 80)
+      }
     } catch (err) {
       console.error(err)
       setError('Something went wrong. Please try again.')
@@ -573,7 +581,7 @@ async function createProject() {
         </div>
 
         {/* RIGHT — OUTPUT */}
-        <div className={styles.outputSide}>
+        <div className={styles.outputSide} ref={outputRef}>
           <div className={styles.outputHeader}>
             <div className={styles.outputTitle}>
               {pack ? '⚡ Your Execution Pack' : 'Awaiting flash—'}
