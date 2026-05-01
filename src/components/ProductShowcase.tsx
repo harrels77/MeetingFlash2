@@ -1,5 +1,6 @@
 'use client'
 import { useState } from 'react'
+import Image from 'next/image'
 import s from './ProductShowcase.module.css'
 
 type Tab = 'app' | 'dashboard' | 'pack'
@@ -42,7 +43,7 @@ function TopBar({ right }: { right: React.ReactNode }) {
   return (
     <div className={s.topbar}>
       <div className={s.logo}>
-        <img src="/logo.png" alt="" className={s.logoMark} />
+        <Image src="/logo.png" alt="" width={22} height={22} className={s.logoMark} />
         MeetingFlash
       </div>
       <div className={s.topbarRight}>{right}</div>
@@ -200,7 +201,7 @@ function DashboardMockup() {
       <div className={s.dashRoot}>
         <div className={s.sidebar}>
           <div className={s.sidebarLogo}>
-            <img src="/logo.png" alt="" className={s.logoMark} />
+            <Image src="/logo.png" alt="" width={22} height={22} className={s.logoMark} />
             meetingflash
           </div>
           <div className={s.sidebarNav}>

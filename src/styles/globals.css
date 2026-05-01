@@ -65,6 +65,16 @@ a { color: inherit; text-decoration: none; }
 button { font-family: var(--font); cursor: pointer; }
 input, textarea, select { font-family: var(--font); }
 
+/* Accessibility: kill animations for users who request reduced motion (also a Lighthouse / Core Web Vitals signal) */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
 ::-webkit-scrollbar { width: 4px; }
 ::-webkit-scrollbar-track { background: var(--bg); }
 ::-webkit-scrollbar-thumb { background: var(--surface2); border-radius: 2px; }

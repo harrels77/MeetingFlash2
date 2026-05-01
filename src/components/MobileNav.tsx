@@ -1,6 +1,7 @@
 'use client'
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
+import Image from 'next/image'
 import { useAuth } from '@/lib/AuthProvider'
 import styles from './MobileNav.module.css'
 
@@ -49,7 +50,7 @@ export default function MobileNav() {
     <>
       <nav className={styles.nav}>
         <Link href="/" className={styles.logo}>
-          <img src="/logo.png" alt="MeetingFlash" width={28} height={28} style={{ borderRadius: 6 }} />
+          <Image src="/logo.png" alt="MeetingFlash" width={28} height={28} style={{ borderRadius: 6 }} priority />
           MeetingFlash
         </Link>
 
@@ -57,7 +58,7 @@ export default function MobileNav() {
         <div className={styles.desktopLinks}>
           <Link href="/" className={styles.navLink}>Home</Link>
           <Link href="#features" className={styles.navLink}>Features</Link>
-          <Link href="#pricing"  className={styles.navLink}>Pricing</Link>
+          <Link href="/pricing"  className={styles.navLink}>Pricing</Link>
           <Link href="/blog"     className={styles.navLink}>Blog</Link>
           
           
@@ -139,11 +140,20 @@ export default function MobileNav() {
           <Link href="#features" className={styles.mobileLink} onClick={() => setOpen(false)}>
             Features
           </Link>
-          <Link href="#pricing" className={styles.mobileLink} onClick={() => setOpen(false)}>
+          <Link href="/pricing" className={styles.mobileLink} onClick={() => setOpen(false)}>
             Pricing
           </Link>
           <Link href="/blog" className={styles.mobileLink} onClick={() => setOpen(false)}>
             Blog
+          </Link>
+          <Link href="/for-agencies" className={styles.mobileLink} onClick={() => setOpen(false)}>
+            For agencies
+          </Link>
+          <Link href="/for-product-teams" className={styles.mobileLink} onClick={() => setOpen(false)}>
+            For product teams
+          </Link>
+          <Link href="/for-freelancers" className={styles.mobileLink} onClick={() => setOpen(false)}>
+            For freelancers
           </Link>
 
         {user ? (

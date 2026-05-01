@@ -39,6 +39,7 @@ export interface Project {
 }
 
 export interface Pack {
+  snapshot?: string
   decisions: string
   actions: string
   questions: string

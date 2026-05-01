@@ -34,33 +34,44 @@ export async function generateMetadata({ params }: { params: { slug: string } })
 }
 
 function articleJsonLd(article: { slug: string; title: string; description: string; date: string; category: string }) {
-  return {
-    '@context': 'https://schema.org',
-    '@type': 'BlogPosting',
-    mainEntityOfPage: {
-      '@type': 'WebPage',
-      '@id': `https://meetingflash.work/blog/${article.slug}`,
-    },
-    headline: article.title,
-    description: article.description,
-    image: 'https://meetingflash.work/opengraph-image',
-    datePublished: article.date,
-    dateModified: article.date,
-    articleSection: article.category,
-    author: {
-      '@type': 'Person',
-      name: 'Simon Harrel',
-      url: 'https://meetingflash.work',
-    },
-    publisher: {
-      '@type': 'Organization',
-      name: 'MeetingFlash',
-      logo: {
-        '@type': 'ImageObject',
-        url: 'https://meetingflash.work/logo.png',
+  return [
+    {
+      '@context': 'https://schema.org',
+      '@type': 'BlogPosting',
+      mainEntityOfPage: {
+        '@type': 'WebPage',
+        '@id': `https://meetingflash.work/blog/${article.slug}`,
+      },
+      headline: article.title,
+      description: article.description,
+      image: 'https://meetingflash.work/opengraph-image',
+      datePublished: article.date,
+      dateModified: article.date,
+      articleSection: article.category,
+      author: {
+        '@type': 'Person',
+        name: 'Simon Harrel',
+        url: 'https://meetingflash.work',
+      },
+      publisher: {
+        '@type': 'Organization',
+        name: 'MeetingFlash',
+        logo: {
+          '@type': 'ImageObject',
+          url: 'https://meetingflash.work/logo.png',
+        },
       },
     },
-  }
+    {
+      '@context': 'https://schema.org',
+      '@type': 'BreadcrumbList',
+      itemListElement: [
+        { '@type': 'ListItem', position: 1, name: 'Home', item: 'https://meetingflash.work' },
+        { '@type': 'ListItem', position: 2, name: 'Blog', item: 'https://meetingflash.work/blog' },
+        { '@type': 'ListItem', position: 3, name: article.title, item: `https://meetingflash.work/blog/${article.slug}` },
+      ],
+    },
+  ]
 }
 
 function parseInline(line: string, keyBase: string): React.ReactNode[] {

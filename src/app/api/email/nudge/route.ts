@@ -56,7 +56,7 @@ export async function POST(req: NextRequest) {
         </tr>
         <tr>
           <td style="padding:28px 40px;">
-            <a href="${process.env.NEXT_PUBLIC_APP_URL}/#pricing"
+            <a href="${process.env.NEXT_PUBLIC_APP_URL}/pricing"
                style="display:inline-block;background:#2563EB;color:#fff;font-size:15px;font-weight:600;padding:14px 28px;border-radius:10px;text-decoration:none;">
               Upgrade to Pro →
             </a>

@@ -571,8 +571,21 @@ export default function Home() {
             <div className={s.footerCol}>
               <div className={s.footerColTitle}>Product</div>
               <Link href="#features">Features</Link>
-              <Link href="#pricing">Pricing</Link>
+              <Link href="/pricing">Pricing</Link>
               <Link href="/app">Try free</Link>
+              <Link href="/blog">Blog</Link>
+            </div>
+            <div className={s.footerCol}>
+              <div className={s.footerColTitle}>Use cases</div>
+              <Link href="/for-agencies">For agencies</Link>
+              <Link href="/for-product-teams">For product teams</Link>
+              <Link href="/for-freelancers">For freelancers</Link>
+            </div>
+            <div className={s.footerCol}>
+              <div className={s.footerColTitle}>Free tools</div>
+              <Link href="/tools/follow-up-email-generator">Follow-up email generator</Link>
+              <Link href="/tools/meeting-action-items-extractor">Action items extractor</Link>
+              <Link href="/tools/discovery-call-recap-tool">Discovery call recap</Link>
             </div>
             <FooterAccount className={s.footerCol} colTitleClass={s.footerColTitle} />
             <div className={s.footerCol}>

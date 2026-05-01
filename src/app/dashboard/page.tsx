@@ -2,6 +2,7 @@
 import { useState, useEffect, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
+import Image from 'next/image'
 import { supabase } from '@/lib/supabase'
 import { useAuth } from '@/lib/AuthProvider'
 import ThemeToggle from '@/components/ThemeToggle'
@@ -135,7 +136,7 @@ export default function Dashboard() {
     if (!newProject.trim() || !profile) return
     if (profile.plan === 'free' && projects.length >= 1) {
       alert('Free plan is limited to 1 project. Upgrade to Pro for unlimited projects.')
-      window.location.href = '/#pricing'
+      window.location.href = '/pricing'
       return
     }
     setCreating(true)
@@ -205,7 +206,7 @@ export default function Dashboard() {
       {/* SIDEBAR */}
       <aside className={styles.sidebar}>
         <Link href="/" className={styles.sidebarLogo}>
-          <img src="/logo.png" alt="MeetingFlash" width={28} height={28} style={{ borderRadius: 6, objectFit: 'contain' }} />
+          <Image src="/logo.png" alt="MeetingFlash" width={28} height={28} style={{ borderRadius: 6, objectFit: 'contain' }} priority />
           meetingflash
         </Link>
 
@@ -235,7 +236,7 @@ export default function Dashboard() {
             </span>
           </div>
           {profile?.plan === 'free' && (
-            <Link href="/#pricing" className={styles.upgradeBtn}>Upgrade to Pro →</Link>
+            <Link href="/pricing" className={styles.upgradeBtn}>Upgrade to Pro →</Link>
           )}
           <div className={styles.userRow}>
             <div className={styles.userEmail}>{profile?.email}</div>

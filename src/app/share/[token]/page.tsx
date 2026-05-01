@@ -1,5 +1,6 @@
 import { createClient } from '@supabase/supabase-js'
 import Link from 'next/link'
+import Image from 'next/image'
 import type { Metadata } from 'next'
 import styles from './share.module.css'
 
@@ -46,7 +47,7 @@ export default async function SharePage({ params }: { params: { token: string } 
     <div className={styles.page}>
       <nav className={styles.nav}>
         <Link href="/" className={styles.logo}>
-          <img src="/logo.png" alt="" className={styles.logoMark} />
+          <Image src="/logo.png" alt="" width={22} height={22} className={styles.logoMark} />
           MeetingFlash
         </Link>
         <div className={styles.navBadge}>Shared pack · Read only</div>
@@ -61,6 +62,13 @@ export default async function SharePage({ params }: { params: { token: string } 
           </div>
           <h1 className={styles.title}>{meeting.title}</h1>
         </div>
+
+        {meeting.pack?.snapshot && (
+          <div className={styles.snapshot}>
+            <div className={styles.snapshotPill}>⚡ Executive snapshot</div>
+            <p className={styles.snapshotBody}>{meeting.pack.snapshot}</p>
+          </div>
+        )}
 
         <div className={styles.blocks}>
           {BLOCKS.map((block, i) => (

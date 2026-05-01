@@ -2,6 +2,7 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
+import Image from 'next/image'
 import { supabase } from '@/lib/supabase'
 import ThemeToggle from '@/components/ThemeToggle'
 import styles from './auth.module.css'
@@ -43,7 +44,7 @@ export default function LoginPage() {
 
       <div className={styles.card}>
         <div className={styles.cardHeader}>
-          <img src="/logo.png" alt="MeetingFlash" className={styles.glyph} />
+          <Image src="/logo.png" alt="MeetingFlash" width={44} height={44} className={styles.glyph} priority />
           <h1 className={styles.title}>Sign in</h1>
           <p className={styles.sub}>Welcome back. Your packs are waiting.</p>
         </div>

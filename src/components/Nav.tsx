@@ -25,7 +25,7 @@ export default function Nav() {
       <div className={styles.links}>
         <Link href="#how" className={styles.link}>Process</Link>
         <Link href="#pack" className={styles.link}>The Pack</Link>
-        <Link href="#pricing" className={styles.link}>Pricing</Link>
+        <Link href="/pricing" className={styles.link}>Pricing</Link>
         <Link href="/app" className={styles.cta}>Get your pack →</Link>
       </div>
 
@@ -42,7 +42,7 @@ export default function Nav() {
         <div className={styles.mobileMenu}>
           <Link href="#how" onClick={() => setMenuOpen(false)}>Process</Link>
           <Link href="#pack" onClick={() => setMenuOpen(false)}>The Pack</Link>
-          <Link href="#pricing" onClick={() => setMenuOpen(false)}>Pricing</Link>
+          <Link href="/pricing" onClick={() => setMenuOpen(false)}>Pricing</Link>
           <Link href="/app" className={styles.mobileCta}>Get your pack →</Link>
         </div>
       )}

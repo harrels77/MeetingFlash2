@@ -1,0 +1,23 @@
+{
+  "name": "MeetingFlash",
+  "short_name": "MeetingFlash",
+  "description": "Turn meeting notes into a complete Execution Pack in under 20 seconds.",
+  "start_url": "/app",
+  "display": "standalone",
+  "background_color": "#060C18",
+  "theme_color": "#060C18",
+  "icons": [
+    {
+      "src": "/favicon.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/logo.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ]
+}

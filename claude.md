@@ -101,6 +101,15 @@ persistent project memory, structured ready-to-use outputs.
 src/
 ├── app/
 │   ├── page.tsx                     ← Landing page (hero, live demo, ProductShowcase, features, compare, agencies, outcomes, pricing, FAQ, founder note)
+│   ├── pricing/                     ← /pricing standalone page (server) + PricingClient (client island for monthly/annual toggle)
+│   ├── for-agencies/                ← /for-agencies SEO landing (ICP-targeted)
+│   ├── for-product-teams/           ← /for-product-teams SEO landing (ICP-targeted)
+│   ├── for-freelancers/             ← /for-freelancers SEO landing (ICP-targeted)
+│   ├── tools/
+│   │   ├── follow-up-email-generator/        ← Free-tool SEO landing → /app
+│   │   ├── meeting-action-items-extractor/   ← Free-tool SEO landing → /app
+│   │   └── discovery-call-recap-tool/        ← Free-tool SEO landing → /app
+│   ├── not-found.tsx                ← Global 404 page (popular-pages cards, noindex)
 │   ├── layout.tsx                   ← Root layout + AuthProvider + Analytics + theme FOUC script
 │   ├── app/page.tsx                 ← Flash tool (main product)
 │   ├── blog/
@@ -217,7 +226,8 @@ The landing was rewritten in two pre-launch passes after external reviewer round
 - **Team card** = "Coming soon" + `mailto:hello@meetingflash.work?subject=Notify me about Team` CTA. No price, no checkout. (See Payments.)
 - **FAQ section (6 entries)** addresses the most common reviewer objections: accuracy on messy notes, where the data goes, supported languages, cancellation behavior, "built solo" reliability concerns, and why Team is delayed. The "built solo" answer is the trust anchor — keep its tone direct, not defensive.
 - **"From the maker" note** (replaced the old "Built solo and shipping fast" one-liner): named founder Simon, direct `hello@meetingflash.work` email, plain-language. This adds the human/trust dimension reviewers said was missing. Don't replace with growth-hacking copy.
-- **Currency consistency**: Free is `$0` (was `€0` — mixed currencies confused users since Pro is `$12`). All prices on the landing are USD.
+- **Currency consistency**: Free is `$0` (was `
+` — mixed currencies confused users since Pro is `$12`). All prices on the landing are USD.
 - **Brand mark = `/logo.png` everywhere.** Login, signup, share page, dashboard sidebar, ProductShowcase mockups all use `<Image src="/logo.png" />`. The old "blue square" placeholder is gone — don't re-introduce it on new pages.
 
 ### Post-flash Guest CTA (`src/app/app/page.tsx`)
@@ -347,6 +357,31 @@ RESEND_API_KEY                          ← get from resend.com (needs custom do
 - Structured data (JSON-LD): `Organization` site-wide (root layout), `WebSite` + `SoftwareApplication` + `FAQPage` on home (`page.tsx` — FAQ data lives in `FAQ_ITEMS` const, used by both the JSX and the JSON-LD; keep them in sync), `BlogPosting` on each article (`blog/[slug]/page.tsx:articleJsonLd`)
 - Canonical URLs on every public page via `alternates.canonical` in metadata (root, `/app`, `/blog`, `/blog/[slug]`); `/login`, `/signup`, `/share` are `noindex` instead
 - Per-route metadata via dedicated `layout.tsx` for client pages (`/app/layout.tsx`, `/login/layout.tsx`, `/signup/layout.tsx`) — these client pages can't export metadata themselves
+
+### ICP landing pages + standalone /pricing (SEO Phase 3)
+- **Shared styles** in `src/styles/marketing.module.css` — used by `/for-agencies`, `/for-product-teams`, `/for-freelancers`, and (partially) `/pricing`. Don't duplicate hero/section/card/mockup/FAQ classes per page; extend the shared module instead.
+- **`/for-agencies`, `/for-product-teams`, `/for-freelancers`** are full SEO landings: hero with ICP badge + agency/team/freelancer-specific headline, 4 meeting-type cards, pain-point + Discovery/Sprint/Client mockup split, ICP-specific FAQ (5 entries each, also exposed as `FAQPage` JSON-LD), CTA banner, mini-footer. Each has `WebPage` + `FAQPage` JSON-LD. Mockup uses the same multi-layer shadow language as ProductShowcase.
+- **`/pricing` standalone** = server component for metadata + `Product` JSON-LD with all 3 offers (Free, Pro Monthly, Pro Annual) + `FAQPage`. Toggle is in `PricingClient.tsx` (client island) with monthly/annual + Stripe checkout call. Pricing-specific module at `src/app/pricing/pricing.module.css`. The Team card here matches the landing rule: "Coming soon" + Notify-me mailto, no checkout button.
+- **All `/#pricing` redirects updated to `/pricing`** site-wide: dashboard upgrade buttons, settings upgrade, search Pro lock, pack PDF gate, Stripe `cancel_url`, nudge email CTA, Nav.tsx + MobileNav. The on-page `#pricing` anchor on the landing still exists as a deep-link fallback but new code should target `/pricing`.
+- **Sitemap** includes the 4 new pages with priorities: `/pricing` 0.85, `/for-*` pages 0.8 each.
+- **Footer** on landing has a new "Use cases" column with the 3 ICP pages. MobileNav (mobile menu) also lists them.
+
+### Free-tool SEO landings + 404 (SEO Phase 4)
+- **`/tools/follow-up-email-generator`, `/tools/meeting-action-items-extractor`, `/tools/discovery-call-recap-tool`** are single-purpose SEO landings that target long-tail tool queries ("free follow-up email generator", "extract action items from meeting notes", "discovery call recap tool"). Each has hero, "how it works" or example mockup, FAQ, CTA → `/app`. Each declares `WebApplication` JSON-LD (free Offer, applicationCategory: BusinessApplication) + `FAQPage` JSON-LD. Each cross-links to the others, to the related blog article, and to the related ICP page. They reuse `marketing.module.css` — no new CSS module.
+- **The `/app` flash tool is the same destination** — the `/tools/*` pages are framing layers that match a specific search intent and convert to the same /app entry point. Don't build a new tool route per landing — reuse /app.
+- **Sitemap** includes all 3 tool pages at priority 0.75.
+- **Footer** on landing has a new "Free tools" column listing all three. (MobileNav doesn't list them — the menu would get too long; footer is enough for crawl discovery.)
+- **`src/app/not-found.tsx`** = global 404 with `noindex, follow` — a styled page with 4 popular-page cards (/app, /pricing, /blog, /for-agencies) so visitors who land on a broken link have routes back into the funnel. The `follow` directive lets Google still crawl the links from this page.
+
+### Performance + advanced schemas + a11y (SEO Phase 5)
+- **All `<img src="/logo.png">` migrated to `next/image`** across MobileNav, ProductShowcase, login/signup/dashboard/share/app pages. Critical above-the-fold logos (nav, auth, dashboard) get `priority`. Auto-generates WebP/AVIF, lazy-loads non-critical, sized-attribute reservation prevents layout shift (CLS Core Web Vital).
+- **`viewport` export** in root layout: `themeColor` adapts dark/light, mobile width/scale set explicitly. Mobile address-bar matches the theme.
+- **Preconnect / dns-prefetch** in root layout `<head>`: Google Fonts (preconnect with crossOrigin), Anthropic API + Stripe (dns-prefetch). Browser opens TLS sessions in parallel with HTML parse — faster first interaction.
+- **Web App Manifest** at `/public/manifest.json` (referenced from root metadata `manifest: '/manifest.json'`) — name/short_name/description, start_url `/app`, theme_color, icons. Signal "real app" to crawlers + lets users "Add to home screen". The `/logo.png` icon is set with `purpose: 'maskable'`.
+- **`prefers-reduced-motion: reduce`** block in `globals.css` — kills all animations / transitions / smooth-scroll for users who request reduced motion. Lighthouse a11y boost + accessibility correctness.
+- **`BreadcrumbList` JSON-LD** added to: blog articles (Home → Blog → Article), each ICP page (Home → For X), each tool page (Home → Free tools → Tool name), `/pricing` (Home → Pricing). Helper at `src/lib/breadcrumb.ts:buildBreadcrumb()` — pass an ordered array of `{name, path}` crumbs; Home is auto-prepended. Google may render breadcrumbs in SERPs (CTR boost).
+- **Search Console verification slot** prepared in root layout metadata as a commented-out `verification: { google: '...' }` line. When you claim the property in https://search.google.com/search-console, paste the token and uncomment.
+
 - Favicon tight-cropped (was 1536×1024 with 70% whitespace, now 512×512 transparent)
 - Light-mode contrast fix on blue accents + nav (was hardcoded dark)
 - Product showcase section on landing page — 3 interactive mockups
@@ -356,14 +391,41 @@ RESEND_API_KEY                          ← get from resend.com (needs custom do
 - Sharper post-flash guest CTA ("Save this pack") on `/app`
 - Canonical `useAuth().signOut` everywhere — no more local awaiting sign-out paths in dashboard/settings
 
-## Features Pending ⏳
-- Activate email (Resend) — account flagged, awaiting Resend support response
-- Slack integration
-- Notion integration
-- Google Calendar integration
-- SEO: add more blog articles over time
+## Roadmap / TODO (priorities)
+
+This section is the **source of truth for what's left to do**. Update as items ship or get deprioritized. Newest decisions go above older ones within a priority bucket.
+
+### P0 — Blocked on external action (no code work possible right now)
+- **Resend email account reactivation** — Resend flagged the account, awaiting their support response. Until lifted, all `/api/email/*` routes silently no-op (fire-and-forget with `.catch(()=>{})`). Once reactivated:
+  - **Welcome email copy fix**: `src/app/api/email/welcome/route.ts:39` says "3 free Execution Packs" → bump to **5** (matches current Free plan limit).
+  - **Nudge email copy fix**: `src/app/api/email/nudge/route.ts:19+39` say "3 free packs" → bump to **5**.
+  - **Nudge trigger threshold**: `src/app/api/flash/route.ts:182` checks `uses_this_month >= 3` → bump to `>= 5` so the nudge fires at the actual limit, not earlier.
+  - All three are intentionally NOT touched yet because the user said skip email infra changes until Resend reactivates. Don't fix in isolation.
+- **Search Console domain claim** — `meetingflash.work` not yet registered on https://search.google.com/search-console. Slot ready in `src/app/layout.tsx` as commented `verification: { google: '...' }`. When the user claims the domain, paste the token and uncomment.
+
+### P1 — High-impact, ready to execute
+- **i18n FR / ES / DE (SEO Phase 6)** — Pro plan already outputs in EN/FR/ES/DE but the marketing site is EN-only. Big SEO opportunity: each language gets its own Google index footprint.
+  - Recommended approach: subpath routes `/fr/*`, `/es/*`, `/de/*` (English stays at root), `hreflang` alternates in metadata, sitemap includes all variants, lightweight in-house translations dict at `src/lib/i18n.ts` (no `next-i18next` dep).
+  - Pages to translate (priority order): home → pricing → 3 ICP pages → 3 tools → 3-4 phare blog articles. The `/app`, `/dashboard`, `/login`, `/signup`, `/share` routes do NOT need translation (product UI vs marketing surface).
+  - Translation quality: Claude can do FR well, ES/DE acceptably but ideally relit by a native before launch. Recommended: **Option C — start with FR only** (6 pages: home, pricing, 3 ICP, lang switcher), validate quality, then ES/DE once native reviewers are available.
+
+### P2 — Product features (planned, not started)
+- **Team plan implementation** — currently "Coming soon" mailto everywhere. Real build needs: shared workspaces (multi-user projects), per-seat billing in Stripe (the price IDs exist in env but no flow), admin controls + SSO, Slack/Notion sync. Weeks of focused work — don't start without a clear customer demand signal (mailto inbox).
+- **Slack integration** — export a Pack directly to a Slack channel via webhook. The Pack already includes a draft "Slack message" output, this would automate the actual posting.
+- **Notion integration** — export decisions + tasks to a Notion database. Useful for product teams that live in Notion.
+- **Google Calendar integration** — turn the next-agenda output into pre-filled calendar invites for the next meeting.
+
+### P3 — Content + growth (ongoing)
+- **More blog articles** for long-tail SEO. Current count: 9. Suggested next angles: alternative-to-X comparisons (Otter, Fireflies, Fathom — each as a separate article), "AI for sales call notes", "QBR template", industry-specific (legal, design agencies, etc.). Each new article auto-includes BlogPosting + BreadcrumbList JSON-LD via existing infra.
+- **Real testimonials** — when first paying customers convert. Replace the deliberately-empty social proof slot. **Don't** fabricate (the user explicitly rejected fake testimonials in pre-launch v2).
+- **Directory submissions** (off-code, user action): Product Hunt, AlternativeTo, BetaList, SaaSHub, Indie Hackers product directory. Helps with referral traffic + backlinks for SEO.
+- **Live Lighthouse audit** post-deploy — Phase 5 added the perf optimizations but only a real production trace measures the actual Core Web Vitals scores.
+
+### Nits / hygiene (small fixes that can be batched anytime)
+- Unused import `createClient` in `src/app/api/checkout/route.ts:3` — never used. Safe to delete.
+- Bump `*Last updated*` date at the bottom of this file when major work ships.
 
 ---
 
-*Last updated: April 2026*
+*Last updated: May 2026*
 *Primary AI assistant: Claude (claude.ai + Claude Code)*

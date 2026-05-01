@@ -1,9 +1,18 @@
-import type { Metadata } from 'next'
+import type { Metadata, Viewport } from 'next'
 import '../styles/globals.css'
 import { AuthProvider } from '@/lib/AuthProvider'
 import { Analytics } from '@vercel/analytics/next'
 
 const SITE_URL = 'https://meetingflash.work'
+
+export const viewport: Viewport = {
+  themeColor: [
+    { media: '(prefers-color-scheme: dark)',  color: '#060C18' },
+    { media: '(prefers-color-scheme: light)', color: '#F8FAFC' },
+  ],
+  width: 'device-width',
+  initialScale: 1,
+}
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
@@ -50,6 +59,9 @@ export const metadata: Metadata = {
     apple: '/favicon.png',
   },
   category: 'productivity',
+  manifest: '/manifest.json',
+  // Paste your Search Console verification token here once you've claimed the domain
+  // verification: { google: 'XXXXXXXXXXXXXXXXXXXXXX' },
 }
 
 const organizationLd = {
@@ -70,6 +82,11 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="en" suppressHydrationWarning>
       <head>
+        {/* Preconnect to performance-critical origins so the browser opens connections in parallel with HTML parsing */}
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="" />
+        <link rel="dns-prefetch" href="https://api.anthropic.com" />
+        <link rel="dns-prefetch" href="https://js.stripe.com" />
         <script dangerouslySetInnerHTML={{ __html: `(function(){var t=localStorage.getItem('mf_theme');if(t)document.documentElement.setAttribute('data-theme',t)})()` }} />
         <script
           type="application/ld+json"

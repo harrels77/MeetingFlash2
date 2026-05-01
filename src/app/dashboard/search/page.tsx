@@ -124,7 +124,7 @@ export default function Search() {
         <p style={{ color: 'var(--muted)', fontSize: 15, maxWidth: 480, margin: '0 auto 28px' }}>
           Search across every decision, action, and follow-up you&apos;ve ever flashed. Available on the Pro plan.
         </p>
-        <Link href="/#pricing" style={{ display: 'inline-block', background: 'var(--blue)', color: '#fff', padding: '12px 28px', borderRadius: 10, fontWeight: 600, textDecoration: 'none' }}>
+        <Link href="/pricing" style={{ display: 'inline-block', background: 'var(--blue)', color: '#fff', padding: '12px 28px', borderRadius: 10, fontWeight: 600, textDecoration: 'none' }}>
           Upgrade to Pro →
         </Link>
       </div>

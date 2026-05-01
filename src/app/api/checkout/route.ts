@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
 import Stripe from 'stripe'
-import { createClient } from '@supabase/supabase-js'
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
   apiVersion: '2026-03-25.dahlia',
@@ -15,7 +14,7 @@ export async function POST(req: NextRequest) {
       payment_method_types: ['card'],
       line_items: [{ price: priceId, quantity: 1 }],
       success_url: `${process.env.NEXT_PUBLIC_APP_URL}/dashboard?upgraded=true`,
-      cancel_url: `${process.env.NEXT_PUBLIC_APP_URL}/#pricing`,
+      cancel_url: `${process.env.NEXT_PUBLIC_APP_URL}/pricing`,
       ...(email ? { customer_email: email } : {}),
       metadata: { userId, priceId },
     })

@@ -1,13 +1,12 @@
 'use client'
 import { useState } from 'react'
-import { useRouter } from 'next/navigation'
 import Link from 'next/link'
+import Image from 'next/image'
 import { supabase } from '@/lib/supabase'
 import ThemeToggle from '@/components/ThemeToggle'
 import styles from '../login/auth.module.css'
 
 export default function SignupPage() {
-  const router = useRouter()
   const [email, setEmail]       = useState('')
   const [password, setPassword] = useState('')
   const [name, setName]         = useState('')
@@ -49,7 +48,7 @@ export default function SignupPage() {
       </div>
       <div className={styles.card}>
         <div className={styles.cardHeader}>
-          <img src="/logo.png" alt="MeetingFlash" className={styles.glyph} />
+          <Image src="/logo.png" alt="MeetingFlash" width={44} height={44} className={styles.glyph} priority />
           <h1 className={styles.title}>Check your email</h1>
           <p className={styles.sub}>We sent a confirmation link to <strong>{email}</strong>. Click it to activate your account.</p>
         </div>
@@ -69,7 +68,7 @@ export default function SignupPage() {
 
       <div className={styles.card}>
         <div className={styles.cardHeader}>
-          <img src="/logo.png" alt="MeetingFlash" className={styles.glyph} />
+          <Image src="/logo.png" alt="MeetingFlash" width={44} height={44} className={styles.glyph} priority />
           <h1 className={styles.title}>Create account</h1>
           <p className={styles.sub}>5 free Execution Packs per month. No credit card.</p>
         </div>

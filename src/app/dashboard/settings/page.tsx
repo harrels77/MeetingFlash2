@@ -140,7 +140,7 @@ export default function Settings() {
                 </div>
               </div>
               {profile?.plan === 'free' && (
-                <Link href="/#pricing" className={styles.upgradeBtn}>
+                <Link href="/pricing" className={styles.upgradeBtn}>
                   Upgrade to Pro →
                 </Link>
               )}

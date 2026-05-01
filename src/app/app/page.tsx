@@ -1,14 +1,15 @@
 'use client'
 import { useState, useRef } from 'react'
 import Link from 'next/link'
+import Image from 'next/image'
 import styles from './app.module.css'
 import { supabase } from '@/lib/supabase'
 import ThemeToggle from '@/components/ThemeToggle'
 import { useEffect } from 'react'
-import { useRouter } from 'next/navigation'
 
 
 type Pack = {
+  snapshot?: string
   decisions: string
   actions: string
   questions: string
@@ -331,6 +332,7 @@ async function createProject() {
   function copyAll() {
     if (!pack) return
     const all = [
+      pack.snapshot ? `EXECUTIVE SNAPSHOT\n${pack.snapshot}` : null,
       `DECISIONS\n${pack.decisions}`,
       `ACTION ITEMS\n${pack.actions}`,
       `OPEN QUESTIONS\n${pack.questions}`,
@@ -338,7 +340,7 @@ async function createProject() {
       `FOLLOW-UP EMAIL\n${pack.email}`,
       `SLACK MESSAGE\n${pack.slack}`,
       `NEXT AGENDA\n${pack.agenda}`,
-    ].join('\n\n')
+    ].filter(Boolean).join('\n\n')
     copy('all', all)
   }
 
@@ -395,7 +397,7 @@ async function createProject() {
       {/* NAV */}
       <nav className={styles.nav}>
         <Link href="/" className={styles.navLogo}>
-          <img src="/logo.png" alt="MeetingFlash" width={28} height={28} style={{ borderRadius: 6 }} />
+          <Image src="/logo.png" alt="MeetingFlash" width={28} height={28} style={{ borderRadius: 6 }} priority />
           MeetingFlash
         </Link>
         <div className={styles.navRight}>
@@ -624,6 +626,21 @@ async function createProject() {
             <div className={styles.loadingState}>
               <div className={styles.loaderTrack}><div className={styles.loaderBar}/></div>
               <div className={styles.loaderTxt}>{loaderMsg}</div>
+            </div>
+          )}
+
+          {pack?.snapshot && (
+            <div className={styles.snapshot}>
+              <div className={styles.snapshotHead}>
+                <span className={styles.snapshotPill}>⚡ Executive snapshot</span>
+                <button
+                  className={`${styles.cpBtn} ${copied === 'snapshot' ? styles.cpDone : ''}`}
+                  onClick={() => copy('snapshot', pack.snapshot!)}
+                >
+                  {copied === 'snapshot' ? '✓' : 'Copy'}
+                </button>
+              </div>
+              <p className={styles.snapshotBody}>{pack.snapshot}</p>
             </div>
           )}
 

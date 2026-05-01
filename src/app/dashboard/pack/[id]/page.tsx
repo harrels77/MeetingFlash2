@@ -174,7 +174,7 @@ export default function PackDetail() {
               Export PDF
             </button>
           ) : (
-            <Link href="/#pricing" className={styles.pdfBtn} style={{ opacity: 0.7, textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: 6 }}>
+            <Link href="/pricing" className={styles.pdfBtn} style={{ opacity: 0.7, textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: 6 }}>
               🔒 Export PDF
             </Link>
           )}
@@ -240,6 +240,13 @@ export default function PackDetail() {
           </div>
           <h1 className={styles.title}>{meeting.title}</h1>
         </div>
+
+        {meeting.pack?.snapshot && (
+          <div className={styles.snapshot}>
+            <div className={styles.snapshotPill}>⚡ Executive snapshot</div>
+            <p className={styles.snapshotBody}>{meeting.pack.snapshot}</p>
+          </div>
+        )}
 
         <div className={styles.blocks}>
           {BLOCKS.map((block, i) => (
