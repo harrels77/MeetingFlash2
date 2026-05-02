@@ -136,11 +136,19 @@ Return ONLY a valid JSON object with exactly these keys:
 
 - "decisions": bullet list using • of all decisions actually made (not discussed, not proposed). If none: "No decisions identified."
 
-- "actions": bullet list using • of action items, GROUPED BY PRIORITY in this exact order:
-  Section header 1: "P0 — Blockers (must ship to unblock progress)"
-  Section header 2: "P1 — Commitments (promised, deadline-bound)"
-  Section header 3: "P2 — Maintenance (useful, flexible)"
-  Each item formatted as "• [Person] → [Task] (by [deadline if mentioned])". Skip a section header if it has zero items. Infer priority from signals: client-facing commitments / unblocks-other-work → P0, internal promises with deadlines → P1, nice-to-have / docs / cleanup → P2. If you cannot determine priority confidently, default to P1.
+- "actions": MUST BE A SINGLE STRING (not an object, not an array). The string contains a bulleted list of action items GROUPED BY PRIORITY using inline section headers (capital-letter lines, NOT markdown headings). Format the string EXACTLY like this example, with literal line breaks:
+
+P0 — Blockers
+• Sarah → Send SOW (by Mon)
+• You → Confirm migration scope (by Wed)
+
+P1 — Commitments
+• Tom → Share brand assets (by Tue)
+
+P2 — Maintenance
+• Maya → Update internal wiki (when convenient)
+
+Skip a priority section entirely if it has zero items (do not emit empty section headers). Infer priority from signals: client-facing commitments / unblocks-other-work → P0, internal promises with deadlines → P1, nice-to-have / docs / cleanup → P2. Default to P1 if uncertain. THE ENTIRE actions VALUE IS ONE STRING — do not return it as a JSON object or an array of objects.
 
 - "questions": bullet list using • of open questions. Include BOTH (a) questions explicitly raised but not answered AND (b) implicit gaps you noticed (missing approvers, unconfirmed dependencies, unstated assumptions, unscoped commitments). Prefix inferred items with "Inferred:" so the reader knows you surfaced something not said out loud. Be intelligent — surface real gaps, not noise.
 

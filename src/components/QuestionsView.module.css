@@ -1,0 +1,71 @@
+/* Open Questions block — distinguishes "Inferred:" gaps (tool surfaced) from explicit questions. */
+
+.list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.item {
+  position: relative;
+  padding-left: 22px;
+  font-size: 14px;
+  line-height: 1.55;
+  color: var(--text);
+}
+.item::before {
+  content: '?';
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: var(--surface2);
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+}
+
+.itemInferred {
+  background: linear-gradient(135deg, rgba(96,165,250,0.07) 0%, rgba(96,165,250,0.02) 100%);
+  border-left: 2px solid rgba(96,165,250,0.5);
+  padding: 8px 12px 8px 34px;
+  border-radius: 0 8px 8px 0;
+}
+.itemInferred::before {
+  content: '💭';
+  background: transparent;
+  font-size: 14px;
+  left: 10px;
+  top: 8px;
+  width: auto;
+  height: auto;
+}
+
+.inferredBadge {
+  display: inline-flex;
+  align-items: center;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--blue3);
+  margin-right: 8px;
+  padding: 2px 6px;
+  border-radius: 4px;
+  background: rgba(96,165,250,0.14);
+  vertical-align: middle;
+}
+
+:global([data-theme="light"]) .inferredBadge {
+  color: #1E40AF;
+  background: rgba(96,165,250,0.18);
+}

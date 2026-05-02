@@ -3,7 +3,9 @@ import { useState, useRef } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
 import styles from './app.module.css'
-import { supabase } from '@/lib/supabase'
+import { supabase, packFieldToString } from '@/lib/supabase'
+import ActionTiers from '@/components/ActionTiers'
+import QuestionsView from '@/components/QuestionsView'
 import ThemeToggle from '@/components/ThemeToggle'
 import { useEffect } from 'react'
 
@@ -134,6 +136,15 @@ What they're committing to:
 [IC's action items]`,
 }
 
+// URL-friendly slugs → TEMPLATES keys, used by ICP landings (/for-agencies?…) to prefill /app
+// e.g. /app?template=discovery loads the Discovery template into the textarea on mount.
+const TEMPLATE_SLUG_MAP: Record<string, string> = {
+  discovery: 'Discovery call (agency → prospect)',
+  status:    'Client status update',
+  retro:     'Sprint retro (product team)',
+  oneonone:  '1-on-1 (manager ↔ IC)',
+}
+
 const LOADER_MSGS = [
   'Reading your notes—',
   'Identifying decisions—',
@@ -162,8 +173,21 @@ export default function AppPage() {
   const [newProjectName, setNewProjectName]       = useState('')
   const [timeSavedToast, setTimeSavedToast]       = useState<number | null>(null)
   const [creatingProject, setCreatingProject]     = useState(false)
+  const [templateBanner, setTemplateBanner]       = useState<string | null>(null)
   const outputRef = useRef<HTMLDivElement>(null)
   const [showUpgradeModal, setShowUpgradeModal]   = useState(false)
+
+  // Prefill the textarea with a template when the user lands here from an ICP page
+  // (e.g. /for-agencies CTA → /app?template=discovery).
+  // Also surfaces a dismissible banner so the user knows WHY the textarea is pre-filled.
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search)
+    const slug = params.get('template')
+    if (slug && TEMPLATE_SLUG_MAP[slug] && TEMPLATES[TEMPLATE_SLUG_MAP[slug]]) {
+      setText(TEMPLATES[TEMPLATE_SLUG_MAP[slug]])
+      setTemplateBanner(TEMPLATE_SLUG_MAP[slug])
+    }
+  }, [])
 
   useEffect(() => {
   if (!isLoggedIn) return
@@ -172,7 +196,7 @@ export default function AppPage() {
     .select('id, name')
     .order('created_at', { ascending: false })
     .then(({ data }) => setProjects(data || []))
-  }, [isLoggedIn])  
+  }, [isLoggedIn])
 
   useEffect(() => {
     async function loadAuth(session: import('@supabase/supabase-js').Session | null) {
@@ -332,26 +356,26 @@ async function createProject() {
   function copyAll() {
     if (!pack) return
     const all = [
-      pack.snapshot ? `EXECUTIVE SNAPSHOT\n${pack.snapshot}` : null,
-      `DECISIONS\n${pack.decisions}`,
-      `ACTION ITEMS\n${pack.actions}`,
-      `OPEN QUESTIONS\n${pack.questions}`,
-      `RISKS\n${pack.risks}`,
-      `FOLLOW-UP EMAIL\n${pack.email}`,
-      `SLACK MESSAGE\n${pack.slack}`,
-      `NEXT AGENDA\n${pack.agenda}`,
+      pack.snapshot ? `EXECUTIVE SNAPSHOT\n${packFieldToString(pack.snapshot)}` : null,
+      `DECISIONS\n${packFieldToString(pack.decisions)}`,
+      `ACTION ITEMS\n${packFieldToString(pack.actions)}`,
+      `OPEN QUESTIONS\n${packFieldToString(pack.questions)}`,
+      `RISKS\n${packFieldToString(pack.risks)}`,
+      `FOLLOW-UP EMAIL\n${packFieldToString(pack.email)}`,
+      `SLACK MESSAGE\n${packFieldToString(pack.slack)}`,
+      `NEXT AGENDA\n${packFieldToString(pack.agenda)}`,
     ].filter(Boolean).join('\n\n')
     copy('all', all)
   }
 
   const blocks = pack ? [
-    { id: 'decisions', label: 'Decisions',       color: 'spark',  content: pack.decisions },
-    { id: 'actions',   label: 'Action Items',     color: 'ember',  content: pack.actions   },
-    { id: 'questions', label: 'Open Questions',   color: 'fog',    content: pack.questions  },
-    { id: 'risks',     label: 'Risks',            color: 'danger', content: pack.risks      },
-    { id: 'email',     label: 'Follow-up Email',  color: 'paper',  content: pack.email      },
-    { id: 'slack',     label: 'Slack Message',    color: 'paper',  content: pack.slack      },
-    { id: 'agenda',    label: 'Next Agenda',      color: 'spark',  content: pack.agenda     },
+    { id: 'decisions', label: 'Decisions',       color: 'spark',  content: packFieldToString(pack.decisions) },
+    { id: 'actions',   label: 'Action Items',     color: 'ember',  content: packFieldToString(pack.actions)   },
+    { id: 'questions', label: 'Open Questions',   color: 'fog',    content: packFieldToString(pack.questions) },
+    { id: 'risks',     label: 'Risks',            color: 'danger', content: packFieldToString(pack.risks)     },
+    { id: 'email',     label: 'Follow-up Email',  color: 'paper',  content: packFieldToString(pack.email)     },
+    { id: 'slack',     label: 'Slack Message',    color: 'paper',  content: packFieldToString(pack.slack)     },
+    { id: 'agenda',    label: 'Next Agenda',      color: 'spark',  content: packFieldToString(pack.agenda)    },
   ] : []
 
   function copy(id: string, content: string): void {
@@ -497,6 +521,22 @@ async function createProject() {
 
           <div className={styles.field}>
             <div className={styles.fieldLabel}>Meeting notes / transcript</div>
+            {templateBanner && (
+              <div className={styles.templateBanner}>
+                <span className={styles.templateBannerIcon}>📋</span>
+                <span className={styles.templateBannerText}>
+                  <strong>{templateBanner}</strong> template loaded — replace the bracketed placeholders with your actual notes.
+                </span>
+                <button
+                  type="button"
+                  className={styles.templateBannerDismiss}
+                  onClick={() => setTemplateBanner(null)}
+                  aria-label="Dismiss"
+                >
+                  ✕
+                </button>
+              </div>
+            )}
             <textarea
               className={styles.ta}
               value={text}
@@ -570,7 +610,7 @@ async function createProject() {
               <>
                 <span>Free pack used</span>
                 <span className={styles.hintDot}>·</span>
-                <Link href="/signup" className={styles.hintLink}>Create account for 3 more →</Link>
+                <Link href="/signup" className={styles.hintLink}>Create account for 5 more →</Link>
               </>
             ) : (
               <>
@@ -666,7 +706,11 @@ async function createProject() {
                       {copied === block.id ? '✓' : 'Copy'}
                     </button>
                   </div>
-                  <div className={styles.blockContent}>{block.content}</div>
+                  <div className={styles.blockContent}>
+                    {block.id === 'actions' ? <ActionTiers text={block.content} />
+                      : block.id === 'questions' ? <QuestionsView text={block.content} />
+                      : block.content}
+                  </div>
                 </div>
               ))}
             </div>

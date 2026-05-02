@@ -2,6 +2,9 @@ import { createClient } from '@supabase/supabase-js'
 import Link from 'next/link'
 import Image from 'next/image'
 import type { Metadata } from 'next'
+import { packFieldToString } from '@/lib/supabase'
+import ActionTiers from '@/components/ActionTiers'
+import QuestionsView from '@/components/QuestionsView'
 import styles from './share.module.css'
 
 export const metadata: Metadata = {
@@ -66,7 +69,7 @@ export default async function SharePage({ params }: { params: { token: string } 
         {meeting.pack?.snapshot && (
           <div className={styles.snapshot}>
             <div className={styles.snapshotPill}>⚡ Executive snapshot</div>
-            <p className={styles.snapshotBody}>{meeting.pack.snapshot}</p>
+            <p className={styles.snapshotBody}>{packFieldToString(meeting.pack.snapshot)}</p>
           </div>
         )}
 
@@ -86,7 +89,11 @@ export default async function SharePage({ params }: { params: { token: string } 
                 </div>
               </div>
               <div className={styles.blockContent}>
-                {meeting.pack[block.id] || '—'}
+                {block.id === 'actions'
+                  ? <ActionTiers text={packFieldToString(meeting.pack[block.id])} />
+                  : block.id === 'questions'
+                    ? <QuestionsView text={packFieldToString(meeting.pack[block.id])} />
+                    : (packFieldToString(meeting.pack[block.id]) || '—')}
               </div>
             </div>
           ))}

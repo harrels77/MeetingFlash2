@@ -9,6 +9,7 @@ export default function MobileNav() {
   const { user, profile, loading, signOut } = useAuth()
   const [open, setOpen]               = useState(false)
   const [accountOpen, setAccountOpen] = useState(false)
+  const [forOpen, setForOpen]         = useState(false)
   const [theme, setTheme]             = useState<'dark' | 'light'>('dark')
 
   useEffect(() => {
@@ -34,11 +35,27 @@ export default function MobileNav() {
       if (window.innerWidth > 768) {
         setOpen(false)
         setAccountOpen(false)
+        setForOpen(false)
       }
     }
     window.addEventListener('resize', handleResize)
     return () => window.removeEventListener('resize', handleResize)
   }, [])
+
+  // Close any open dropdown when clicking outside.
+  useEffect(() => {
+    function handleClickOutside(e: MouseEvent) {
+      const target = e.target as HTMLElement
+      if (!target.closest(`.${styles.accountWrap}`) && !target.closest(`.${styles.forWrap}`)) {
+        setAccountOpen(false)
+        setForOpen(false)
+      }
+    }
+    if (accountOpen || forOpen) {
+      document.addEventListener('click', handleClickOutside)
+      return () => document.removeEventListener('click', handleClickOutside)
+    }
+  }, [accountOpen, forOpen])
 
   const displayName = profile?.full_name
     || profile?.email?.split('@')[0]
@@ -57,7 +74,24 @@ export default function MobileNav() {
         {/* DESKTOP LINKS — cachés sur mobile via CSS */}
         <div className={styles.desktopLinks}>
           <Link href="/" className={styles.navLink}>Home</Link>
-          <Link href="#features" className={styles.navLink}>Features</Link>
+          <div className={styles.forWrap}>
+            <button
+              type="button"
+              className={styles.navLink}
+              onClick={() => setForOpen(o => !o)}
+              style={{ display: 'inline-flex', alignItems: 'center', gap: 4, background: 'none', border: 'none', font: 'inherit', cursor: 'pointer' }}
+              aria-expanded={forOpen}
+            >
+              For <span style={{ fontSize: 10, transition: 'transform 0.15s', transform: forOpen ? 'rotate(180deg)' : 'none' }}>▾</span>
+            </button>
+            {forOpen && (
+              <div className={styles.forMenu}>
+                <Link href="/for-agencies"      className={styles.forMenuItem} onClick={() => setForOpen(false)}>For agencies</Link>
+                <Link href="/for-product-teams" className={styles.forMenuItem} onClick={() => setForOpen(false)}>For product teams</Link>
+                <Link href="/for-freelancers"   className={styles.forMenuItem} onClick={() => setForOpen(false)}>For freelancers</Link>
+              </div>
+            )}
+          </div>
           <Link href="/pricing"  className={styles.navLink}>Pricing</Link>
           <Link href="/blog"     className={styles.navLink}>Blog</Link>
           

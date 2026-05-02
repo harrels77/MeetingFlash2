@@ -98,6 +98,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const signOut = async () => {
     // Fire-and-forget — don't block the UI if Supabase hangs.
     supabase.auth.signOut().catch(() => {})
+    // CRITICAL: also clear Supabase auth tokens from localStorage synchronously,
+    // because the redirect below races against supabase.auth.signOut(). Without
+    // this, the next page load restores the session from still-present tokens
+    // and "sign out" silently fails.
+    try {
+      for (const key of Object.keys(localStorage)) {
+        if (key.startsWith('sb-') || key.includes('supabase.auth')) {
+          localStorage.removeItem(key)
+        }
+      }
+    } catch { /* localStorage may be unavailable in some contexts */ }
     setUser(null)
     setProfile(null)
     window.location.replace('/')

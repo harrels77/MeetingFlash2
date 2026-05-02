@@ -87,7 +87,7 @@ export default function ForFreelancersPage() {
             Recap emails, action lists, follow-ups — in 20 seconds. So you can charge for delivery, not for the paperwork that comes after every client call.
           </p>
           <div className={s.heroActions}>
-            <Link href="/app" className={s.btnPrimary}>Try it free →</Link>
+            <Link href="/app?template=status" className={s.btnPrimary}>Try it free →</Link>
             <Link href="#math" className={s.btnGhost}>See the math ↓</Link>
           </div>
           <div className={s.trustStrip}>
@@ -238,7 +238,7 @@ export default function ForFreelancersPage() {
         <p className={s.ctaBannerSub}>
           Try MeetingFlash on your last client call. No signup needed for the first one.
         </p>
-        <Link href="/app" className={s.btnPrimary}>Run your first Flash free →</Link>
+        <Link href="/app?template=status" className={s.btnPrimary}>Run your first Flash free →</Link>
       </section>
 
       <footer className={s.miniFooter}>

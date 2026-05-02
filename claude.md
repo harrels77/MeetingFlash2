@@ -382,6 +382,69 @@ RESEND_API_KEY                          ← get from resend.com (needs custom do
 - **`BreadcrumbList` JSON-LD** added to: blog articles (Home → Blog → Article), each ICP page (Home → For X), each tool page (Home → Free tools → Tool name), `/pricing` (Home → Pricing). Helper at `src/lib/breadcrumb.ts:buildBreadcrumb()` — pass an ordered array of `{name, path}` crumbs; Home is auto-prepended. Google may render breadcrumbs in SERPs (CTR boost).
 - **Search Console verification slot** prepared in root layout metadata as a commented-out `verification: { google: '...' }` line. When you claim the property in https://search.google.com/search-console, paste the token and uncomment.
 
+### Quality refinements — output upgrade + active memory (Phase 7)
+This phase pivoted the perceived value of a Pack from "structured summary" to "senior-analyst brief". Don't dilute these without an explicit reason.
+
+- **Executive Snapshot** (`pack.snapshot`) — new field at the top of every Pack. The prompt asks Claude to produce a 2-3 sentence senior-consultant brief: what just happened, the cardinal risk, the next critical move — with specific names/numbers from the notes. Rendered as a gradient blue card *above* the regular blocks in `/app`, `/share/[token]`, and `/dashboard/pack/[id]`. Included in "Copy All". This is the wow moment now — not the speed.
+- **P0 / P1 / P2 priority tiers** in the `actions` block — the prompt forces a single string with three inline section headers ("P0 — Blockers", "P1 — Commitments", "P2 — Maintenance"), each followed by `•` items. Empty sections are skipped. **Critical**: `actions` MUST be a single string, NOT a JSON object — Claude will sometimes try to return it as `{P0: ..., P1: ..., P2: ...}` and the React renderer would crash with "Objects are not valid as a React child". Two layers of defense: (1) the prompt repeats "actions is one string" multiple times; (2) `packFieldToString()` in `src/lib/supabase.ts` defensively coerces any object/array back to a clean line-broken string. ALWAYS render Pack fields through `packFieldToString` — never `pack.field` directly.
+- **Differentiated tones** — the prompt now imposes 3 registers: `email` = agency-premium client-facing (warm but specific, references a detail from the call, no template phrases like "I hope this email finds you well"), `slack` = casual-direct internal team voice with optional emojis, `agenda` = strategic with "why it's on the agenda" framing (not "Status update / Q&A").
+- **Risks + Mitigation** — every risk bullet is followed by a `Mitigation:` line on the next line. The prompt enforces this with a literal format example.
+- **Inferred Open Questions** — the `questions` block now includes BOTH explicit questions AND implicit gaps (missing approvers, unconfirmed dependencies, unscoped commitments) prefixed with `Inferred:`. This is the one piece with hallucination risk — monitor user feedback.
+- **Active memory (cross-meeting context)** — when `projectId` is set, `/api/flash` fetches the last 5 meetings on that project + all non-done tasks from those meetings, and injects them into the prompt as a "PROJECT MEMORY" preamble before the user's transcript. The prompt instructs Claude to cross-reference: progress on prior commitments, surface still-open items as inferred questions if not addressed, flag prior decisions being revisited. **This is the moat vs ChatGPT** — ChatGPT has no access to prior context. DB errors during the memory fetch are caught silently (try/catch) so a broken query never blocks a flash.
+
+### Bug fixes shipped with Phase 7
+- **Sign-out reliability fix** in `AuthProvider.signOut` — `supabase.auth.signOut()` is fire-and-forget but races against `window.location.replace('/')`. If the redirect fired before Supabase cleared its localStorage tokens, the next page load restored the session and "sign out" silently failed. Fix: synchronously delete every `localStorage` key starting with `sb-` or containing `supabase.auth` BEFORE the redirect. Don't undo this — the symptom was hard to debug.
+- **HeroCta simplified to 2 states** — was 4 states (signed-out × guest-used / signed-in × meeting-count). User feedback: inconsistent, confusing. New rule: signed-out OR loading → "Try with sample notes →"; signed-in → "Continue →". Reflects real intent: a logged-in user already has account context, the CTA should simply send them to the tool. Don't restore the meeting-count branch — it caused regressions on cold cache.
+- **Defensive Pack rendering** via `packFieldToString` (helper in `src/lib/supabase.ts`) — coerces any field (string / object / array / null) to a safe newline-joined string. Used in `/app`, `/share/[token]`, `/dashboard/pack/[id]`. Prevents the recurring "Objects are not valid as a React child" crash when Claude returns a structured field.
+- **Dashboard pack detail JSX bug** in `dashboard/pack/[id]/page.tsx` — the `.blockContent` div was rendering the literal string `: meeting.pack?.[block.id] ?? '—'` (missing JSX `{}` braces, pre-existing). Fixed by wrapping in `{packFieldToString(...)}`.
+- **Stale "3 free packs" copy in /app** (`src/app/app/page.tsx:613`) — the post-flash guest CTA said "Create account for 3 more →" from the era when Free was 3 packs/month. Bumped to "Create account for 5 more →" to match the actual Free plan (5 packs/month). NOTE: the matching copy in the welcome + nudge **emails** is intentionally still "3" — see the P0 roadmap entry. The email copy gets bumped when Resend reactivates the account; the in-app UI copy was the only one safe to fix independently.
+
+### "For" dropdown in nav (visibility for ICP pages)
+- ICP pages (`/for-agencies`, `/for-product-teams`, `/for-freelancers`) were buried in the footer only — feedback was they felt hidden. Added a "For ▾" dropdown in the desktop nav (`MobileNav.tsx:forWrap` / `forMenu`). Mobile menu already lists them flat. The dropdown closes on outside click (handler in `MobileNav` useEffect). Don't replace this with 3 inline links — the desktop nav is already at capacity; a dropdown groups them semantically.
+
+### ICP → /app template prefill (Phase 8a)
+The 3 ICP pages were "marketing only" — same `/app` for everyone. Now each ICP CTA sends to `/app?template=<slug>` and the textarea auto-fills with the matching template on mount.
+- Mapping: `/for-agencies` → `?template=discovery`, `/for-product-teams` → `?template=retro`, `/for-freelancers` → `?template=status`. The 1-on-1 template stays available via the in-app templates dropdown but isn't an ICP-page entry point.
+- Slug map lives in `src/app/app/page.tsx:TEMPLATE_SLUG_MAP` (URL-safe slugs → TEMPLATES keys). `useEffect` on mount reads `window.location.search` (no `useSearchParams`, avoids the Suspense boundary requirement).
+- Each ICP page now delivers something concrete: a pre-filled call template, not just a generic redirect. Don't revert to plain `/app` links — that's what made the pages feel like dead-end content marketing.
+
+### Premium P0/P1/P2 priority view (Phase 8b)
+The `actions` block parses its string client-side into 3 visually distinct tier cards.
+- Helper `parseActionTiers(text)` in `src/lib/supabase.ts` — robust to header variations (`P0 — Blockers`, `P0 -`, `P0:`), strips bullets, returns `{ p0, p1, p2, unsorted }`. The `unsorted` bucket catches items Claude emitted before any tier header (fallback rendering).
+- **Single shared component** `<ActionTiers />` at `src/components/ActionTiers.tsx` + `ActionTiers.module.css` — used by `/app`, `/share/[token]`, `/dashboard/pack/[id]`. Renders P0 with red gradient + 🔴 icon, P1 with amber + 📌, P2 muted + ○. Counts shown as pill badges. Falls back to plain text if `total === 0` (Claude skipped headers). Server-component compatible (no hooks). Don't recreate per-page copies — Phase 8 originally had 3 duplicated locals; the refactor consolidated them.
+- Light-mode tier colors are darkened via `:global([data-theme="light"])` overrides for contrast.
+- Don't revert to a single text block — the visual hierarchy is the whole point of the priority work.
+
+### Inferred-Question badge (Phase 8b cont.)
+The `questions` block has its own renderer `<QuestionsView />` at `src/components/QuestionsView.tsx` (+ module CSS) that parses each line and visually distinguishes items prefixed with `Inferred:` (gaps the tool surfaced from absences in the notes — see Phase 7 prompt) from explicit questions raised in the call.
+- Inferred items render with: 💭 icon, blue tinted background, blue left border, an "INFERRED" pill badge inline with the text. Explicit questions render plain with a "?" round dot.
+- The "Inferred" treatment is the visual hook that signals the tool actually thought about the meeting, not just extracted text. Don't remove it — Phase 7 went to the trouble of inferring those items in the prompt; the UI must surface that effort.
+- Used in `/app`, `/share/[token]`, `/dashboard/pack/[id]` via the shared component.
+
+### Template-loaded banner on /app (Phase 8a cont.)
+When `/app?template=<slug>` prefills the textarea (from an ICP-page CTA), a dismissible banner appears above the textarea: 📋 icon + "{TemplateName} template loaded — replace the bracketed placeholders with your actual notes." + ✕ dismiss button.
+- State `templateBanner` holds the readable template name; `setTemplateBanner(null)` on dismiss. Animation reuses `blockIn` keyframe.
+- Without this banner the textarea looked pre-filled-for-no-reason, which felt confusing. Don't ship the prefill without the banner — they're paired UX.
+
+### PWA polish (Phase 8c)
+- iOS-specific metadata in root layout (`appleWebApp.capable: true`, `statusBarStyle: 'black-translucent'`, `formatDetection.telephone: false`) → "Add to Home Screen" on iPhone gives a real fullscreen app feel, no auto-linking phone numbers.
+- Service worker at `public/sw.js` — minimal cache-first strategy for static assets only (`/manifest.json`, `/favicon.png`, `/logo.png`, plus regex match on image/font extensions). API routes (`/api/`) and auth (`/auth/`) bypass the SW entirely (always network — the app needs fresh AI/auth responses). Versioned via `CACHE_NAME = 'meetingflash-v1'` — bump the version on breaking changes.
+- Registration via `<SwRegister />` client component (rendered in root layout body). Only registers in production (`NODE_ENV === 'production'`), only if `serviceWorker` is supported, errors swallowed silently. Don't await the registration — it must never block the UI.
+- ⚠️ NOT yet done: a proper "maskable" icon with safe-area padding. The current `/logo.png` is set with `purpose: 'maskable'` in the manifest but it's a square image without inner safe area, so it'll get cropped on circular Android masks. To fix: regenerate `/logo.png` with the icon centered inside the inner 80% of a 512×512 canvas. Defer until you have actual install metrics that show this matters.
+
+### Known data issue: dual profiles for same email
+**Symptom**: Same Gmail address shows up as two different identities in the app — e.g. "adrienharrel" (Free, full_name = email prefix) vs "harrel" (Pro, full_name = Google name). Stripe webhook only updated one row → the other stays on the Free plan even though the user is paying.
+
+**Root cause**: Supabase Auth treats an email/password sign-up and a Google OAuth sign-in with the same email as **two separate `auth.users` rows** by default (the identities are NOT auto-linked). Each gets its own `auth.users.id`, which means `profiles` has two rows for the same human.
+
+**Manual fix** (do this in Supabase SQL editor when an affected user reports it):
+1. Find both `auth.users.id`s for the email: `SELECT id, email, raw_app_meta_data->>'provider' AS provider, created_at FROM auth.users WHERE email = '<email>' ORDER BY created_at;`
+2. Identify which one has the active Stripe subscription: check `profiles` where `plan = 'pro'`. Keep that one as the "winner".
+3. Delete the loser profile + auth.user (or merge meetings/tasks/projects to the winner first if any data lives there): `UPDATE meetings SET user_id = '<winner_id>' WHERE user_id = '<loser_id>';` then same for `tasks`, `projects`. Then delete the loser auth.user via Supabase dashboard.
+4. Tell the user to always sign in via the same method going forward (whichever was the "winner").
+
+**Prevention** (deferred): we could detect at `loadProfile` time if a profile with the same email but different id already exists, and surface a warning + offer a merge flow. Not worth building until we see this happen with paying customers more than once. For now, document it here so future-you doesn't re-debug.
+
 - Favicon tight-cropped (was 1536×1024 with 70% whitespace, now 512×512 transparent)
 - Light-mode contrast fix on blue accents + nav (was hardcoded dark)
 - Product showcase section on landing page — 3 interactive mockups
@@ -394,6 +457,9 @@ RESEND_API_KEY                          ← get from resend.com (needs custom do
 ## Roadmap / TODO (priorities)
 
 This section is the **source of truth for what's left to do**. Update as items ship or get deprioritized. Newest decisions go above older ones within a priority bucket.
+
+### P0 — Live data issue (manual fix needed in Supabase)
+- **Dual profiles for same email** — known case: founder's own account (`adrienharrel@gmail.com`) split into "adrienharrel" (Free) + "harrel" (Pro) because the email/password sign-up and Google OAuth sign-in created separate `auth.users` rows. Stripe webhook only marked one as Pro. Procedure to resolve documented in the "Known data issue" section above. Apply the SQL merge once for the founder, then keep the procedure handy for future user reports.
 
 ### P0 — Blocked on external action (no code work possible right now)
 - **Resend email account reactivation** — Resend flagged the account, awaiting their support response. Until lifted, all `/api/email/*` routes silently no-op (fire-and-forget with `.catch(()=>{})`). Once reactivated:
@@ -427,5 +493,5 @@ This section is the **source of truth for what's left to do**. Update as items s
 
 ---
 
-*Last updated: May 2026*
+*Last updated: May 2026 (Phase 8 + 8.5 — ICP template prefill, premium P0/P1/P2 view, PWA polish, shared-component refactor + Inferred badge + template banner + stale-copy fix)*
 *Primary AI assistant: Claude (claude.ai + Claude Code)*

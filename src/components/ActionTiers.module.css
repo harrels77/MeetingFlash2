@@ -1,0 +1,91 @@
+/* Shared styles for the P0/P1/P2 priority view, used in /app, /share, /dashboard/pack. */
+
+.tiers {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.tier {
+  border-radius: 8px;
+  padding: 12px 14px;
+  border: 1px solid var(--border);
+  background: var(--surface2);
+  position: relative;
+}
+
+.tier.tierP0 {
+  background: linear-gradient(135deg, rgba(239,68,68,0.08) 0%, rgba(239,68,68,0.02) 100%);
+  border-color: rgba(239,68,68,0.30);
+  box-shadow: 0 0 0 1px rgba(239,68,68,0.06) inset, 0 4px 16px rgba(239,68,68,0.08);
+}
+.tier.tierP1 {
+  background: linear-gradient(135deg, rgba(251,191,36,0.08) 0%, rgba(251,191,36,0.02) 100%);
+  border-color: rgba(251,191,36,0.30);
+}
+.tier.tierP2 {
+  opacity: 0.85;
+  background: var(--surface);
+}
+
+.tierHead {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.tierIcon { font-size: 13px; line-height: 1; }
+
+.tierLabel {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text);
+}
+.tierP0 .tierLabel { color: #FCA5A5; }
+.tierP1 .tierLabel { color: #FCD34D; }
+.tierP2 .tierLabel { color: var(--muted); }
+
+.tierCount {
+  margin-left: auto;
+  font-size: 11px;
+  font-weight: 600;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: var(--lift);
+  color: var(--muted);
+}
+.tierP0 .tierCount { background: rgba(239,68,68,0.18); color: #FCA5A5; }
+.tierP1 .tierCount { background: rgba(251,191,36,0.18); color: #FCD34D; }
+
+.tierList {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.tierList li {
+  position: relative;
+  padding-left: 16px;
+  font-size: 14px;
+  line-height: 1.55;
+  color: var(--text);
+}
+.tierList li::before {
+  content: '▸';
+  position: absolute;
+  left: 0;
+  color: var(--muted);
+}
+.tierP0 .tierList li { font-size: 14.5px; font-weight: 500; }
+.tierP2 .tierList li { font-size: 13.5px; color: var(--muted); }
+
+/* Light-mode contrast adjustments */
+:global([data-theme="light"]) .tierP0 .tierLabel { color: #B91C1C; }
+:global([data-theme="light"]) .tierP1 .tierLabel { color: #B45309; }
+:global([data-theme="light"]) .tierP0 .tierCount { color: #B91C1C; background: rgba(239,68,68,0.12); }
+:global([data-theme="light"]) .tierP1 .tierCount { color: #B45309; background: rgba(251,191,36,0.18); }

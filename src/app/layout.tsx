@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from 'next'
 import '../styles/globals.css'
 import { AuthProvider } from '@/lib/AuthProvider'
 import { Analytics } from '@vercel/analytics/next'
+import SwRegister from '@/components/SwRegister'
 
 const SITE_URL = 'https://meetingflash.work'
 
@@ -58,6 +59,14 @@ export const metadata: Metadata = {
     shortcut: '/favicon.png',
     apple: '/favicon.png',
   },
+  appleWebApp: {
+    capable: true,
+    title: 'MeetingFlash',
+    statusBarStyle: 'black-translucent',
+  },
+  formatDetection: {
+    telephone: false,
+  },
   category: 'productivity',
   manifest: '/manifest.json',
   // Paste your Search Console verification token here once you've claimed the domain
@@ -97,6 +106,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <AuthProvider>
           {children}
         </AuthProvider>
+        <SwRegister />
         <Analytics />
       </body>
     </html>

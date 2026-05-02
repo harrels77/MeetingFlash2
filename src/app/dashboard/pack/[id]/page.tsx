@@ -2,7 +2,9 @@
 import { useState, useEffect } from 'react'
 import { useRouter, useParams } from 'next/navigation'
 import Link from 'next/link'
-import { supabase } from '@/lib/supabase'
+import { supabase, packFieldToString } from '@/lib/supabase'
+import ActionTiers from '@/components/ActionTiers'
+import QuestionsView from '@/components/QuestionsView'
 import ThemeToggle from '@/components/ThemeToggle'
 import styles from './pack.module.css'
 
@@ -244,7 +246,7 @@ export default function PackDetail() {
         {meeting.pack?.snapshot && (
           <div className={styles.snapshot}>
             <div className={styles.snapshotPill}>⚡ Executive snapshot</div>
-            <p className={styles.snapshotBody}>{meeting.pack.snapshot}</p>
+            <p className={styles.snapshotBody}>{packFieldToString(meeting.pack.snapshot)}</p>
           </div>
         )}
 
@@ -266,7 +268,7 @@ export default function PackDetail() {
                   <div style={{ display:'flex', gap:6 }}>
                     <button
                       className={`${styles.cpBtn} ${copied === block.id ? styles.cpDone : ''}`}
-                      onClick={() => copy(block.id, meeting.pack[block.id] || '—')}
+                      onClick={() => copy(block.id, packFieldToString(meeting.pack[block.id]) || '—')}
                     >
                       {copied === block.id ? '✓' : 'Copy'}
                     </button>
@@ -277,14 +279,18 @@ export default function PackDetail() {
                 ) : (
                   <button
                     className={`${styles.cpBtn} ${copied === block.id ? styles.cpDone : ''}`}
-                    onClick={() => copy(block.id, meeting.pack[block.id] || '—')}
+                    onClick={() => copy(block.id, packFieldToString(meeting.pack[block.id]) || '—')}
                   >
                     {copied === block.id ? '✓' : 'Copy'}
                   </button>
                 )}
               </div>
               <div className={styles.blockContent}>
-                  : meeting.pack?.[block.id] ?? '—'
+                {block.id === 'actions'
+                  ? <ActionTiers text={packFieldToString(meeting.pack?.[block.id])} />
+                  : block.id === 'questions'
+                    ? <QuestionsView text={packFieldToString(meeting.pack?.[block.id])} />
+                    : (packFieldToString(meeting.pack?.[block.id]) || '—')}
               </div>
             </div>
           ))}

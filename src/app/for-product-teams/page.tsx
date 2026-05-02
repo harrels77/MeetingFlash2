@@ -87,7 +87,7 @@ export default function ForProductTeamsPage() {
             Sprint retros, planning, 1-on-1s, stakeholder reviews — turned into structured commitments with named owners and deadlines, in 20 seconds. So next sprint actually starts where the last one ended.
           </p>
           <div className={s.heroActions}>
-            <Link href="/app" className={s.btnPrimary}>Try it free →</Link>
+            <Link href="/app?template=retro" className={s.btnPrimary}>Try it free →</Link>
             <Link href="#meetings" className={s.btnGhost}>See meeting types ↓</Link>
           </div>
           <div className={s.trustStrip}>
@@ -238,7 +238,7 @@ export default function ForProductTeamsPage() {
         <p className={s.ctaBannerSub}>
           Try it on your last sprint — no signup required for the first one.
         </p>
-        <Link href="/app" className={s.btnPrimary}>Run your first Flash free →</Link>
+        <Link href="/app?template=retro" className={s.btnPrimary}>Run your first Flash free →</Link>
       </section>
 
       <footer className={s.miniFooter}>

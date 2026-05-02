@@ -92,7 +92,7 @@ export default function ForAgenciesPage() {
             Discovery calls, weekly status updates, sprint retros, quarterly reviews — turned into a polished recap email and Slack message in 20 seconds. Built for agencies who run too many client meetings to write recaps by hand.
           </p>
           <div className={s.heroActions}>
-            <Link href="/app" className={s.btnPrimary}>Try it free →</Link>
+            <Link href="/app?template=discovery" className={s.btnPrimary}>Try it free →</Link>
             <Link href="#how" className={s.btnGhost}>See how it works ↓</Link>
           </div>
           <div className={s.trustStrip}>
@@ -247,7 +247,7 @@ export default function ForAgenciesPage() {
         <p className={s.ctaBannerSub}>
           Try it on your last meeting — no signup required for the first one.
         </p>
-        <Link href="/app" className={s.btnPrimary}>Run your first Flash free →</Link>
+        <Link href="/app?template=discovery" className={s.btnPrimary}>Run your first Flash free →</Link>
       </section>
 
       <footer className={s.miniFooter}>
