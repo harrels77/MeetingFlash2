@@ -92,6 +92,10 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="en" suppressHydrationWarning>
       <head>
         {/* Preconnect to performance-critical origins so the browser opens connections in parallel with HTML parsing */}
+        {/* Cross-platform PWA meta — Next.js auto-emits the apple-mobile-web-app
+            variant from appleWebApp metadata, but Chrome warns it's deprecated
+            without this generic counterpart. */}
+        <meta name="mobile-web-app-capable" content="yes" />
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="" />
         <link rel="dns-prefetch" href="https://api.anthropic.com" />
