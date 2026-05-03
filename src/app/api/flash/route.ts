@@ -78,6 +78,15 @@ export async function POST(req: NextRequest) {
         )
         const { data: { user } } = await memClient.auth.getUser()
         if (user) {
+          // Project-level free-text notes (long-running context: client info,
+          // deal size, tone preferences, do's/don'ts). Edited from /dashboard/project/[id].
+          const { data: projectRow } = await memClient
+            .from('projects')
+            .select('name, notes')
+            .eq('id', projectId)
+            .eq('user_id', user.id)
+            .single()
+
           // Last 5 meetings on this project (most recent first), excluding the one we're about to create
           const { data: priorMeetings } = await memClient
             .from('meetings')
@@ -97,6 +106,9 @@ export async function POST(req: NextRequest) {
             .limit(20)
 
           const priorBlocks: string[] = []
+          if (projectRow?.notes && projectRow.notes.trim().length > 0) {
+            priorBlocks.push(`PROJECT BRIEF (persistent context the user has set for "${projectRow.name}"):\n${projectRow.notes.trim()}`)
+          }
           if (priorMeetings && priorMeetings.length > 0) {
             const decisions = priorMeetings
               .map(m => {
@@ -188,8 +200,14 @@ ${text}`
         'anthropic-beta': 'prompt-caching-2024-07-31',
       },
       body: JSON.stringify({
-        model: 'claude-sonnet-4-20250514',
-        max_tokens: 4000,
+        // Haiku 4.5 is roughly 3× faster than Sonnet 4 with comparable quality
+        // on tightly-structured JSON tasks like this one (the schema does most
+        // of the work — the model just fills slots). Switched in Phase 10 to
+        // address user feedback that packs took too long to load.
+        model: 'claude-haiku-4-5-20251001',
+        // 2500 is enough for a full 7-block pack; previous 4000 was a safety
+        // ceiling that almost never got close. Lower budget = faster response.
+        max_tokens: 2500,
         system: [
           {
             type: 'text',

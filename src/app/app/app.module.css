@@ -110,6 +110,20 @@
 }
 .sampleBtn:hover { color: var(--text); border-color: var(--border3); }
 
+.clearBtn {
+  background: none;
+  border: 1px solid rgba(239,68,68,0.3);
+  font-family: var(--font);
+  font-size: 12px;
+  font-weight: 500;
+  color: #FCA5A5;
+  padding: 5px 12px;
+  cursor: pointer;
+  transition: all 0.15s;
+  border-radius: 6px;
+}
+.clearBtn:hover { background: rgba(239,68,68,0.08); border-color: rgba(239,68,68,0.5); color: #FECACA; }
+
 .templateWrap { position: relative; }
 
 .templateBtn {
@@ -292,6 +306,15 @@
 .select:focus { border-color: rgba(37,99,235,0.4); }
 .select option { background: var(--surface); color: var(--text); }
 
+/* When a project is selected, tint the select itself so the user can see at a
+   glance they're working in project context (memory injected, etc). */
+.selectActive {
+  background: linear-gradient(135deg, rgba(37,99,235,0.10) 0%, rgba(96,165,250,0.04) 100%);
+  border-color: rgba(37,99,235,0.35);
+  color: var(--text);
+  font-weight: 600;
+}
+
 .error {
   border: 1px solid rgba(239,68,68,0.3);
   background: rgba(239,68,68,0.08);
@@ -376,6 +399,62 @@
   transition: all 0.15s;
 }
 .createProjectCancel:hover { color: var(--text); }
+
+/* Active-project context badge — shown in place of the dropdown when projectId is set,
+   so the input feels integrated with the project rather than a flat tag selector. */
+.projectActive {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 14px;
+  background: linear-gradient(135deg, rgba(37,99,235,0.12) 0%, rgba(96,165,250,0.05) 100%);
+  border: 1px solid rgba(37,99,235,0.32);
+  border-radius: 10px;
+  font-size: 13px;
+  animation: blockIn 0.35s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+.projectActiveDot {
+  width: 8px; height: 8px;
+  background: var(--blue3);
+  border-radius: 50%;
+  box-shadow: 0 0 0 3px rgba(96,165,250,0.18);
+  flex-shrink: 0;
+}
+.projectActiveLabel {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+.projectActiveName {
+  font-weight: 700;
+  color: var(--text);
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.projectActiveMemory {
+  font-size: 11px;
+  color: var(--blue3);
+  font-style: italic;
+  flex-shrink: 0;
+}
+.projectActiveSwitch {
+  background: none;
+  border: 1px solid var(--border2);
+  font-family: var(--font);
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--muted);
+  padding: 4px 10px;
+  cursor: pointer;
+  border-radius: 6px;
+  transition: all 0.15s;
+  flex-shrink: 0;
+}
+.projectActiveSwitch:hover { color: var(--text); border-color: var(--border3); background: var(--surface); }
 
 /* ── FLASH BUTTON ── */
 .flashBtn {
@@ -512,6 +591,48 @@
   border-radius: 6px;
 }
 .copyAllBtn:hover { color: var(--text); border-color: var(--border3); }
+
+/* "Flash another →" — quick path to start a new pack from the output header.
+   Same compact pill as Copy All, but tinted to feel like a primary action. */
+.flashAnotherBtn {
+  background: linear-gradient(135deg, rgba(37,99,235,0.14) 0%, rgba(96,165,250,0.06) 100%);
+  border: 1px solid rgba(37,99,235,0.35);
+  font-family: var(--font);
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--blue3);
+  padding: 6px 14px;
+  cursor: pointer;
+  transition: all 0.15s;
+  border-radius: 6px;
+}
+.flashAnotherBtn:hover {
+  background: linear-gradient(135deg, rgba(37,99,235,0.22) 0%, rgba(96,165,250,0.10) 100%);
+  border-color: rgba(37,99,235,0.55);
+}
+
+/* Footer version under the last pack block — visually the next step after
+   the user has finished reading. Wider + more inviting than the header pill. */
+.flashAnotherFooter {
+  width: 100%;
+  margin-top: 18px;
+  padding: 16px;
+  background: linear-gradient(135deg, var(--blue) 0%, var(--blue2) 100%);
+  color: #fff;
+  border: none;
+  font-family: var(--font);
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  border-radius: 12px;
+  letter-spacing: -0.2px;
+  transition: all 0.18s;
+  box-shadow: 0 6px 24px rgba(37,99,235,0.25);
+}
+.flashAnotherFooter:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 10px 32px rgba(37,99,235,0.38);
+}
 
 /* ── EMPTY STATE ── */
 .emptyState {

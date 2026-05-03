@@ -10,6 +10,7 @@ interface Project {
   id: string
   name: string
   description: string | null
+  notes: string | null
   created_at: string
 }
 
@@ -38,7 +39,10 @@ export default function ProjectDetail() {
   const [tasks, setTasks]       = useState<Task[]>([])
   const [loading, setLoading]   = useState(true)
   const [tab, setTab]           = useState<'overview' | 'decisions' | 'tasks'>('overview')
-  
+  const [notesDraft, setNotesDraft] = useState('')
+  const [editingNotes, setEditingNotes] = useState(false)
+  const [savingNotes, setSavingNotes]   = useState(false)
+
 
   const load = useCallback(async () => {
     const { data: { session } } = await supabase.auth.getSession()
@@ -54,6 +58,7 @@ export default function ProjectDetail() {
 
     if (!proj) { router.push('/dashboard'); return }
     setProject(proj)
+    setNotesDraft(proj.notes || '')
 
     // Load meetings in this project
     const { data: meets } = await supabase
@@ -81,6 +86,19 @@ export default function ProjectDetail() {
   }, [params.id, router])
 
   useEffect(() => { load() }, [load])
+
+  async function saveNotes() {
+    if (!project) return
+    setSavingNotes(true)
+    const trimmed = notesDraft.trim()
+    await supabase
+      .from('projects')
+      .update({ notes: trimmed || null })
+      .eq('id', project.id)
+    setProject({ ...project, notes: trimmed || null })
+    setSavingNotes(false)
+    setEditingNotes(false)
+  }
 
   async function updateTaskStatus(taskId: string, status: 'todo' | 'in_progress' | 'done') {
     await supabase
@@ -165,6 +183,91 @@ export default function ProjectDetail() {
         {/* OVERVIEW TAB */}
         {tab === 'overview' && (
           <div className={styles.tabContent}>
+            {/* Project notes — long-running context (client, deal size, do's/don'ts).
+                Injected into every flash on this project as PROJECT MEMORY so the
+                AI has persistent background that won't fit in any single transcript. */}
+            <div style={{
+              marginBottom: 28,
+              padding: 20,
+              background: 'linear-gradient(135deg, rgba(37,99,235,0.06) 0%, rgba(96,165,250,0.02) 100%)',
+              border: '1px solid rgba(37,99,235,0.22)',
+              borderRadius: 14,
+            }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 13, fontWeight: 600, color: 'var(--text)' }}>
+                  <span style={{ fontSize: 16 }}>🧠</span>
+                  Project notes
+                  <span style={{ fontSize: 11, color: 'var(--blue3)', fontWeight: 500, fontStyle: 'italic' }}>
+                    · injected into every new flash on this project
+                  </span>
+                </div>
+                {!editingNotes && (
+                  <button
+                    onClick={() => setEditingNotes(true)}
+                    style={{
+                      background: 'none',
+                      border: '1px solid var(--border2)',
+                      color: 'var(--muted)',
+                      fontSize: 12,
+                      fontWeight: 600,
+                      padding: '6px 12px',
+                      borderRadius: 6,
+                      cursor: 'pointer',
+                    }}
+                  >
+                    {project?.notes ? 'Edit' : '+ Add notes'}
+                  </button>
+                )}
+              </div>
+
+              {editingNotes ? (
+                <>
+                  <textarea
+                    value={notesDraft}
+                    onChange={e => setNotesDraft(e.target.value)}
+                    placeholder="Long-running context for this project — e.g. client name + role of each contact, deal size, key constraints, things to avoid saying, the founder's tone preference. Anything that should colour every meeting recap."
+                    style={{
+                      width: '100%',
+                      minHeight: 140,
+                      background: 'var(--surface)',
+                      border: '1px solid var(--border)',
+                      color: 'var(--text)',
+                      fontFamily: 'var(--font)',
+                      fontSize: 13,
+                      lineHeight: 1.6,
+                      padding: 14,
+                      borderRadius: 10,
+                      outline: 'none',
+                      resize: 'vertical',
+                    }}
+                  />
+                  <div style={{ display: 'flex', gap: 8, marginTop: 10, justifyContent: 'flex-end' }}>
+                    <button
+                      onClick={() => { setEditingNotes(false); setNotesDraft(project?.notes || '') }}
+                      style={{ background: 'none', border: '1px solid var(--border2)', color: 'var(--muted)', fontSize: 13, padding: '8px 16px', borderRadius: 8, cursor: 'pointer' }}
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      onClick={saveNotes}
+                      disabled={savingNotes}
+                      style={{ background: 'var(--blue)', color: '#fff', border: 'none', fontSize: 13, fontWeight: 600, padding: '8px 18px', borderRadius: 8, cursor: 'pointer' }}
+                    >
+                      {savingNotes ? 'Saving…' : 'Save notes'}
+                    </button>
+                  </div>
+                </>
+              ) : project?.notes ? (
+                <div style={{ fontSize: 13, lineHeight: 1.7, color: 'var(--text)', whiteSpace: 'pre-wrap' }}>
+                  {project.notes}
+                </div>
+              ) : (
+                <div style={{ fontSize: 13, color: 'var(--muted)', fontStyle: 'italic', lineHeight: 1.6 }}>
+                  No notes yet. Add context that should travel with every meeting on this project — client info, deal stage, language tone, key constraints.
+                </div>
+              )}
+            </div>
+
             <div className={styles.sectionTitle}>Meeting history</div>
             {meetings.length === 0 ? (
               <div className={styles.empty}>

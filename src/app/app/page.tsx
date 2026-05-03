@@ -4,6 +4,7 @@ import Link from 'next/link'
 import Image from 'next/image'
 import styles from './app.module.css'
 import { supabase, packFieldToString } from '@/lib/supabase'
+import { useAuth } from '@/lib/AuthProvider'
 import ActionTiers from '@/components/ActionTiers'
 import QuestionsView from '@/components/QuestionsView'
 import ThemeToggle from '@/components/ThemeToggle'
@@ -154,6 +155,7 @@ const LOADER_MSGS = [
 ]
 
 export default function AppPage() {
+  const { user, profile, loading: authLoading } = useAuth()
   const [text, setText]     = useState('')
   const [lang, setLang]     = useState('EN')
   const [style, setStyle]   = useState('Concise')
@@ -162,13 +164,10 @@ export default function AppPage() {
   const [pack, setPack]     = useState<Pack | null>(null)
   const [error, setError]   = useState('')
   const [copied, setCopied] = useState<string | null>(null)
-  const [isLoggedIn, setIsLoggedIn] = useState<boolean | null>(null)
-  const [plan, setPlan] = useState<'free' | 'pro' | 'team'>('free')
   const [guestUsed, setGuestUsed]   = useState(false)
   const [projectId, setProjectId] = useState<string | null>(null)
   const [projects, setProjects]   = useState<{id: string, name: string}[]>([])
   const [showTemplates, setShowTemplates] = useState(false)
-  const [usesLeft, setUsesLeft] = useState<number | null>(null)
   const [showCreateProject, setShowCreateProject] = useState(false)
   const [newProjectName, setNewProjectName]       = useState('')
   const [timeSavedToast, setTimeSavedToast]       = useState<number | null>(null)
@@ -176,6 +175,17 @@ export default function AppPage() {
   const [templateBanner, setTemplateBanner]       = useState<string | null>(null)
   const outputRef = useRef<HTMLDivElement>(null)
   const [showUpgradeModal, setShowUpgradeModal]   = useState(false)
+
+  // Derived auth state — sourced from AuthProvider so it's consistent across pages
+  // and never shows the wrong UI during initial mount race (the previous bug:
+  // a Pro user briefly saw "Free pack used" + EN-only language locks because
+  // /app ran its own getSession() that hadn't resolved yet).
+  const isLoggedIn = authLoading ? null : !!user
+  const plan = (profile?.plan as 'free' | 'pro' | 'team' | undefined) ?? null
+  const usesLeft =
+    !user || !profile ? null
+    : profile.plan === 'free' ? Math.max(0, 5 - (profile.uses_this_month ?? 0))
+    : Infinity
 
   // Prefill the textarea with a template when the user lands here from an ICP page
   // (e.g. /for-agencies CTA → /app?template=discovery).
@@ -189,54 +199,27 @@ export default function AppPage() {
     }
   }, [])
 
+  // Load projects once auth is resolved AND user is logged in.
+  // (Guest users have no projects.) NOTE: rely on RLS (auth.uid() = user_id)
+  // for filtering rather than an explicit .eq('user_id', user.id) — adding the
+  // explicit filter caused projects to disappear in dual-profile edge cases
+  // where useAuth().user.id didn't exactly match the row's user_id.
   useEffect(() => {
-  if (!isLoggedIn) return
-  supabase
-    .from('projects')
-    .select('id, name')
-    .order('created_at', { ascending: false })
-    .then(({ data }) => setProjects(data || []))
-  }, [isLoggedIn])
+    if (authLoading || !user) return
+    supabase
+      .from('projects')
+      .select('id, name')
+      .order('created_at', { ascending: false })
+      .then(({ data, error }) => {
+        if (error) console.error('Projects load error:', error)
+        setProjects(data || [])
+      })
+  }, [authLoading, user])
 
+  // Track guest free-pack usage in localStorage (only meaningful when not signed in)
   useEffect(() => {
-    async function loadAuth(session: import('@supabase/supabase-js').Session | null) {
-      if (session) {
-        setIsLoggedIn(true)
-        const { data: profile } = await supabase
-          .from('profiles')
-          .select('uses_this_month, plan')
-          .eq('id', session.user.id)
-          .single()
-        if (profile) {
-          const limit = profile.plan === 'free' ? 5 : Infinity
-          setUsesLeft(Math.max(0, limit - profile.uses_this_month))
-          setPlan(profile.plan as 'free' | 'pro' | 'team')
-        }
-         {
-          const { data } = await supabase
-            .from('projects')
-            .select('id, name')
-            .order('created_at', { ascending: false })
-          setProjects(data || [])
-        }
-      } else {
-        setIsLoggedIn(false)
-        setUsesLeft(null)
-      }
-    }
-
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      loadAuth(session)
-    })
-
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_, session) => {
-      loadAuth(session)
-    })
-
     const used = localStorage.getItem('mf_guest_used')
     if (used) setGuestUsed(true)
-
-    return () => subscription.unsubscribe()
   }, [])
 
   async function flash() {
@@ -287,9 +270,9 @@ export default function AppPage() {
       }
 
       setPack(data.pack)
-        if (isLoggedIn && usesLeft !== null && usesLeft !== Infinity) {
-        setUsesLeft(prev => prev !== null ? Math.max(0, prev - 1) : null)
-      }
+      // usesLeft is derived from AuthProvider's profile; the next page render or
+      // navigation refetches the profile via /api/flash's increment_uses RPC.
+      // No local optimistic decrement needed.
 
       // Estimate time saved: ~3 min per action item + 8 min for the email + 2 min for slack/agenda formatting
       const actionsCount = (data.pack?.actions || '').split('\n').filter((l: string) => l.trim().startsWith('•')).length
@@ -385,6 +368,21 @@ async function createProject() {
     })
   }
 
+  // After a pack is generated, let the user start a new flash in one click:
+  // wipe inputs/output and scroll back to the textarea (the pack pushes it
+  // off-screen, especially on mobile). Keeps `projectId` so the user stays in
+  // their project context — they explicitly opted in to that.
+  function flashAnother() {
+    setPack(null)
+    setText('')
+    setError('')
+    setTemplateBanner(null)
+    setCopied(null)
+    if (typeof window !== 'undefined') {
+      window.scrollTo({ top: 0, behavior: 'smooth' })
+    }
+  }
+
   return (
     <div className={styles.page}>
       {/* Time-saved toast — celebrates the wow moment */}
@@ -466,38 +464,66 @@ async function createProject() {
               <button className={styles.sampleBtn} onClick={() => setText(SAMPLE)}>
                 Load sample ↗
               </button>
+              {text.length > 0 && (
+                <button
+                  className={styles.clearBtn}
+                  onClick={() => {
+                    setText('')
+                    setTemplateBanner(null)
+                    setError('')
+                  }}
+                  title="Clear meeting notes"
+                  type="button"
+                >
+                  Clear ✕
+                </button>
+              )}
             </div>
           </div>
 
                       {isLoggedIn && (
               <div className={styles.field}>
-                <div className={styles.fieldLabel}>Project</div>
+                <div className={styles.fieldLabel}>
+                  Project
+                  {projectId && (
+                    <span style={{ marginLeft: 8, fontSize: 11, color: 'var(--blue3)', textTransform: 'none', letterSpacing: 0, fontWeight: 600 }}>
+                      · memory active (last 5 meetings injected)
+                    </span>
+                  )}
+                </div>
                 <div className={styles.projectRow}>
+                  {/* Dropdown stays visible even when a project is selected, so
+                      the user can switch to another project at any time without
+                      having to click "Change" first. */}
                   <select
-                    className={styles.select}
+                    className={`${styles.select} ${projectId ? styles.selectActive : ''}`}
                     value={projectId || ''}
                     onChange={e => setProjectId(e.target.value || null)}
                   >
-                    <option value="">No project</option>
+                    <option value="">No project (single-shot flash)</option>
                     {projects.map(p => (
                       <option key={p.id} value={p.id}>{p.name}</option>
                     ))}
                   </select>
-                  <button
-                    className={styles.newProjectInlineBtn}
-                    onClick={() => setShowCreateProject(!showCreateProject)}
-                    type="button"
-                  >
-                    + New
-                  </button>
+                  {/* "+ New" disappears once a project is selected — they're
+                      already working in one. To create another, deselect first. */}
+                  {!projectId && !showCreateProject && (
+                    <button
+                      className={styles.newProjectInlineBtn}
+                      onClick={() => setShowCreateProject(true)}
+                      type="button"
+                    >
+                      + New
+                    </button>
+                  )}
                 </div>
-                {showCreateProject && (
+                {showCreateProject && !projectId && (
                   <div className={styles.createProjectInline}>
                     <input
                       className={styles.createProjectInput}
                       value={newProjectName}
                       onChange={e => setNewProjectName(e.target.value)}
-                      placeholder="Project name…"
+                      placeholder="Project name… (e.g. Acme Corp, Q2 launch)"
                       autoFocus
                       onKeyDown={e => { if (e.key === 'Enter') createProject() }}
                     />
@@ -596,7 +622,11 @@ async function createProject() {
           </button>
 
           <div className={styles.hint}>
-            {isLoggedIn ? (
+            {authLoading ? (
+              // Don't flash a guest CTA at a possibly-logged-in user while
+              // the AuthProvider is still resolving — render a neutral spacer.
+              <span style={{ opacity: 0.5 }}>Loading account…</span>
+            ) : isLoggedIn ? (
               <>
                 <span>
                   {usesLeft === null ? '…' :
@@ -629,13 +659,22 @@ async function createProject() {
               {pack ? '⚡ Your Execution Pack' : 'Awaiting flash—'}
             </div>
             {pack && (
-              <button className={styles.copyAllBtn} onClick={copyAll}>
-                {copied === 'all' ? '✓ Copied' : 'Copy all'}
-              </button>
+              <div style={{ display: 'flex', gap: 8 }}>
+                <button className={styles.copyAllBtn} onClick={copyAll}>
+                  {copied === 'all' ? '✓ Copied' : 'Copy all'}
+                </button>
+                <button
+                  className={styles.flashAnotherBtn}
+                  onClick={flashAnother}
+                  title="Clear and flash another meeting"
+                >
+                  ⚡ Flash another →
+                </button>
+              </div>
             )}
           </div>
 
-          {pack && !isLoggedIn && (
+          {pack && !authLoading && !isLoggedIn && (
             <div className={styles.guestBanner}>
               <div className={styles.guestBannerText}>
                 <strong>That took 20 seconds.</strong> Save this pack, and get 4 more like it this month — free, no credit card.
@@ -713,6 +752,14 @@ async function createProject() {
                   </div>
                 </div>
               ))}
+              {/* Bottom CTA — after the user has read the whole pack, they're
+                  primed to do the next one. Don't make them scroll back up. */}
+              <button
+                className={styles.flashAnotherFooter}
+                onClick={flashAnother}
+              >
+                ⚡ Flash another meeting →
+              </button>
             </div>
           )}
         </div>

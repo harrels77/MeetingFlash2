@@ -31,25 +31,47 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [loading, setLoading] = useState(true)
 
   async function loadProfile(userId: string, email: string) {
-    let { data } = await supabase
-      .from('profiles')
-      .select('*')
-      .eq('id', userId)
-      .single()
+    async function fetchOnce() {
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', userId)
+        .single()
+      return { data, errorCode: error?.code ?? null }
+    }
+
+    let { data, errorCode } = await fetchOnce()
+
+    // Retry on ANY failure — cold-start (free tier) can return hard errors or
+    // spurious PGRST116 before the instance wakes up. Always retry before
+    // concluding the row doesn't exist, otherwise we'd try to create a free
+    // profile for an existing Pro user and leave profile=null on conflict.
+    if (!data) {
+      await new Promise(r => setTimeout(r, 1500))
+      const second = await fetchOnce()
+      data = second.data
+      errorCode = second.errorCode
+    }
 
     if (!data) {
-      const { data: newProf } = await supabase
-        .from('profiles')
-        .insert({ id: userId, email, plan: 'free', uses_this_month: 0 })
-        .select()
-        .single()
-      data = newProf
-      // Send welcome email for new accounts (fire and forget)
-      fetch('/api/email/welcome', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, name: data?.full_name || '' }),
-      }).catch(() => {})
+      // Only create a new profile when we're confident the row truly doesn't
+      // exist (PGRST116 = PostgREST "0 rows" — not a connection error).
+      // A hard/network error leaves profile=null; onAuthStateChange will
+      // correct it on the next auth event rather than overwriting with 'free'.
+      if (errorCode === 'PGRST116') {
+        const { data: newProf } = await supabase
+          .from('profiles')
+          .insert({ id: userId, email, plan: 'free', uses_this_month: 0 })
+          .select()
+          .single()
+        data = newProf
+        // Send welcome email for new accounts (fire and forget)
+        fetch('/api/email/welcome', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email, name: data?.full_name || '' }),
+        }).catch(() => {})
+      }
     }
 
     if (data) setProfile(data)

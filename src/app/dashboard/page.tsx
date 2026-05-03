@@ -49,45 +49,67 @@ export default function Dashboard() {
   const [selectMode, setSelectMode]         = useState(false)
   const [hovered, setHovered]               = useState<string | null>(null)
   const [openTasks, setOpenTasks]           = useState<{ id: string; text: string; owner: string | null; deadline: string | null; meeting_id: string; meeting_title: string }[]>([])
+  const [loadError, setLoadError]           = useState(false)
 
-  const loadData = useCallback(async (userId: string, userEmail: string) => {
-    try {
-      const [profResult, projResult, meetsResult, tasksResult] = await Promise.all([
-        supabase.from('profiles').select('*').eq('id', userId).single(),
-        supabase.from('projects').select('*').eq('user_id', userId).order('created_at', { ascending: false }),
-        supabase.from('meetings').select('*').eq('user_id', userId).order('created_at', { ascending: false }).limit(50),
-        supabase.from('tasks').select('id, text, owner, deadline, meeting_id, status').eq('user_id', userId).neq('status', 'done').order('created_at', { ascending: false }).limit(20)
-      ])
+  // Returns true on success, false if any of the underlying queries errored.
+  // CRITICAL: only overwrites state on success — prevents the "dashboard goes
+  // blank after navigating back from settings" bug where Supabase's cold-start
+  // returned an error (not empty data) and the previous logic blindly did
+  // setMeetings([]) / setProjects([]) etc., wiping the visible state.
+  const loadData = useCallback(async (userId: string, userEmail: string): Promise<boolean> => {
+    const [profResult, projResult, meetsResult, tasksResult] = await Promise.all([
+      supabase.from('profiles').select('*').eq('id', userId).single(),
+      supabase.from('projects').select('*').eq('user_id', userId).order('created_at', { ascending: false }),
+      supabase.from('meetings').select('*').eq('user_id', userId).order('created_at', { ascending: false }).limit(50),
+      supabase.from('tasks').select('id, text, owner, deadline, meeting_id, status').eq('user_id', userId).neq('status', 'done').order('created_at', { ascending: false }).limit(20)
+    ])
 
-      let prof = profResult.data
-      if (!prof) {
-        const { data: newProf } = await supabase
-          .from('profiles')
-          .insert({ id: userId, email: userEmail, plan: 'free', uses_this_month: 0 })
-          .select().single()
-        prof = newProf
-      }
-      if (prof) setProfile(prof)
-      setProjects(projResult.data || [])
-      setMeetings(meetsResult.data || [])
-
-      const allMeetings = meetsResult.data || []
-      const meetingTitleById = new Map(allMeetings.map(m => [m.id, m.title]))
-      const enrichedTasks = (tasksResult.data || []).map(t => ({
-        id: t.id,
-        text: t.text,
-        owner: t.owner,
-        deadline: t.deadline,
-        meeting_id: t.meeting_id,
-        meeting_title: meetingTitleById.get(t.meeting_id) || 'Untitled meeting',
-      }))
-      setOpenTasks(enrichedTasks)
-    } catch (err) {
-      console.error('Dashboard load error:', err)
-    } finally {
-      setLoading(false)
+    // Profile single() returns error PGRST116 when no row — that's not a real
+    // failure, we'll create the row below. Any other error is treated as failure.
+    const profSoftError = profResult.error && profResult.error.code !== 'PGRST116'
+    const anyError = profSoftError || projResult.error || meetsResult.error || tasksResult.error
+    if (anyError) {
+      console.error('Dashboard load error:', { profErr: profResult.error, projErr: projResult.error, meetsErr: meetsResult.error, tasksErr: tasksResult.error })
+      return false
     }
+
+    let prof = profResult.data
+    if (!prof) {
+      const { data: newProf } = await supabase
+        .from('profiles')
+        .insert({ id: userId, email: userEmail, plan: 'free', uses_this_month: 0 })
+        .select().single()
+      prof = newProf
+    }
+    if (prof) setProfile(prof)
+    setProjects(projResult.data || [])
+    setMeetings(meetsResult.data || [])
+
+    const allMeetings = meetsResult.data || []
+    const meetingTitleById = new Map(allMeetings.map(m => [m.id, m.title]))
+    const enrichedTasks = (tasksResult.data || []).map(t => ({
+      id: t.id,
+      text: t.text,
+      owner: t.owner,
+      deadline: t.deadline,
+      meeting_id: t.meeting_id,
+      meeting_title: meetingTitleById.get(t.meeting_id) || 'Untitled meeting',
+    }))
+    setOpenTasks(enrichedTasks)
+    return true
   }, [])
+
+  const runLoad = useCallback(async (userId: string, userEmail: string) => {
+    setLoadError(false)
+    let ok = await loadData(userId, userEmail)
+    // Cold-start retry once after 1.5s — Supabase free tier wakes up on the second hit.
+    if (!ok) {
+      await new Promise(r => setTimeout(r, 1500))
+      ok = await loadData(userId, userEmail)
+    }
+    if (!ok) setLoadError(true)
+    setLoading(false)
+  }, [loadData])
 
   useEffect(() => {
     // Wait for AuthProvider to finish its initial check (instant from React context)
@@ -96,12 +118,12 @@ export default function Dashboard() {
     // Not signed in → redirect to login immediately, no spinner
     if (!user) { router.replace('/login'); return }
 
-    // Safety net: never let the spinner run more than 8s
-    const timeout = setTimeout(() => setLoading(false), 8000)
-    loadData(user.id, user.email ?? '').finally(() => clearTimeout(timeout))
+    // Safety net: never let the spinner run more than 12s (covers the 1.5s retry)
+    const timeout = setTimeout(() => setLoading(false), 12000)
+    runLoad(user.id, user.email ?? '').finally(() => clearTimeout(timeout))
 
     return () => clearTimeout(timeout)
-  }, [user, authLoading, router, loadData])
+  }, [user, authLoading, router, runLoad])
 
   // Close menu when clicking outside
   useEffect(() => {
@@ -247,6 +269,48 @@ export default function Dashboard() {
 
       {/* MAIN */}
       <main className={styles.main}>
+        {loadError && (
+          // Surface load failures explicitly instead of letting the dashboard
+          // appear empty. The "blank dashboard after settings" bug was this:
+          // queries errored on Supabase cold start, state stayed empty, user
+          // assumed their data was lost. Now we tell them, and offer a retry.
+          <div style={{
+            margin: '0 0 24px 0',
+            padding: '14px 18px',
+            background: 'linear-gradient(135deg, rgba(245,158,11,0.10), rgba(245,158,11,0.03))',
+            border: '1px solid rgba(245,158,11,0.32)',
+            borderRadius: 12,
+            display: 'flex',
+            alignItems: 'center',
+            gap: 14,
+            fontSize: 13,
+            color: 'var(--text)',
+          }}>
+            <span style={{ fontSize: 18 }}>⚠️</span>
+            <div style={{ flex: 1 }}>
+              <strong>Couldn&apos;t load your data.</strong> Your packs are still saved — this is a temporary connection issue.
+            </div>
+            <button
+              onClick={() => {
+                if (!user) return
+                setLoading(true)
+                runLoad(user.id, user.email ?? '')
+              }}
+              style={{
+                background: 'var(--blue)',
+                color: '#fff',
+                border: 'none',
+                padding: '8px 16px',
+                borderRadius: 8,
+                fontSize: 13,
+                fontWeight: 600,
+                cursor: 'pointer',
+              }}
+            >
+              Retry
+            </button>
+          </div>
+        )}
         <div className={styles.mainHeader}>
           <div className={styles.mainTitle}>
             {tab === 'recent'
@@ -264,12 +328,15 @@ export default function Dashboard() {
                 Delete {selected.length}
               </button>
             )}
-            <button
-              className={`${styles.selectModeBtn} ${selectMode ? styles.selectModeBtnActive : ''}`}
-              onClick={() => { setSelectMode(!selectMode); setSelected([]) }}
-            >
-              {selectMode ? '✕ Cancel' : 'Select'}
-            </button>
+            {/* Hide Select when there's nothing to select on the active tab */}
+            {((tab === 'recent' && meetings.length > 0) || (tab === 'projects' && projects.length > 0)) && (
+              <button
+                className={`${styles.selectModeBtn} ${selectMode ? styles.selectModeBtnActive : ''}`}
+                onClick={() => { setSelectMode(!selectMode); setSelected([]) }}
+              >
+                {selectMode ? '✕ Cancel' : 'Select'}
+              </button>
+            )}
             {tab === 'projects' && (
               <button
                 className={styles.newProjectBtn}

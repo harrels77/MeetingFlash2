@@ -31,27 +31,34 @@ export default function Settings() {
     if (authLoading) return
     if (!user) { router.replace('/login'); return }
 
-    // Safety net: never let the spinner spin more than 8s
-    const timeout = setTimeout(() => setLoading(false), 8000)
+    // Safety net: never let the spinner spin more than 12s (covers a cold-start retry)
+    const timeout = setTimeout(() => setLoading(false), 12000)
 
+    // Same root cause as the dashboard data-loss bug: Supabase free tier cold
+    // start returns an error on the first hit, the page silently kept empty
+    // state, and the user thought their saved name was lost. Retry once before
+    // giving up.
+    async function fetchOnce() {
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', user!.id)
+        .single()
+      if (error) return null
+      return data
+    }
     async function load() {
-      try {
-        const { data } = await supabase
-          .from('profiles')
-          .select('*')
-          .eq('id', user!.id)
-          .single()
-
-        if (data) {
-          setProfile(data)
-          setName(data.full_name || '')
-        }
-      } catch (err) {
-        console.error('Settings load error:', err)
-      } finally {
-        clearTimeout(timeout)
-        setLoading(false)
+      let data = await fetchOnce()
+      if (!data) {
+        await new Promise(r => setTimeout(r, 1500))
+        data = await fetchOnce()
       }
+      if (data) {
+        setProfile(data)
+        setName(data.full_name || '')
+      }
+      clearTimeout(timeout)
+      setLoading(false)
     }
     load()
 
