@@ -20,6 +20,23 @@ export default function SignupPage() {
     if (password.length < 8) return setError('Password must be at least 8 characters.')
     setLoading(true)
     setError('')
+
+    // Block if this email already has any auth method — prevents creating a
+    // second identity (email/password) on top of an existing Google account
+    // (which produced the dual-identity name-flicker bug).
+    const { data: providers } = await supabase.rpc('get_auth_providers_for_email', { check_email: email })
+    if (Array.isArray(providers) && providers.length > 0) {
+      if (providers.includes('email')) {
+        setError('An account with this email already exists. Please sign in instead.')
+      } else if (providers.includes('google')) {
+        setError('This email is already registered via Google. Please use "Continue with Google" to sign in.')
+      } else {
+        setError('An account with this email already exists.')
+      }
+      setLoading(false)
+      return
+    }
+
     const { error } = await supabase.auth.signUp({
       email,
       password,

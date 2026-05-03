@@ -1,5 +1,5 @@
 'use client'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import Image from 'next/image'
@@ -15,10 +15,35 @@ export default function LoginPage() {
   const [error, setError]       = useState('')
   const [showPassword, setShowPassword] = useState(false)
 
+  // Surface errors bubbled up from the OAuth callback (e.g. cross-method
+  // login attempt). The callback redirects here with ?error=<code>.
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search)
+    const errCode = params.get('error')
+    if (errCode === 'use_email') {
+      setError('This email is registered with a password. Please sign in with email and password instead.')
+    } else if (errCode === 'use_google') {
+      setError('This email is registered via Google. Please use "Continue with Google" to sign in.')
+    } else if (errCode === 'multi_identity') {
+      setError('Your account has multiple sign-in methods linked. Please contact support to resolve this.')
+    }
+  }, [])
+
   async function handleLogin(e: React.FormEvent) {
     e.preventDefault()
     setLoading(true)
     setError('')
+
+    // If this email is registered only via Google, don't even attempt the
+    // password flow — Supabase would just return a generic "Invalid login
+    // credentials" error, which sends the user in circles.
+    const { data: providers } = await supabase.rpc('get_auth_providers_for_email', { check_email: email })
+    if (Array.isArray(providers) && providers.length > 0 && !providers.includes('email')) {
+      setError('This email is registered via Google. Please use "Continue with Google" to sign in.')
+      setLoading(false)
+      return
+    }
+
     const { error } = await supabase.auth.signInWithPassword({ email, password })
     if (error) {
       setError(error.message)
