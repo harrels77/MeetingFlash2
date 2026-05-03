@@ -78,12 +78,20 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }
 
   useEffect(() => {
-    // Hard safety: if Supabase doesn't respond in 4s, stop blocking the UI.
-    // Treat as "no session" — onAuthStateChange will correct it later if needed.
-    const timeout = setTimeout(() => setLoading(false), 4000)
+    let sessionResolved = false
+
+    // Hard safety: if getSession itself doesn't respond in 4s, stop blocking
+    // the UI (treat as no session). But once getSession HAS resolved with a
+    // session, we let loadProfile run its own retry budget — otherwise the
+    // 4s timer would fire mid-fetch, set loading=false with profile=null, and
+    // the nav would render the email-prefix ("adrienharrel") for a beat.
+    const timeout = setTimeout(() => {
+      if (!sessionResolved) setLoading(false)
+    }, 4000)
 
     // Charge la session initiale
     supabase.auth.getSession().then(({ data: { session } }) => {
+      sessionResolved = true
       setUser(session?.user ?? null)
       if (session?.user) {
         loadProfile(session.user.id, session.user.email || '')
@@ -94,6 +102,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
     }).catch(err => {
       console.error('Auth getSession error:', err)
+      sessionResolved = true
       clearTimeout(timeout)
       setLoading(false)
     })

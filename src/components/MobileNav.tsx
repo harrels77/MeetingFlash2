@@ -57,11 +57,19 @@ export default function MobileNav() {
     }
   }, [accountOpen, forOpen])
 
-  const displayName = profile?.full_name
-    || profile?.email?.split('@')[0]
-    || user?.email?.split('@')[0]
-    || 'Account'
-  const initial = (displayName[0] || 'A').toUpperCase()
+  // While auth is loading OR the profile hasn't arrived yet for a logged-in
+  // user, show a neutral placeholder. Falling back to user.email.split('@')[0]
+  // here would briefly render the email-prefix (e.g. "adrienharrel") before
+  // the real Google/profile name ("Harrel") loads in — a confusing flash on
+  // every cold-start refresh.
+  const profilePending = loading || (!!user && !profile)
+  const displayName = profilePending
+    ? 'Account'
+    : (profile?.full_name
+        || profile?.email?.split('@')[0]
+        || user?.email?.split('@')[0]
+        || 'Account')
+  const initial = profilePending ? '·' : (displayName[0] || 'A').toUpperCase()
 
   return (
     <>
@@ -115,7 +123,7 @@ export default function MobileNav() {
                     <div className={styles.accountMenuHeader}>
                       <div className={styles.accountMenuName}>{displayName}</div>
                       <div className={styles.accountMenuEmail}>{profile?.email || user.email}</div>
-                      <div className={styles.accountMenuPlan}>{profile?.plan || 'free'}</div>
+                      <div className={styles.accountMenuPlan}>{profile?.plan || (profilePending ? '—' : 'free')}</div>
                     </div>
                     <Link href="/app" className={styles.accountMenuItem} onClick={() => setAccountOpen(false)}>
                       ⚡ New Flash
