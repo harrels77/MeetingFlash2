@@ -110,12 +110,46 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     // Écoute tous les changements
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
-        setUser(session?.user ?? null)
         if (session?.user) {
+          setUser(session.user)
           await loadProfile(session.user.id, session.user.email || '').catch(() => {})
-        } else {
-          setProfile(null)
+          setLoading(false)
+          return
         }
+
+        // No session in this event. Could be:
+        //  (a) explicit sign-out — our signOut() cleared sb-* tokens first
+        //  (b) cold-start token-refresh failure — sb-* tokens still present
+        // Without distinguishing these, a transient (b) wipes user+profile and
+        // the app silently shows Free mode even though the user is logged in.
+        let hasSbTokens = false
+        try {
+          for (const key of Object.keys(localStorage)) {
+            if (key.startsWith('sb-') || key.includes('supabase.auth')) {
+              hasSbTokens = true
+              break
+            }
+          }
+        } catch { /* localStorage may be unavailable */ }
+
+        if (hasSbTokens) {
+          // Transient refresh failure — keep state, retry getSession after a
+          // brief delay to give the Supabase free-tier instance time to wake.
+          setTimeout(() => {
+            supabase.auth.getSession().then(({ data: { session: s } }) => {
+              if (s?.user) {
+                setUser(s.user)
+                loadProfile(s.user.id, s.user.email || '').catch(() => {})
+              }
+            }).catch(() => {})
+          }, 1500)
+          setLoading(false)
+          return
+        }
+
+        // Real sign-out — clear state.
+        setUser(null)
+        setProfile(null)
         setLoading(false)
       }
     )
