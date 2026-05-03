@@ -33,7 +33,7 @@ interface Meeting {
 
 export default function Dashboard() {
   const router = useRouter()
-  const { user, loading: authLoading } = useAuth()
+  const { user, profile: authProfile, loading: authLoading } = useAuth()
   const [profile, setProfile]   = useState<Profile | null>(null)
   const [projects, setProjects] = useState<Project[]>([])
   const [meetings, setMeetings] = useState<Meeting[]>([])
@@ -57,6 +57,16 @@ export default function Dashboard() {
   // returned an error (not empty data) and the previous logic blindly did
   // setMeetings([]) / setProjects([]) etc., wiping the visible state.
   const loadData = useCallback(async (userId: string, userEmail: string): Promise<boolean> => {
+    // Wait for the JWT to be present before firing queries — without this,
+    // a navigation that races with a Supabase token refresh can issue all
+    // four queries unauthenticated, RLS silently returns empty results
+    // (no error code), and the dashboard renders blank + "FREE / Unlimited".
+    const { data: { session } } = await supabase.auth.getSession()
+    if (!session?.access_token) {
+      console.warn('Dashboard load: no session JWT yet, will retry')
+      return false
+    }
+
     const [profResult, projResult, meetsResult, tasksResult] = await Promise.all([
       supabase.from('profiles').select('*').eq('id', userId).single(),
       supabase.from('projects').select('*').eq('user_id', userId).order('created_at', { ascending: false }),
@@ -213,8 +223,12 @@ export default function Dashboard() {
     return lines.join(' · ') || 'No summary available'
   }
 
-  const usesLeft = profile?.plan === 'free'
-    ? Math.max(0, 5 - (profile?.uses_this_month ?? 0))
+  // Prefer the local profile (freshest, includes uses_this_month after a flash)
+  // but fall back to AuthProvider's profile so the sidebar badge never shows
+  // a contradictory "FREE / Unlimited" when local load hasn't completed yet.
+  const effectiveProfile = profile ?? authProfile
+  const usesLeft = effectiveProfile?.plan === 'free'
+    ? Math.max(0, 5 - (effectiveProfile?.uses_this_month ?? 0))
     : Infinity
 
   if (loading) return (
@@ -252,16 +266,20 @@ export default function Dashboard() {
 
         <div className={styles.sidebarBottom}>
           <div className={styles.planBadge}>
-            <span className={styles.planName}>{profile?.plan ?? 'free'}</span>
+            <span className={styles.planName}>{effectiveProfile?.plan ?? '—'}</span>
             <span className={styles.planUses}>
-              {profile?.plan === 'free' ? `${usesLeft} / 5 left` : 'Unlimited'}
+              {effectiveProfile?.plan === 'free'
+                ? `${usesLeft} / 5 left`
+                : effectiveProfile?.plan === 'pro' || effectiveProfile?.plan === 'team'
+                  ? 'Unlimited'
+                  : '—'}
             </span>
           </div>
-          {profile?.plan === 'free' && (
+          {effectiveProfile?.plan === 'free' && (
             <Link href="/pricing" className={styles.upgradeBtn}>Upgrade to Pro →</Link>
           )}
           <div className={styles.userRow}>
-            <div className={styles.userEmail}>{profile?.email}</div>
+            <div className={styles.userEmail}>{effectiveProfile?.email ?? user?.email}</div>
             <Link href="/dashboard/settings" className={styles.settingsLink}>⚙</Link>
           </div>
         </div>

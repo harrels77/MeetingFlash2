@@ -204,16 +204,38 @@ export default function AppPage() {
   // for filtering rather than an explicit .eq('user_id', user.id) — adding the
   // explicit filter caused projects to disappear in dual-profile edge cases
   // where useAuth().user.id didn't exactly match the row's user_id.
+  // Also waits for the JWT to be present + retries once on cold-start —
+  // without this, navigating from /dashboard to /app could fire the query
+  // before the token attached and RLS would silently return [] (project
+  // dropdown appears empty even though projects exist).
   useEffect(() => {
     if (authLoading || !user) return
-    supabase
-      .from('projects')
-      .select('id, name')
-      .order('created_at', { ascending: false })
-      .then(({ data, error }) => {
-        if (error) console.error('Projects load error:', error)
-        setProjects(data || [])
-      })
+    let cancelled = false
+
+    async function loadProjects(): Promise<boolean> {
+      const { data: { session } } = await supabase.auth.getSession()
+      if (!session?.access_token) return false
+      const { data, error } = await supabase
+        .from('projects')
+        .select('id, name')
+        .order('created_at', { ascending: false })
+      if (error) {
+        console.error('Projects load error:', error)
+        return false
+      }
+      if (!cancelled) setProjects(data || [])
+      return true
+    }
+
+    ;(async () => {
+      const ok = await loadProjects()
+      if (!ok && !cancelled) {
+        await new Promise(r => setTimeout(r, 1500))
+        if (!cancelled) await loadProjects()
+      }
+    })()
+
+    return () => { cancelled = true }
   }, [authLoading, user])
 
   // Track guest free-pack usage in localStorage (only meaningful when not signed in)
