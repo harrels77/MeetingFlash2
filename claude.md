@@ -23,13 +23,17 @@ This project is assisted by AI coding agents (Claude Code + Claude.ai).
 
 **Supabase free tier hangs (root cause of most "infinite loading" bugs)**
 - The Supabase free instance sleeps after inactivity → `supabase.auth.getSession()` and queries can stay pending forever (no error thrown).
-- ✅ `AuthProvider.tsx` already has a 4s timeout that releases `loading=false` even if Supabase doesn't reply. Don't remove it.
-- ✅ `signOut` is fire-and-forget (`window.location.replace('/')` runs immediately, doesn't wait for `supabase.auth.signOut()`). Don't `await` it.
-- ✅ Pages that fetch user data (dashboard, settings, pack, project) should:
-  1. Use `useAuth()` from AuthProvider — never call `supabase.auth.getSession()` directly inside a page useEffect.
+- ✅ `AuthProvider.tsx` has a 4s safety timeout that releases `loading=false` only if `getSession()` itself hasn't resolved (Phase 10 fix — it used to fire unconditionally and wipe profile state mid-`loadProfile`). Don't remove it. Don't make it fire mid-fetch.
+- ✅ `AuthProvider.loadProfile` waits for `session.access_token` to be attached (polls up to 2s, 500ms intervals) BEFORE issuing the profile query. Without this, RLS returns 0 rows on cold start, the code thinks "new user", tries to INSERT a free profile, conflicts with the existing Pro row, and `setProfile` never runs. The "Account" placeholder in the nav was this bug. Don't refactor `loadProfile` to skip the JWT wait.
+- ✅ `AuthProvider.onAuthStateChange` does NOT wipe state on a SIGNED_OUT event when `sb-*` tokens are still in localStorage. That signature distinguishes a real sign-out (our `signOut()` clears those tokens first) from a transient token-refresh failure during cold start. Without this, navigating between pages occasionally logged the user out cosmetically. Don't remove the localStorage check.
+- ✅ Background recovery: a separate effect in AuthProvider polls `loadProfile` every 4s while `user` is set but `profile` is null. Self-heals if all in-flight retries happened during the worst of the cold start. Don't remove.
+- ✅ `signOut` is fire-and-forget (`window.location.replace('/')` runs immediately, doesn't wait for `supabase.auth.signOut()`). It also synchronously deletes every `sb-*` / `supabase.auth*` key from localStorage BEFORE the redirect. The token-clearing is what makes the SIGNED_OUT vs transient-failure distinction work — don't break that order.
+- ✅ Pages that fetch user data (dashboard, settings, pack, project, /app) should:
+  1. Use `useAuth()` from AuthProvider — never call `supabase.auth.getSession()` directly for auth state inside a page useEffect (only call it to **wait for the JWT to be attached** before firing data queries).
   2. `if (authLoading) return` early.
   3. `if (!user) router.replace('/login')` — never spinner-on-no-session.
-  4. Add an 8s `setTimeout` safety to force `setLoading(false)` even if data fetch hangs.
+  4. Before any `supabase.from(...)` query in the data-load function, do `const { data: { session } } = await supabase.auth.getSession(); if (!session?.access_token) return false` — treat missing JWT as a retryable failure. The dashboard `loadData` and /app projects effect both follow this pattern (added Phase 10). Without it, queries fire unauthenticated, RLS silently returns `[]`, and the page renders blank with no error.
+  5. Add an 8s `setTimeout` safety to force `setLoading(false)` even if data fetch hangs.
 - ✅ `/api/ping` exists to keep Supabase warm; user has UptimeRobot hitting it every 5 minutes.
 
 **Stripe**
@@ -154,14 +158,21 @@ src/
 ### Authentication
 - Handled via Supabase Auth (Google OAuth + email/password)
 - Google OAuth consent screen branded as "MeetingFlash" (verified, in production) — authorized domains include `meetingflash.work`, `supabase.co`, and Vercel preview domains
-- Global session managed by `AuthProvider.tsx` — most components use `useAuth()`
-- **EXCEPTION:** `src/app/app/page.tsx` (flash tool) does NOT use `useAuth()` — it has its own `supabase.auth.getSession()` + `onAuthStateChange` directly, with local `isLoggedIn` state. Do not refactor this without careful testing.
+- Global session managed by `AuthProvider.tsx` — every page uses `useAuth()`. The earlier exception for `/app` was removed in Phase 9; do not reintroduce a self-managed `getSession()` in any page.
 - After login/signup: redirect to `/` (not `/dashboard`)
-- OAuth callback route: `src/app/auth/callback/route.ts`
-- `AuthProvider` calls both `getSession()` AND `onAuthStateChange` — both can call `loadProfile` simultaneously (known race condition in prod, do not change without testing)
-- `signOut` in AuthProvider: `async`, awaits `supabase.auth.signOut()`, then does `window.location.replace('/')` — full page reload to clear state
+- OAuth callback route: `src/app/auth/callback/route.ts` — also enforces single-method auth post-OAuth (see "Single-method auth enforcement" below).
+- `AuthProvider` calls both `getSession()` AND `onAuthStateChange` — both can call `loadProfile` simultaneously (known race condition in prod, do not change without testing). `loadProfile` is idempotent on the result (only `setProfile` when data exists), so two concurrent calls don't fight.
+- `signOut` in AuthProvider: fire-and-forget `supabase.auth.signOut()`, then synchronous wipe of every `sb-*` / `supabase.auth*` key from localStorage, then `window.location.replace('/')`. The synchronous localStorage wipe is **load-bearing** for the transient-SIGNED_OUT distinction (see Mistakes section above). Don't await the Supabase call; don't reorder the wipe.
 - **Always use the canonical `useAuth().signOut`.** `dashboard/page.tsx` and `settings/page.tsx` previously had their own local sign-out that awaited `supabase.auth.signOut()` and could hang when Supabase slept. Both now call `useAuth().signOut` directly. `settings/page.tsx`'s `deleteAccount` also finishes by calling the canonical signOut. Don't reintroduce local awaiting sign-out paths.
-- **Welcome email trigger:** when `loadProfile` creates a new profile (first time, no existing row), it calls `fetch('/api/email/welcome', ...)` fire-and-forget. Currently fails silently (no domain yet).
+- **Welcome email trigger:** when `loadProfile` creates a new profile (first time, no existing row CONFIRMED via PGRST116 with the JWT attached), it calls `fetch('/api/email/welcome', ...)` fire-and-forget. Currently fails silently (Resend account flagged).
+
+### Single-method auth enforcement (Phase 10)
+Prevents a single email from ending up with both a Google identity and an email/password identity, which produced the "name flicker" bug (see Phase 10 in this file).
+- **RPC** `public.get_auth_providers_for_email(check_email text) returns text[]` — `SECURITY DEFINER`, callable by anon. Migration: `supabase/migrations/2026_05_03_get_auth_providers.sql` (must be applied manually). Returns the providers linked to the email or `[]`.
+- **`/signup`**: pre-flight RPC. If providers exist → block with method-specific message ("Use Continue with Google" / "Sign in instead").
+- **`/login` password form**: pre-flight RPC. If providers exist but `'email'` is not in them → block ("This email is registered via Google").
+- **`/auth/callback`**: post-OAuth check. If `user.identities.length > 1` AND any identity was created in the last 60s (`FRESH_MS = 60_000`) → freshly-linked dual identity, sign out + redirect to `/login?error=multi_identity`. Existing legacy dual-identity accounts (no fresh identity) are allowed through to avoid permanently locking them out — they need to be cleaned up via SQL (procedure documented in "Known data issue: dual identities" section). Same freshness gate covers the brand-new-Google-on-existing-email-account case via the RPC.
+- **Login page** reads `?error=use_email | use_google | multi_identity | oauth_failed` from URL and surfaces the appropriate message inline.
 
 ### Database (Supabase PostgreSQL)
 Tables: `profiles`, `projects`, `meetings`, `tasks`
@@ -178,8 +189,8 @@ Key schema:
 - **IMPORTANT:** webhook + cron use `SUPABASE_SERVICE_ROLE_KEY` (not anon key) to bypass RLS
 
 ### AI — /api/flash
-- Model: `claude-sonnet-4-20250514`
-- max_tokens: 4000
+- Model: `claude-haiku-4-5-20251001` (Phase 10 swap from `claude-sonnet-4-20250514` — ~3× faster on this structured-JSON task with comparable quality, since the schema does most of the heavy lifting). Don't revert without measuring; the user feedback was specifically that packs were too slow.
+- max_tokens: 2500 (lowered from 4000 in Phase 10 — the old ceiling almost never got close, and lower budget = faster response).
 - Called via direct `fetch('https://api.anthropic.com/v1/messages')` — NOT the Anthropic SDK
 - Headers: `x-api-key`, `anthropic-version: 2023-06-01`, `anthropic-beta: prompt-caching-2024-07-31`
 - System message has `cache_control: { type: 'ephemeral' }` for prompt caching
@@ -443,18 +454,62 @@ This phase tackled 4 reported bugs + 1 product upgrade in one pass.
 - **Dashboard cold-start recovery** — `loadData` no longer blindly calls `setMeetings([])` / `setProjects([])` on Supabase errors (the previous behaviour silently wiped visible state when the free-tier instance was sleeping). Now: returns boolean ok/fail, retries once after 1.5s on hard error, and on persistent failure surfaces a yellow "Couldn't load your data — Retry" banner above the dashboard header instead of a blank page. Same defensive retry pattern applied to `dashboard/settings/page.tsx` (fixed the "my saved name disappeared" bug — same root cause) and to `AuthProvider.loadProfile` (so the profile/plan doesn't come back null on cold-start, which would cascade into Pro-being-shown-as-Free everywhere).
 - **Select button hidden when there's nothing to select** — on `/dashboard`, the "Select" button only renders if the active tab has at least one item (`meetings.length > 0` for recent, `projects.length > 0` for projects). Don't restore the unconditional render — there is nothing useful for the user to do with bulk-select on an empty list.
 
-### Known data issue: dual profiles for same email
-**Symptom**: Same Gmail address shows up as two different identities in the app — e.g. "adrienharrel" (Free, full_name = email prefix) vs "harrel" (Pro, full_name = Google name). Stripe webhook only updated one row → the other stays on the Free plan even though the user is paying.
+### Phase 10 — Auth stability + speed (May 2026)
+The "Free plan flicker" symptom that triggered Phase 9 turned out to be the surface of three deeper bugs in the auth flow. This phase fixes them root-and-branch and locks the door against the underlying cause.
 
-**Root cause**: Supabase Auth treats an email/password sign-up and a Google OAuth sign-in with the same email as **two separate `auth.users` rows** by default (the identities are NOT auto-linked). Each gets its own `auth.users.id`, which means `profiles` has two rows for the same human.
+**Speed**
+- AI model swap: `claude-sonnet-4-20250514` → `claude-haiku-4-5-20251001` in `/api/flash`. Roughly 3× faster on this tightly-structured JSON task with comparable quality (the schema does most of the heavy lifting). Combined with `max_tokens: 4000 → 2500` (which was a safety ceiling that almost never got close), packs now load in roughly half the previous time. Don't revert to Sonnet without measuring — the user feedback was specifically "too slow".
 
-**Manual fix** (do this in Supabase SQL editor when an affected user reports it):
-1. Find both `auth.users.id`s for the email: `SELECT id, email, raw_app_meta_data->>'provider' AS provider, created_at FROM auth.users WHERE email = '<email>' ORDER BY created_at;`
-2. Identify which one has the active Stripe subscription: check `profiles` where `plan = 'pro'`. Keep that one as the "winner".
-3. Delete the loser profile + auth.user (or merge meetings/tasks/projects to the winner first if any data lives there): `UPDATE meetings SET user_id = '<winner_id>' WHERE user_id = '<loser_id>';` then same for `tasks`, `projects`. Then delete the loser auth.user via Supabase dashboard.
-4. Tell the user to always sign in via the same method going forward (whichever was the "winner").
+**Auth — stop wiping state on transient SIGNED_OUT**
+- Symptom: navigating between /app and /dashboard occasionally flipped the account into Free mode even though the user was still logged in. Page-level Supabase queries 401 on free-tier cold-start; the JS client tries to refresh; the refresh also fails; the client fires SIGNED_OUT; our handler called `setUser(null) + setProfile(null)`. The localStorage tokens were still present — it wasn't a real sign-out.
+- Fix in `AuthProvider.onAuthStateChange`: when the event has no session, scan localStorage for `sb-*` keys. If present → transient refresh failure, KEEP user/profile state and retry `getSession()` after 1.5s. If absent → real sign-out (our `signOut()` synchronously clears those keys before redirecting), wipe state.
+- Don't undo this — without it, every cold-start refresh logs the user out cosmetically.
 
-**Prevention** (deferred): we could detect at `loadProfile` time if a profile with the same email but different id already exists, and surface a warning + offer a merge flow. Not worth building until we see this happen with paying customers more than once. For now, document it here so future-you doesn't re-debug.
+**Auth — `loadProfile` waits for the JWT before querying**
+- Root cause of the "Account" placeholder + Free-mode UI for a paying Pro user. After a session resolves, the global `supabase` client takes a beat to attach the JWT to outgoing requests. If `loadProfile` fires its `.from('profiles').single()` in that window, RLS sees an unauthenticated request and returns 0 rows (PGRST116). The old code interpreted PGRST116 as "no profile yet" and tried to INSERT a new free profile, which conflicted with the existing Pro row → `setProfile` never ran → UI shows nothing or falls back to "free".
+- Fix in `AuthProvider.loadProfile`: poll `supabase.auth.getSession()` until `session.access_token` is attached (up to 2s, 500ms intervals) before issuing the profile query. Then fetch with three retries at 0/1.5s/3s backoff. Only run the new-profile INSERT branch when PGRST116 is observed AFTER the JWT is confirmed present.
+- Background recovery: a separate effect retries `loadProfile` every 4s while `user` is set but `profile` is still null. Self-healing if the cold start outlasts the in-flight retries.
+
+**Auth — MobileNav placeholder while profile pending**
+- Symptom: even when the profile load was healthy, the nav briefly rendered "adrienharrel" (the email prefix) before swapping to "Harrel" (the Google name). The displayName fallback chain was `profile?.full_name → profile?.email?.split('@')[0] → user?.email?.split('@')[0]` — that second-to-last step would fire while profile was still in flight.
+- Fix in `MobileNav.tsx:60`: define `profilePending = loading || (!!user && !profile)`; while pending, render "Account" + "·" initial instead of the email-prefix fallback. Plan badge similarly shows "—" instead of the false "free" fallback during pending.
+- The 4s `loading` safety timeout in AuthProvider was also bug-fixed (`useEffect` body, ~line 105): it used to fire `setLoading(false)` unconditionally even mid-`loadProfile`. Now only fires if `getSession()` itself hasn't resolved, letting `loadProfile` finish on its own retry budget.
+
+**Auth — single-method enforcement (anti-doublon)**
+- Migration `supabase/migrations/2026_05_03_get_auth_providers.sql` creates `public.get_auth_providers_for_email(check_email text) returns text[]` as a `SECURITY DEFINER` RPC, callable by the anon key — returns `['google']`, `['email']`, both, or `[]`. **Must be applied manually in Supabase SQL editor.** Don't wire any new check to this without confirming the migration ran.
+- `/signup`: pre-flight RPC call. If providers exist, block with method-specific error ("Use Google" vs "Sign in").
+- `/login` (password form): pre-flight RPC. If email has only Google identity → block with "Use Continue with Google" before `signInWithPassword` (which would otherwise return generic "invalid credentials" and send the user in circles).
+- `/auth/callback` (Google OAuth): after `exchangeCodeForSession`, check `user.identities`. If `length > 1` AND any identity was created within the last 60s → freshly-linked dual identity, sign out + redirect to `/login?error=multi_identity`. Existing legacy dual-identity accounts (no fresh identity) are allowed through to avoid permanently locking them out — they need to be cleaned up manually via SQL. Same freshness gate applied to the case where a brand-new Google user collides with an existing email/password account.
+- Login page reads `?error=use_email | use_google | multi_identity` from URL on mount and shows the appropriate red error inline.
+
+**Dashboard / /app — wait for JWT before querying (same root cause)**
+- Same race that bit `loadProfile` was hiding the dashboard's data + emptying the project dropdown on `/app`. Symptom: dashboard sidebar showing the contradictory "FREE / Unlimited" combo (because the local `profile` state was null → planName fallback `'free'` + ternary picking the non-free branch `'Unlimited'`).
+- `dashboard/page.tsx:loadData` now starts with `supabase.auth.getSession()` and treats a missing `access_token` as a retryable failure (returns `false`, surfaces the yellow "Couldn't load your data — Retry" banner if both attempts fail).
+- Dashboard sidebar now reads `effectiveProfile = profile ?? authProfile` (where `authProfile` is from `useAuth()`) so the badge can never show the contradictory state. It defaults to "—" / "—" while truly unknown rather than a misleading "free".
+- `/app` projects effect uses the same `getSession` → query → 1.5s retry pattern. Without this, navigating from /dashboard to /app would fire the projects query before the JWT attached, RLS returned `[]`, and the dropdown appeared empty even though projects existed.
+
+**Other**
+- Next.js: `14.2.0 → 14.2.35`. Fixed the HMR `removeChild` runtime error in dev. Stayed on 14.x; do NOT jump to 16.x without a separate migration plan (async params in server components is a breaking change).
+- Added `<meta name="mobile-web-app-capable" content="yes" />` in root layout `<head>` — silences Chrome's deprecation warning about the apple-only variant. The `appleWebApp` metadata still emits the iOS variant.
+
+### Known data issue: dual identities on same auth user (NOT dual profiles)
+The Phase 9 hypothesis was wrong — when we ran the diagnostic SQL on the founder's account it showed only ONE row in both `auth.users` and `profiles`, but `auth.identities` had **two rows** for the same `user_id` (one `provider='google'`, one `provider='email'`). Supabase had linked them when the project's auth setting "Allow same email across providers" was on.
+
+**Symptom**: Same single auth user appears differently depending on session — "adrienharrel" (email-prefix fallback) vs "harrel" (Google name) — because each identity carries different `user_metadata`, and which one populates `session.user` depends on the active sign-in method. The plan stays correct because Stripe → profile → `auth.users.id` is a single chain.
+
+**Manual cleanup** (use this when a user reports cross-method confusion):
+1. List both identities: `SELECT i.id AS identity_id, i.provider, i.created_at FROM auth.identities i JOIN auth.users u ON u.id = i.user_id WHERE u.email = '<email>' ORDER BY i.created_at;`
+2. Decide which method to keep (usually whichever is the user's primary).
+3. Delete the unwanted identity row: `DELETE FROM auth.identities WHERE id = '<identity_id>' AND provider = '<email|google>';`
+4. The user can no longer log in via the deleted method on that account, but the profile, plan, meetings, tasks, projects all stay intact (they're keyed on `auth.users.id`, not the identity).
+
+**Prevention** is shipped in Phase 10 (single-method enforcement above) — new users can't end up in this state. The legacy "two separate auth.users rows" scenario from Phase 9 may also exist for some users; the cleanup procedure for that case is preserved below for completeness.
+
+**Legacy "two separate auth.users rows" cleanup** (rare — happens when the linking setting was off at sign-up time):
+1. `SELECT id, email, raw_app_meta_data->>'provider' AS provider, created_at FROM auth.users WHERE email = '<email>' ORDER BY created_at;`
+2. Identify the row with the active Stripe subscription via `profiles.plan = 'pro'`.
+3. Reassign data: `UPDATE meetings SET user_id = '<winner_id>' WHERE user_id = '<loser_id>';` (then `tasks`, `projects`).
+4. Delete the loser auth.user via Supabase dashboard.
 
 - Favicon tight-cropped (was 1536×1024 with 70% whitespace, now 512×512 transparent)
 - Light-mode contrast fix on blue accents + nav (was hardcoded dark)
@@ -469,8 +524,9 @@ This phase tackled 4 reported bugs + 1 product upgrade in one pass.
 
 This section is the **source of truth for what's left to do**. Update as items ship or get deprioritized. Newest decisions go above older ones within a priority bucket.
 
-### P0 — Live data issue (manual fix needed in Supabase)
-- **Dual profiles for same email** — known case: founder's own account (`adrienharrel@gmail.com`) split into "adrienharrel" (Free) + "harrel" (Pro) because the email/password sign-up and Google OAuth sign-in created separate `auth.users` rows. Stripe webhook only marked one as Pro. Procedure to resolve documented in the "Known data issue" section above. Apply the SQL merge once for the founder, then keep the procedure handy for future user reports.
+### P0 — Live data issue (manual cleanup needed in Supabase)
+- **Migration not yet applied** — `supabase/migrations/2026_05_03_get_auth_providers.sql` must be run in the Supabase SQL editor before the single-method auth enforcement gates do anything. Until then, /signup and /login fall through silently (the RPC call returns no data, the gate is bypassed). Migration `2026_05_02_add_project_notes.sql` (project notes column) also needs to be applied if not already.
+- **Founder's own dual identity** — the founder's account (`adrienharrel@gmail.com`) has two linked identities (`provider='google'` + `provider='email'`) on the SAME `auth.users` row. NOT a dual-profile situation (Phase 9's hypothesis was wrong — see "Known data issue" section). Until the email identity is deleted via SQL, OAuth login is allowed (the freshness gate exempts legacy duals) but the cosmetic name/plan flicker is mitigated by the placeholder + recovery polling, not eliminated. To eliminate fully: delete the unwanted identity row (procedure in "Known data issue: dual identities").
 
 ### P0 — Blocked on external action (no code work possible right now)
 - **Resend email account reactivation** — Resend flagged the account, awaiting their support response. Until lifted, all `/api/email/*` routes silently no-op (fire-and-forget with `.catch(()=>{})`). Once reactivated:
@@ -504,5 +560,5 @@ This section is the **source of truth for what's left to do**. Update as items s
 
 ---
 
-*Last updated: May 2026 (Phase 9 — /app moved to useAuth (fixes Pro-shown-as-Free flash), integrated project context with memory-active hint, project-level notes with PROJECT BRIEF injection, dashboard/settings/AuthProvider cold-start retry + retry banner, Clear button on /app, Select hidden on empty dashboard)*
+*Last updated: 2026-05-07 (Phase 10 — Haiku 4.5 model swap (~2× faster packs); auth stability fixes: AuthProvider waits for JWT before profile query + 3-attempt backoff + background recovery poll; transient SIGNED_OUT during cold-start no longer wipes state; MobileNav shows "Account" placeholder while profile pending instead of email-prefix flash; dashboard sidebar reads from useAuth().profile fallback (no more "FREE / Unlimited" contradiction); single-method auth enforcement via SECURITY DEFINER RPC + freshness-gated OAuth callback so existing dual-identity users aren't locked out; Next 14.2.0 → 14.2.35; mobile-web-app-capable meta)*
 *Primary AI assistant: Claude (claude.ai + Claude Code)*
