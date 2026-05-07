@@ -31,6 +31,21 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [loading, setLoading] = useState(true)
 
   async function loadProfile(userId: string, email: string) {
+    // Confirm the JWT is attached to the supabase client before querying.
+    // Without this, the profile request goes out without auth, RLS returns
+    // 0 rows (PGRST116), and the code below thinks "this is a brand-new
+    // user, let me create a Free profile" — which then conflicts with the
+    // existing Pro row and leaves profile=null. Symptom: "Account" placeholder
+    // and free-mode UI even though the user is a paying Pro.
+    async function waitForToken(attempts = 4): Promise<boolean> {
+      for (let i = 0; i < attempts; i++) {
+        const { data: { session } } = await supabase.auth.getSession()
+        if (session?.access_token) return true
+        await new Promise(r => setTimeout(r, 500))
+      }
+      return false
+    }
+
     async function fetchOnce() {
       const { data, error } = await supabase
         .from('profiles')
@@ -40,24 +55,26 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       return { data, errorCode: error?.code ?? null }
     }
 
-    let { data, errorCode } = await fetchOnce()
+    const tokenReady = await waitForToken()
+    if (!tokenReady) return  // bail; onAuthStateChange will retry when token arrives
 
-    // Retry on ANY failure — cold-start (free tier) can return hard errors or
-    // spurious PGRST116 before the instance wakes up. Always retry before
-    // concluding the row doesn't exist, otherwise we'd try to create a free
-    // profile for an existing Pro user and leave profile=null on conflict.
-    if (!data) {
-      await new Promise(r => setTimeout(r, 1500))
-      const second = await fetchOnce()
-      data = second.data
-      errorCode = second.errorCode
+    // Up to 3 attempts with backoff — Supabase free tier can take several
+    // seconds to wake on a true cold start.
+    const delays = [0, 1500, 3000]
+    let data = null
+    let errorCode: string | null = null
+    for (const delay of delays) {
+      if (delay > 0) await new Promise(r => setTimeout(r, delay))
+      const r = await fetchOnce()
+      data = r.data
+      errorCode = r.errorCode
+      if (data) break
     }
 
     if (!data) {
       // Only create a new profile when we're confident the row truly doesn't
-      // exist (PGRST116 = PostgREST "0 rows" — not a connection error).
-      // A hard/network error leaves profile=null; onAuthStateChange will
-      // correct it on the next auth event rather than overwriting with 'free'.
+      // exist (PGRST116 after multiple attempts). A persistent hard error
+      // leaves profile=null and the next auth event will retry.
       if (errorCode === 'PGRST116') {
         const { data: newProf } = await supabase
           .from('profiles')
@@ -159,6 +176,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       subscription.unsubscribe()
     }
   }, [])
+
+  // Background recovery: if user is set but profile failed to load (cold-start
+  // exhausted retries), keep retrying every 4s until it succeeds. Without this,
+  // the nav stays on "Account" placeholder and downstream pages treat the user
+  // as having no plan until they manually refresh.
+  useEffect(() => {
+    if (!user || profile) return
+    const id = setInterval(() => {
+      loadProfile(user.id, user.email || '').catch(() => {})
+    }, 4000)
+    return () => clearInterval(id)
+  }, [user, profile])
 
   const signOut = async () => {
     // Fire-and-forget — don't block the UI if Supabase hangs.
