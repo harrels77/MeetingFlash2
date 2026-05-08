@@ -94,6 +94,53 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     if (data) setProfile(data)
   }
 
+  // Helper used both on initial mount and on any "no session" auth event.
+  // The previous design just kept user/profile state and scheduled a getSession
+  // retry — but if Supabase's internal token refresh had already failed before
+  // we got here (sb-* tokens in localStorage are stale), getSession will keep
+  // returning null forever and the user is stranded in a half-logged-in state
+  // (nav says "Account", /app shows guest CTAs, dashboard is empty). This
+  // function is decisive: try refreshSession() explicitly, and if that fails,
+  // wipe the dead tokens and treat as a real sign-out so the user can recover.
+  async function recoverOrSignOut(): Promise<{ user: User | null }> {
+    let hasSbTokens = false
+    try {
+      for (const key of Object.keys(localStorage)) {
+        if (key.startsWith('sb-') || key.includes('supabase.auth')) {
+          hasSbTokens = true
+          break
+        }
+      }
+    } catch { /* localStorage may be unavailable */ }
+
+    if (!hasSbTokens) {
+      setUser(null)
+      setProfile(null)
+      return { user: null }
+    }
+
+    const { data, error } = await supabase.auth.refreshSession()
+    if (data?.session?.user && !error) {
+      setUser(data.session.user)
+      await loadProfile(data.session.user.id, data.session.user.email || '').catch(() => {})
+      return { user: data.session.user }
+    }
+
+    // Refresh failed — tokens are dead. Clear them so we don't loop forever
+    // pretending to be logged in. Next render shows the proper signed-out UI.
+    console.warn('Supabase refreshSession failed; clearing stale tokens', error)
+    try {
+      for (const key of Object.keys(localStorage)) {
+        if (key.startsWith('sb-') || key.includes('supabase.auth')) {
+          localStorage.removeItem(key)
+        }
+      }
+    } catch { /* ignore */ }
+    setUser(null)
+    setProfile(null)
+    return { user: null }
+  }
+
   useEffect(() => {
     let sessionResolved = false
 
@@ -107,13 +154,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }, 4000)
 
     // Charge la session initiale
-    supabase.auth.getSession().then(({ data: { session } }) => {
+    supabase.auth.getSession().then(async ({ data: { session } }) => {
       sessionResolved = true
-      setUser(session?.user ?? null)
       if (session?.user) {
+        setUser(session.user)
         loadProfile(session.user.id, session.user.email || '')
           .finally(() => { clearTimeout(timeout); setLoading(false) })
       } else {
+        // No session, but tokens may exist in localStorage — try refresh
+        // before giving up. Without this, a stale refresh-token leaves the
+        // app convinced the user is signed out forever.
+        await recoverOrSignOut()
         clearTimeout(timeout)
         setLoading(false)
       }
@@ -133,40 +184,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           setLoading(false)
           return
         }
-
-        // No session in this event. Could be:
-        //  (a) explicit sign-out — our signOut() cleared sb-* tokens first
-        //  (b) cold-start token-refresh failure — sb-* tokens still present
-        // Without distinguishing these, a transient (b) wipes user+profile and
-        // the app silently shows Free mode even though the user is logged in.
-        let hasSbTokens = false
-        try {
-          for (const key of Object.keys(localStorage)) {
-            if (key.startsWith('sb-') || key.includes('supabase.auth')) {
-              hasSbTokens = true
-              break
-            }
-          }
-        } catch { /* localStorage may be unavailable */ }
-
-        if (hasSbTokens) {
-          // Transient refresh failure — keep state, retry getSession after a
-          // brief delay to give the Supabase free-tier instance time to wake.
-          setTimeout(() => {
-            supabase.auth.getSession().then(({ data: { session: s } }) => {
-              if (s?.user) {
-                setUser(s.user)
-                loadProfile(s.user.id, s.user.email || '').catch(() => {})
-              }
-            }).catch(() => {})
-          }, 1500)
-          setLoading(false)
-          return
-        }
-
-        // Real sign-out — clear state.
-        setUser(null)
-        setProfile(null)
+        // Same recovery path on any "no session" event — try refresh, fall
+        // back to a clean signed-out state if it fails.
+        await recoverOrSignOut()
         setLoading(false)
       }
     )
