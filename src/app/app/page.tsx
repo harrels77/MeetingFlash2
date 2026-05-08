@@ -174,7 +174,12 @@ export default function AppPage() {
   // the "folder context" banner that turns the project from a tag into an
   // actual workspace. Loaded on demand (not at projects-list time) to avoid
   // pulling all meetings up-front.
-  const [projectMeta, setProjectMeta] = useState<{ count: number; lastTitle: string | null; lastDate: string | null }>({ count: 0, lastTitle: null, lastDate: null })
+  const [projectMeta, setProjectMeta] = useState<{
+    count: number
+    lastTitle: string | null
+    lastDate: string | null
+    recent: { id: string; title: string; created_at: string }[]
+  }>({ count: 0, lastTitle: null, lastDate: null, recent: [] })
   const [showTemplates, setShowTemplates] = useState(false)
   const [showCreateProject, setShowCreateProject] = useState(false)
   const [newProjectName, setNewProjectName]       = useState('')
@@ -252,7 +257,7 @@ export default function AppPage() {
   // project feels like a folder you're working inside.
   useEffect(() => {
     if (!projectId || !user) {
-      setProjectMeta({ count: 0, lastTitle: null, lastDate: null })
+      setProjectMeta({ count: 0, lastTitle: null, lastDate: null, recent: [] })
       return
     }
     let cancelled = false
@@ -261,7 +266,7 @@ export default function AppPage() {
       if (!session?.access_token) return
       const { data, error } = await supabase
         .from('meetings')
-        .select('title, created_at')
+        .select('id, title, created_at')
         .eq('project_id', projectId)
         .order('created_at', { ascending: false })
         .limit(20)
@@ -271,6 +276,7 @@ export default function AppPage() {
         count: rows.length,
         lastTitle: rows[0]?.title ?? null,
         lastDate: rows[0]?.created_at ?? null,
+        recent: rows.slice(0, 4),
       })
     })()
     return () => { cancelled = true }
@@ -352,9 +358,13 @@ export default function AppPage() {
 
       setPack(data.pack)
       // Optimistically bump the project meta so the banner reflects the new
-      // meeting on the next chained flash without a page reload.
+      // meeting on the next chained flash without a page reload. The file list
+      // is intentionally NOT updated here since we don't have the new
+      // meeting's id yet — the reload-on-mount effect will refresh it on
+      // the next visit; for now the count + last bump is enough.
       if (projectId && data.pack?.title) {
         setProjectMeta(prev => ({
+          ...prev,
           count: prev.count + 1,
           lastTitle: typeof data.pack.title === 'string' ? data.pack.title : prev.lastTitle,
           lastDate: new Date().toISOString(),
@@ -595,40 +605,72 @@ async function createProject() {
                   const activeProject = projects.find(p => p.id === projectId)
                   return (
                     <div className={styles.projectBanner}>
-                      <div className={styles.projectBannerLeft}>
-                        <div className={styles.projectBannerTitle}>
-                          <span className={styles.projectBannerIcon} aria-hidden="true">📁</span>
-                          {activeProject?.name || 'Project'}
+                      <div className={styles.projectBannerHead}>
+                        <div className={styles.projectBannerLeft}>
+                          <div className={styles.projectBannerTitle}>
+                            <span className={styles.projectBannerIcon} aria-hidden="true">📁</span>
+                            {activeProject?.name || 'Project'}
+                          </div>
+                          <div className={styles.projectBannerMeta}>
+                            {projectMeta.count === 0
+                              ? <>First meeting in this project · memory active</>
+                              : <>
+                                  {projectMeta.count} meeting{projectMeta.count !== 1 ? 's' : ''} in this folder · memory active
+                                </>
+                            }
+                          </div>
                         </div>
-                        <div className={styles.projectBannerMeta}>
-                          {projectMeta.count === 0
-                            ? <>First meeting in this project · memory active</>
-                            : <>
-                                {projectMeta.count} previous meeting{projectMeta.count !== 1 ? 's' : ''}
-                                {projectMeta.lastTitle && (
-                                  <> · Last: <span className={styles.projectBannerLast}>&ldquo;{projectMeta.lastTitle}&rdquo;</span></>
-                                )}
-                                {projectMeta.lastDate && (
-                                  <> ({new Date(projectMeta.lastDate).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })})</>
-                                )}
-                                <> · memory active</>
-                              </>
-                          }
+                        <div className={styles.projectBannerRight}>
+                          <select
+                            className={styles.projectBannerSwitch}
+                            value={projectId}
+                            onChange={e => setProjectId(e.target.value || null)}
+                            title="Switch project or remove context"
+                          >
+                            <option value="">— Leave project</option>
+                            {projects.map(p => (
+                              <option key={p.id} value={p.id}>Switch to: {p.name}</option>
+                            ))}
+                          </select>
                         </div>
                       </div>
-                      <div className={styles.projectBannerRight}>
-                        <select
-                          className={styles.projectBannerSwitch}
-                          value={projectId}
-                          onChange={e => setProjectId(e.target.value || null)}
-                          title="Switch project or remove context"
-                        >
-                          <option value="">— Leave project</option>
-                          {projects.map(p => (
-                            <option key={p.id} value={p.id}>Switch to: {p.name}</option>
-                          ))}
-                        </select>
-                      </div>
+
+                      {/* File list — each meeting in the project is a "file" the
+                          user can open. The current flash creates a new file by
+                          default. We deliberately don't expose an "add to existing"
+                          flow yet (v2) because the data model would need to support
+                          appending notes; the visible list is enough to give the
+                          folder feel and let the user open prior packs in one click. */}
+                      {projectMeta.recent.length > 0 && (
+                        <div className={styles.projectFiles}>
+                          <div className={styles.projectFilesLabel}>Files in this folder</div>
+                          <ul className={styles.projectFilesList}>
+                            {projectMeta.recent.map(m => (
+                              <li key={m.id} className={styles.projectFileItem}>
+                                <Link href={`/dashboard/pack/${m.id}`} className={styles.projectFileLink}>
+                                  <span className={styles.projectFileIcon} aria-hidden="true">📄</span>
+                                  <span className={styles.projectFileTitle}>{m.title}</span>
+                                  <span className={styles.projectFileDate}>
+                                    {new Date(m.created_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })}
+                                  </span>
+                                  <span className={styles.projectFileArrow} aria-hidden="true">→</span>
+                                </Link>
+                              </li>
+                            ))}
+                            {projectMeta.count > projectMeta.recent.length && activeProject && (
+                              <li className={styles.projectFileMore}>
+                                <Link href={`/dashboard/project/${activeProject.id}`} className={styles.projectFileMoreLink}>
+                                  +{projectMeta.count - projectMeta.recent.length} older — see all in dashboard →
+                                </Link>
+                              </li>
+                            )}
+                          </ul>
+                          <div className={styles.projectFilesHint}>
+                            <span className={styles.projectFilesHintIcon}>+</span>
+                            Pasting notes below creates a new file in this folder.
+                          </div>
+                        </div>
+                      )}
                     </div>
                   )
                 })()}
