@@ -56,7 +56,7 @@ export default function Dashboard() {
   // blank after navigating back from settings" bug where Supabase's cold-start
   // returned an error (not empty data) and the previous logic blindly did
   // setMeetings([]) / setProjects([]) etc., wiping the visible state.
-  const loadData = useCallback(async (userId: string, userEmail: string): Promise<boolean> => {
+  const loadData = useCallback(async (userId: string): Promise<boolean> => {
     // Wait for the JWT to be present before firing queries — without this,
     // a navigation that races with a Supabase token refresh can issue all
     // four queries unauthenticated, RLS silently returns empty results
@@ -74,24 +74,29 @@ export default function Dashboard() {
       supabase.from('tasks').select('id, text, owner, deadline, meeting_id, status').eq('user_id', userId).neq('status', 'done').order('created_at', { ascending: false }).limit(20)
     ])
 
-    // Profile single() returns error PGRST116 when no row — that's not a real
-    // failure, we'll create the row below. Any other error is treated as failure.
-    const profSoftError = profResult.error && profResult.error.code !== 'PGRST116'
-    const anyError = profSoftError || projResult.error || meetsResult.error || tasksResult.error
-    if (anyError) {
+    // Any hard error from any query → retryable failure.
+    if (profResult.error || projResult.error || meetsResult.error || tasksResult.error) {
       console.error('Dashboard load error:', { profErr: profResult.error, projErr: projResult.error, meetsErr: meetsResult.error, tasksErr: tasksResult.error })
       return false
     }
 
-    let prof = profResult.data
-    if (!prof) {
-      const { data: newProf } = await supabase
-        .from('profiles')
-        .insert({ id: userId, email: userEmail, plan: 'free', uses_this_month: 0 })
-        .select().single()
-      prof = newProf
+    // Coherence guard: AuthProvider already confirmed this user has a profile
+    // in the DB (otherwise authProfile would be null and the user would have
+    // been redirected). If THIS load got back an empty profile + empty
+    // projects + empty meetings, that's the silent-RLS-empty bug — JWT was
+    // technically attached but the request went out before the auth context
+    // propagated through the supabase client. Treat as failure to trigger
+    // a retry + the yellow "Couldn't load your data" banner, instead of
+    // rendering a misleading "blank dashboard like a new account" state.
+    const noProfile = !profResult.data
+    const noProjects = !projResult.data || projResult.data.length === 0
+    const noMeetings = !meetsResult.data || meetsResult.data.length === 0
+    if (authProfile && noProfile && noProjects && noMeetings) {
+      console.warn('Dashboard load: AuthProvider has profile but DB queries all returned empty — likely RLS race, retrying')
+      return false
     }
-    if (prof) setProfile(prof)
+
+    if (profResult.data) setProfile(profResult.data)
     setProjects(projResult.data || [])
     setMeetings(meetsResult.data || [])
 
@@ -107,15 +112,23 @@ export default function Dashboard() {
     }))
     setOpenTasks(enrichedTasks)
     return true
-  }, [])
+  }, [authProfile])
 
-  const runLoad = useCallback(async (userId: string, userEmail: string) => {
+  const runLoad = useCallback(async (userId: string) => {
     setLoadError(false)
-    let ok = await loadData(userId, userEmail)
-    // Cold-start retry once after 1.5s — Supabase free tier wakes up on the second hit.
+    let ok = await loadData(userId)
+    // Cold-start retry once after 1.5s — Supabase free tier wakes up on the
+    // second hit.
     if (!ok) {
       await new Promise(r => setTimeout(r, 1500))
-      ok = await loadData(userId, userEmail)
+      ok = await loadData(userId)
+    }
+    // Second retry at 4s — covers the case where the first 1.5s wasn't enough
+    // for the instance to wake. Total budget is now ~5.5s, well under the 8s
+    // safety. After this we surface the yellow "Couldn't load" banner.
+    if (!ok) {
+      await new Promise(r => setTimeout(r, 2500))
+      ok = await loadData(userId)
     }
     if (!ok) setLoadError(true)
     setLoading(false)
@@ -130,7 +143,7 @@ export default function Dashboard() {
 
     // Safety net: never let the spinner run more than 12s (covers the 1.5s retry)
     const timeout = setTimeout(() => setLoading(false), 12000)
-    runLoad(user.id, user.email ?? '').finally(() => clearTimeout(timeout))
+    runLoad(user.id).finally(() => clearTimeout(timeout))
 
     return () => clearTimeout(timeout)
   }, [user, authLoading, router, runLoad])
@@ -312,7 +325,7 @@ export default function Dashboard() {
               onClick={() => {
                 if (!user) return
                 setLoading(true)
-                runLoad(user.id, user.email ?? '')
+                runLoad(user.id)
               }}
               style={{
                 background: 'var(--blue)',
