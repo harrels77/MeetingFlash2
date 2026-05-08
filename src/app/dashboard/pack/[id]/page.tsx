@@ -5,6 +5,7 @@ import Link from 'next/link'
 import { supabase, packFieldToString } from '@/lib/supabase'
 import ActionTiers from '@/components/ActionTiers'
 import QuestionsView from '@/components/QuestionsView'
+import RisksView from '@/components/RisksView'
 import ThemeToggle from '@/components/ThemeToggle'
 import styles from './pack.module.css'
 
@@ -290,7 +291,9 @@ export default function PackDetail() {
                   ? <ActionTiers text={packFieldToString(meeting.pack?.[block.id])} />
                   : block.id === 'questions'
                     ? <QuestionsView text={packFieldToString(meeting.pack?.[block.id])} />
-                    : (packFieldToString(meeting.pack?.[block.id]) || '—')}
+                    : block.id === 'risks'
+                      ? <RisksView text={packFieldToString(meeting.pack?.[block.id])} />
+                      : (packFieldToString(meeting.pack?.[block.id]) || '—')}
               </div>
             </div>
           ))}

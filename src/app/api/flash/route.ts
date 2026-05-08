@@ -169,8 +169,8 @@ Skip a priority section entirely if it has zero items (do not emit empty section
   4. A dependency or approval is implied but not confirmed.
 Generic gaps ("when does the project end?", "what's the budget?") are noise unless they were specifically discussed without resolution. Surface 2-4 high-value inferences, not 6 weak ones.
 
-- "risks": bullet list using • of risks that are STILL OPEN at the end of the meeting. CRITICAL: if a concern was raised AND addressed/resolved within the same meeting (e.g. "Mark flagged technical feasibility, Elena agreed to simplify" — that's resolved), DO NOT list it as a risk. Resolved-in-meeting items belong in the snapshot or decisions, not in risks. A risk is something that could derail the work and remains unaddressed when the meeting ends. EVERY risk MUST be followed by a "Mitigation:" line on the next line, indented with two spaces. Format:
-  "• [Risk description]
+- "risks": bullet list using • of risks that are STILL OPEN at the end of the meeting. CRITICAL: if a concern was raised AND addressed/resolved within the same meeting (e.g. "Mark flagged technical feasibility, Elena agreed to simplify" — that's resolved), DO NOT list it as a risk. Resolved-in-meeting items belong in the snapshot or decisions, not in risks. A risk is something that could derail the work and remains unaddressed when the meeting ends. EVERY risk line MUST start with a severity marker — "[CRITICAL]", "[MEDIUM]", or "[LOW]" — and be followed by a "Mitigation:" line on the next line, indented with two spaces. Severity guide: CRITICAL = could block delivery / hit a deadline / costs money; MEDIUM = could cause rework or delay a workstream; LOW = minor friction. Format:
+  "• [CRITICAL] [Risk description]
     Mitigation: [specific, concrete mitigation step]"
   If a real risk has no clean mitigation, write "Mitigation: surface and discuss next meeting." but only as a last resort. If none: "No risks identified."
 

@@ -7,6 +7,7 @@ import { supabase, packFieldToString } from '@/lib/supabase'
 import { useAuth } from '@/lib/AuthProvider'
 import ActionTiers from '@/components/ActionTiers'
 import QuestionsView from '@/components/QuestionsView'
+import RisksView from '@/components/RisksView'
 import ThemeToggle from '@/components/ThemeToggle'
 import { useEffect } from 'react'
 
@@ -317,8 +318,16 @@ export default function AppPage() {
       // navigation refetches the profile via /api/flash's increment_uses RPC.
       // No local optimistic decrement needed.
 
-      // Estimate time saved: ~3 min per action item + 8 min for the email + 2 min for slack/agenda formatting
-      const actionsCount = (data.pack?.actions || '').split('\n').filter((l: string) => l.trim().startsWith('•')).length
+      // Estimate time saved: ~3 min per action item + 8 min for the email + 2 min for slack/agenda formatting.
+      // Use packFieldToString to safely coerce — if Claude returns actions as
+      // an object (it sometimes tries despite the prompt), the previous code
+      // crashed with "split is not a function" and the toast silently never
+      // fired.
+      const actionsStr = packFieldToString(data.pack?.actions)
+      const actionsCount = actionsStr
+        .split('\n')
+        .filter((l: string) => l.trim().startsWith('•'))
+        .length
       const estimatedMinutes = Math.max(15, actionsCount * 3 + 10)
       setTimeSavedToast(estimatedMinutes)
       setTimeout(() => setTimeSavedToast(null), 6000)
@@ -796,6 +805,7 @@ async function createProject() {
                   <div className={styles.blockContent}>
                     {block.id === 'actions' ? <ActionTiers text={block.content} />
                       : block.id === 'questions' ? <QuestionsView text={block.content} />
+                      : block.id === 'risks' ? <RisksView text={block.content} />
                       : block.content}
                   </div>
                 </div>

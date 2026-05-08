@@ -5,6 +5,7 @@ import type { Metadata } from 'next'
 import { packFieldToString } from '@/lib/supabase'
 import ActionTiers from '@/components/ActionTiers'
 import QuestionsView from '@/components/QuestionsView'
+import RisksView from '@/components/RisksView'
 import styles from './share.module.css'
 
 export const metadata: Metadata = {
@@ -93,7 +94,9 @@ export default async function SharePage({ params }: { params: { token: string } 
                   ? <ActionTiers text={packFieldToString(meeting.pack[block.id])} />
                   : block.id === 'questions'
                     ? <QuestionsView text={packFieldToString(meeting.pack[block.id])} />
-                    : (packFieldToString(meeting.pack[block.id]) || '—')}
+                    : block.id === 'risks'
+                      ? <RisksView text={packFieldToString(meeting.pack[block.id])} />
+                      : (packFieldToString(meeting.pack[block.id]) || '—')}
               </div>
             </div>
           ))}
