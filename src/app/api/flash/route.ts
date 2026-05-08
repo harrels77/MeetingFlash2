@@ -178,7 +178,7 @@ Generic gaps ("when does the project end?", "what's the budget?") are noise unle
 
 - "slack": concise Slack recap under 90 words. Audience: internal team. Tone: casual-direct, bullet-friendly, "we won X" framing, emojis allowed (1-2 max). Different register than the email — this is for colleagues, not clients. Plain text only.
 
-- "agenda": bullet list using • of items for the NEXT meeting. Tone: strategic, not generic. Each item should explain what decision is needed or what it unblocks. Avoid bland phrasing like "Status update" or "Q&A". Format example: "• Decision needed: confirm migration scope (gates week-4 design phase)" — i.e. say WHY it's on the agenda.
+- "agenda": bullet list using • of items for the NEXT meeting. Tone: strategic, not generic. Each item should explain what decision is needed or what it unblocks. Avoid bland phrasing like "Status update" or "Q&A". Format example: "• Decision needed: confirm migration scope (gates week-4 design phase)" — i.e. say WHY it's on the agenda. When an agenda item depends on a precondition that may or may not be met (e.g. "if API docs are received in time"), make the branching explicit using the format "• If [condition]: [path A] / Otherwise: [path B]". Don't paper over uncertainty with a single optimistic item — the conditional structure is what makes the next meeting actually useful instead of stalled.
 
 - "tasks": array of task objects extracted from the action items. Each object must have:
   - "text": the task description

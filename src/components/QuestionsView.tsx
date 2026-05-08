@@ -20,20 +20,35 @@ export default function QuestionsView({ text }: { text: string }) {
 
   if (items.length === 0) return <>{text}</>
 
+  // Detect if any inferred items exist so we can show the caveat once. Without
+  // an explicit legend, an external reader of a shared pack might assume these
+  // questions were raised in the meeting itself — which would damage trust
+  // ("the AI is making things up"). The caveat is the small line of text that
+  // makes the convention unambiguous and lets us keep the high-value
+  // inferences in the output instead of hiding them.
+  const hasInferred = items.some(line => /^Inferred:\s*/i.test(line))
+
   return (
-    <ul className={s.list}>
-      {items.map((raw, i) => {
-        const inferredMatch = raw.match(/^Inferred:\s*(.*)$/i)
-        if (inferredMatch) {
-          return (
-            <li key={i} className={`${s.item} ${s.itemInferred}`}>
-              <span className={s.inferredBadge}>Inferred</span>
-              {inferredMatch[1]}
-            </li>
-          )
-        }
-        return <li key={i} className={s.item}>{raw}</li>
-      })}
-    </ul>
+    <>
+      {hasInferred && (
+        <p className={s.legend}>
+          Items marked <span className={s.inferredBadge}>Inferred</span> were surfaced by AI from gaps in the notes — they were <em>not</em> raised in the meeting.
+        </p>
+      )}
+      <ul className={s.list}>
+        {items.map((raw, i) => {
+          const inferredMatch = raw.match(/^Inferred:\s*(.*)$/i)
+          if (inferredMatch) {
+            return (
+              <li key={i} className={`${s.item} ${s.itemInferred}`}>
+                <span className={s.inferredBadge}>Inferred</span>
+                {inferredMatch[1]}
+              </li>
+            )
+          }
+          return <li key={i} className={s.item}>{raw}</li>
+        })}
+      </ul>
+    </>
   )
 }
