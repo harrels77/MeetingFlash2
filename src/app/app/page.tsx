@@ -170,6 +170,11 @@ export default function AppPage() {
   const [guestUsed, setGuestUsed]   = useState(false)
   const [projectId, setProjectId] = useState<string | null>(null)
   const [projects, setProjects]   = useState<{id: string, name: string}[]>([])
+  // Lightweight per-project meta loaded when a project is selected — drives
+  // the "folder context" banner that turns the project from a tag into an
+  // actual workspace. Loaded on demand (not at projects-list time) to avoid
+  // pulling all meetings up-front.
+  const [projectMeta, setProjectMeta] = useState<{ count: number; lastTitle: string | null; lastDate: string | null }>({ count: 0, lastTitle: null, lastDate: null })
   const [showTemplates, setShowTemplates] = useState(false)
   const [showCreateProject, setShowCreateProject] = useState(false)
   const [newProjectName, setNewProjectName]       = useState('')
@@ -240,6 +245,36 @@ export default function AppPage() {
 
     return () => { cancelled = true }
   }, [authLoading, user])
+
+  // When a project is selected, fetch meta (meeting count + most recent meeting
+  // title + date) so the banner above the textarea can show "X previous meetings
+  // · Last: <title>". Without this the project is just a tag — with it the
+  // project feels like a folder you're working inside.
+  useEffect(() => {
+    if (!projectId || !user) {
+      setProjectMeta({ count: 0, lastTitle: null, lastDate: null })
+      return
+    }
+    let cancelled = false
+    ;(async () => {
+      const { data: { session } } = await supabase.auth.getSession()
+      if (!session?.access_token) return
+      const { data, error } = await supabase
+        .from('meetings')
+        .select('title, created_at')
+        .eq('project_id', projectId)
+        .order('created_at', { ascending: false })
+        .limit(20)
+      if (error || cancelled) return
+      const rows = data || []
+      setProjectMeta({
+        count: rows.length,
+        lastTitle: rows[0]?.title ?? null,
+        lastDate: rows[0]?.created_at ?? null,
+      })
+    })()
+    return () => { cancelled = true }
+  }, [projectId, user])
 
   // Track guest free-pack usage in localStorage (only meaningful when not signed in)
   useEffect(() => {
@@ -316,6 +351,15 @@ export default function AppPage() {
       }
 
       setPack(data.pack)
+      // Optimistically bump the project meta so the banner reflects the new
+      // meeting on the next chained flash without a page reload.
+      if (projectId && data.pack?.title) {
+        setProjectMeta(prev => ({
+          count: prev.count + 1,
+          lastTitle: typeof data.pack.title === 'string' ? data.pack.title : prev.lastTitle,
+          lastDate: new Date().toISOString(),
+        }))
+      }
       // usesLeft is derived from AuthProvider's profile; the next page render or
       // navigation refetches the profile via /api/flash's increment_uses RPC.
       // No local optimistic decrement needed.
@@ -542,40 +586,79 @@ async function createProject() {
 
                       {isLoggedIn && (
               <div className={styles.field}>
-                <div className={styles.fieldLabel}>
-                  Project
-                  {projectId && (
-                    <span style={{ marginLeft: 8, fontSize: 11, color: 'var(--blue3)', textTransform: 'none', letterSpacing: 0, fontWeight: 600 }}>
-                      · memory active (last 5 meetings injected)
-                    </span>
-                  )}
-                </div>
-                <div className={styles.projectRow}>
-                  {/* Dropdown stays visible even when a project is selected, so
-                      the user can switch to another project at any time without
-                      having to click "Change" first. */}
-                  <select
-                    className={`${styles.select} ${projectId ? styles.selectActive : ''}`}
-                    value={projectId || ''}
-                    onChange={e => setProjectId(e.target.value || null)}
-                  >
-                    <option value="">No project (single-shot flash)</option>
-                    {projects.map(p => (
-                      <option key={p.id} value={p.id}>{p.name}</option>
-                    ))}
-                  </select>
-                  {/* "+ New" disappears once a project is selected — they're
-                      already working in one. To create another, deselect first. */}
-                  {!projectId && !showCreateProject && (
-                    <button
-                      className={styles.newProjectInlineBtn}
-                      onClick={() => setShowCreateProject(true)}
-                      type="button"
-                    >
-                      + New
-                    </button>
-                  )}
-                </div>
+                {/* When a project is selected, the section transforms into a
+                    workspace banner — name, meeting count, last meeting — and
+                    drops the "+New" button entirely. The dropdown moves to a
+                    discreet "switch" affordance so the user keeps the option
+                    to change project without it dominating the layout. */}
+                {projectId && (() => {
+                  const activeProject = projects.find(p => p.id === projectId)
+                  return (
+                    <div className={styles.projectBanner}>
+                      <div className={styles.projectBannerLeft}>
+                        <div className={styles.projectBannerTitle}>
+                          <span className={styles.projectBannerIcon} aria-hidden="true">📁</span>
+                          {activeProject?.name || 'Project'}
+                        </div>
+                        <div className={styles.projectBannerMeta}>
+                          {projectMeta.count === 0
+                            ? <>First meeting in this project · memory active</>
+                            : <>
+                                {projectMeta.count} previous meeting{projectMeta.count !== 1 ? 's' : ''}
+                                {projectMeta.lastTitle && (
+                                  <> · Last: <span className={styles.projectBannerLast}>&ldquo;{projectMeta.lastTitle}&rdquo;</span></>
+                                )}
+                                {projectMeta.lastDate && (
+                                  <> ({new Date(projectMeta.lastDate).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })})</>
+                                )}
+                                <> · memory active</>
+                              </>
+                          }
+                        </div>
+                      </div>
+                      <div className={styles.projectBannerRight}>
+                        <select
+                          className={styles.projectBannerSwitch}
+                          value={projectId}
+                          onChange={e => setProjectId(e.target.value || null)}
+                          title="Switch project or remove context"
+                        >
+                          <option value="">— Leave project</option>
+                          {projects.map(p => (
+                            <option key={p.id} value={p.id}>Switch to: {p.name}</option>
+                          ))}
+                        </select>
+                      </div>
+                    </div>
+                  )
+                })()}
+
+                {!projectId && (
+                  <>
+                    <div className={styles.fieldLabel}>Project</div>
+                    <div className={styles.projectRow}>
+                      <select
+                        className={styles.select}
+                        value=""
+                        onChange={e => setProjectId(e.target.value || null)}
+                      >
+                        <option value="">No project (single-shot flash)</option>
+                        {projects.map(p => (
+                          <option key={p.id} value={p.id}>{p.name}</option>
+                        ))}
+                      </select>
+                      {!showCreateProject && (
+                        <button
+                          className={styles.newProjectInlineBtn}
+                          onClick={() => setShowCreateProject(true)}
+                          type="button"
+                        >
+                          + New
+                        </button>
+                      )}
+                    </div>
+                  </>
+                )}
                 {showCreateProject && !projectId && (
                   <div className={styles.createProjectInline}>
                     <input
@@ -727,7 +810,9 @@ async function createProject() {
                   onClick={flashAnother}
                   title="Clear and flash another meeting"
                 >
-                  ⚡ Flash another →
+                  {projectId
+                    ? <>⚡ Next meeting in {(projects.find(p => p.id === projectId)?.name) ?? 'project'} →</>
+                    : <>⚡ Flash another →</>}
                 </button>
               </div>
             )}
@@ -819,7 +904,9 @@ async function createProject() {
                 className={styles.flashAnotherFooter}
                 onClick={flashAnother}
               >
-                ⚡ Flash another meeting →
+                {projectId
+                  ? <>⚡ Flash next meeting in {(projects.find(p => p.id === projectId)?.name) ?? 'this project'} →</>
+                  : <>⚡ Flash another meeting →</>}
               </button>
             </div>
           )}

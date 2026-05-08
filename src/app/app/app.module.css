@@ -111,18 +111,20 @@
 .sampleBtn:hover { color: var(--text); border-color: var(--border3); }
 
 .clearBtn {
-  background: none;
-  border: 1px solid rgba(239,68,68,0.3);
+  background: rgba(239,68,68,0.06);
+  border: 1px solid rgba(239,68,68,0.35);
   font-family: var(--font);
   font-size: 12px;
-  font-weight: 500;
+  font-weight: 600;
   color: #FCA5A5;
   padding: 5px 12px;
   cursor: pointer;
   transition: all 0.15s;
   border-radius: 6px;
 }
-.clearBtn:hover { background: rgba(239,68,68,0.08); border-color: rgba(239,68,68,0.5); color: #FECACA; }
+.clearBtn:hover { background: rgba(239,68,68,0.12); border-color: rgba(239,68,68,0.55); color: #FECACA; }
+:global([data-theme="light"]) .clearBtn { color: #B91C1C; background: rgba(239,68,68,0.05); border-color: rgba(239,68,68,0.3); }
+:global([data-theme="light"]) .clearBtn:hover { color: #991B1B; background: rgba(239,68,68,0.10); }
 
 .templateWrap { position: relative; }
 
@@ -349,6 +351,60 @@
   white-space: nowrap;
 }
 .newProjectInlineBtn:hover { background: rgba(37,99,235,0.1); }
+
+/* Project workspace banner — replaces the dropdown+label when a project is
+   selected, turning the project from a tag into a "you are here" affordance. */
+.projectBanner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  padding: 14px 16px;
+  background: linear-gradient(135deg, rgba(37,99,235,0.10) 0%, rgba(96,165,250,0.04) 100%);
+  border: 1px solid rgba(37,99,235,0.28);
+  border-radius: 12px;
+  margin-bottom: 10px;
+}
+.projectBannerLeft { flex: 1; min-width: 0; }
+.projectBannerTitle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--text);
+  letter-spacing: -0.005em;
+}
+.projectBannerIcon { font-size: 16px; line-height: 1; }
+.projectBannerMeta {
+  margin-top: 4px;
+  font-size: 12px;
+  color: var(--muted);
+  line-height: 1.5;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.projectBannerLast { color: var(--text); font-style: italic; }
+.projectBannerRight { flex-shrink: 0; }
+.projectBannerSwitch {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  font-family: var(--font);
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--muted);
+  padding: 6px 10px;
+  cursor: pointer;
+  max-width: 200px;
+}
+.projectBannerSwitch:hover { color: var(--text); border-color: var(--border3); }
+@media (max-width: 600px) {
+  .projectBanner { flex-direction: column; align-items: stretch; }
+  .projectBannerRight { align-self: stretch; }
+  .projectBannerSwitch { width: 100%; max-width: none; }
+}
 
 .createProjectInline {
   display: flex;
