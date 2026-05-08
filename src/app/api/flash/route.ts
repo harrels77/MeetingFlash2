@@ -146,7 +146,7 @@ Return ONLY a valid JSON object with exactly these keys:
 
 - "snapshot": 2-3 sentences. The executive read of this meeting, in the voice of a senior consultant briefing a busy CEO. State (a) what just happened, (b) the cardinal risk or constraint, (c) the next critical move. Reference specific names, numbers, or scope details from the notes. NEVER generic. NEVER template phrasing. This is the most important field — most readers will only read this.
 
-- "decisions": bullet list using • of all decisions actually made (not discussed, not proposed). If none: "No decisions identified."
+- "decisions": bullet list using • of all decisions actually made (not discussed, not proposed). EVERY decision MUST include the rationale on the same line, separated by " — " (em dash with spaces). The rationale comes from the notes ("to ensure X", "because Y", "in order to Z"). If the notes give no rationale for a specific decision, append " — *(rationale not stated)*" so the reader knows the why is missing. A decision without its why is half a decision. Format: "• [Decision] — [rationale from notes]". If none: "No decisions identified."
 
 - "actions": MUST BE A SINGLE STRING (not an object, not an array). The string contains a bulleted list of action items GROUPED BY PRIORITY using inline section headers (capital-letter lines, NOT markdown headings). Format the string EXACTLY like this example, with literal line breaks:
 
@@ -162,9 +162,14 @@ P2 — Maintenance
 
 Skip a priority section entirely if it has zero items (do not emit empty section headers). Infer priority from signals: client-facing commitments / unblocks-other-work → P0, internal promises with deadlines → P1, nice-to-have / docs / cleanup → P2. Default to P1 if uncertain. THE ENTIRE actions VALUE IS ONE STRING — do not return it as a JSON object or an array of objects.
 
-- "questions": bullet list using • of open questions. Include BOTH (a) questions explicitly raised but not answered AND (b) implicit gaps you noticed (missing approvers, unconfirmed dependencies, unstated assumptions, unscoped commitments). Prefix inferred items with "Inferred:" so the reader knows you surfaced something not said out loud. Be intelligent — surface real gaps, not noise.
+- "questions": bullet list using • of open questions. Include BOTH (a) questions explicitly raised but not answered AND (b) implicit gaps you noticed. Prefix inferred items with "Inferred:" so the reader knows you surfaced something not said out loud. PRIORITIZE these inference patterns in this exact order — they're what separates a senior analyst from a summarizer:
+  1. A stakeholder ask was made but NO OWNER was assigned (e.g. "David requested security audits in every sprint" → who owns this?). This is the highest-value inference.
+  2. A success metric or outcome was named but no measurement criteria were defined (e.g. "mobile responsive" → measured how? what breakpoints?).
+  3. A commitment was made but the precise scope is fuzzy (e.g. "simplify the UI" → simplify how, by how much, reviewed by whom?).
+  4. A dependency or approval is implied but not confirmed.
+Generic gaps ("when does the project end?", "what's the budget?") are noise unless they were specifically discussed without resolution. Surface 2-4 high-value inferences, not 6 weak ones.
 
-- "risks": bullet list using • of risks. EVERY risk MUST be followed by a "Mitigation:" line on the next line, indented with two spaces. Format:
+- "risks": bullet list using • of risks that are STILL OPEN at the end of the meeting. CRITICAL: if a concern was raised AND addressed/resolved within the same meeting (e.g. "Mark flagged technical feasibility, Elena agreed to simplify" — that's resolved), DO NOT list it as a risk. Resolved-in-meeting items belong in the snapshot or decisions, not in risks. A risk is something that could derail the work and remains unaddressed when the meeting ends. EVERY risk MUST be followed by a "Mitigation:" line on the next line, indented with two spaces. Format:
   "• [Risk description]
     Mitigation: [specific, concrete mitigation step]"
   If a real risk has no clean mitigation, write "Mitigation: surface and discuss next meeting." but only as a last resort. If none: "No risks identified."
