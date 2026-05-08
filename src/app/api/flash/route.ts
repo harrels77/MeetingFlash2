@@ -191,12 +191,13 @@ Return ONLY raw JSON. No markdown. No explanation.${projectContext}
 Meeting transcript:
 ${text}`
 
-    // Hard 75s timeout on the Anthropic call — without it a network hang or
-    // a stuck upstream leaves the request open indefinitely, the client loader
-    // spins forever, and the user sees no error. The client-side has its own
-    // 90s abort, so 75s here gives us headroom to still return a clean 504.
+    // Hard 25s timeout on the Anthropic call. Product promise is <20s; 25s
+    // catches a real hang while staying inside the client's 30s master timeout
+    // so we always return a clean 504 instead of letting the client time out
+    // first and abort mid-flight. Don't bump this without also bumping the
+    // client.
     const upstreamController = new AbortController()
-    const upstreamTimeout = setTimeout(() => upstreamController.abort(), 75_000)
+    const upstreamTimeout = setTimeout(() => upstreamController.abort(), 25_000)
 
     let res: Response
     try {

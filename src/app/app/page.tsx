@@ -267,14 +267,29 @@ export default function AppPage() {
       setLoaderMsg(LOADER_MSGS[i])
     }, 1100)
 
-    // Hard 90s timeout — without this, a hang on the Anthropic API leaves
-    // the user stuck on the loader indefinitely (one user reported 40 min).
+    // Master 30s timeout covering the ENTIRE flash flow — getSession() included.
+    // The product promises <20s; 30s gives Anthropic cold-start headroom while
+    // still failing fast enough that the user notices (instead of staring at
+    // the loader for minutes). Note: we wrap supabase.auth.getSession() too —
+    // it's the most likely source of a hang because Supabase free-tier sleeps
+    // and getSession can hang forever with no timeout. Without this wrap, the
+    // AbortController on the fetch never gets a chance to fire.
     const controller = new AbortController()
-    const timeoutId = setTimeout(() => controller.abort(), 90_000)
+    const timeoutId = setTimeout(() => controller.abort(), 30_000)
+    const withTimeout = <T,>(p: Promise<T>): Promise<T> =>
+      new Promise((resolve, reject) => {
+        const onAbort = () => reject(new DOMException('Aborted', 'AbortError'))
+        if (controller.signal.aborted) return onAbort()
+        controller.signal.addEventListener('abort', onAbort)
+        p.then(resolve, reject).finally(() =>
+          controller.signal.removeEventListener('abort', onAbort)
+        )
+      })
 
     try {
-      // Get auth token if logged in
-      const { data: { session } } = await supabase.auth.getSession()
+      // Get auth token if logged in — wrapped in the master timeout so a
+      // sleeping Supabase doesn't strand us before we even start the fetch.
+      const { data: { session } } = await withTimeout(supabase.auth.getSession())
 
       const headers: Record<string, string> = {
         'Content-Type': 'application/json',
@@ -317,7 +332,7 @@ export default function AppPage() {
     } catch (err) {
       console.error(err)
       if (err instanceof Error && err.name === 'AbortError') {
-        setError('The flash took too long and was cancelled. Please try again — if it keeps happening, paste shorter notes.')
+        setError('Flash took longer than 30s and was cancelled. This usually clears on a retry — try once more.')
       } else {
         setError('Something went wrong. Please try again.')
       }
