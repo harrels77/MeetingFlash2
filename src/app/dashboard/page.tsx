@@ -56,79 +56,48 @@ export default function Dashboard() {
   // blank after navigating back from settings" bug where Supabase's cold-start
   // returned an error (not empty data) and the previous logic blindly did
   // setMeetings([]) / setProjects([]) etc., wiping the visible state.
-  const loadData = useCallback(async (userId: string): Promise<boolean> => {
-    // Wait for the JWT to be present before firing queries — without this,
-    // a navigation that races with a Supabase token refresh can issue all
-    // four queries unauthenticated, RLS silently returns empty results
-    // (no error code), and the dashboard renders blank + "FREE / Unlimited".
+  const loadData = useCallback(async (): Promise<boolean> => {
+    // Server-side fetch via /api/dashboard/data — uses the service role key
+    // on the server so RLS races on Supabase cold-starts can't return silent
+    // empty results. The route verifies the caller via the Authorization
+    // header before fetching, so security is unchanged. See the route file
+    // for the full rationale.
     const { data: { session } } = await supabase.auth.getSession()
     if (!session?.access_token) {
       console.warn('Dashboard load: no session JWT yet, will retry')
       return false
     }
 
-    const [profResult, projResult, meetsResult, tasksResult] = await Promise.all([
-      supabase.from('profiles').select('*').eq('id', userId).single(),
-      supabase.from('projects').select('*').eq('user_id', userId).order('created_at', { ascending: false }),
-      supabase.from('meetings').select('*').eq('user_id', userId).order('created_at', { ascending: false }).limit(50),
-      supabase.from('tasks').select('id, text, owner, deadline, meeting_id, status').eq('user_id', userId).neq('status', 'done').order('created_at', { ascending: false }).limit(20)
-    ])
-
-    // Any hard error from any query → retryable failure.
-    if (profResult.error || projResult.error || meetsResult.error || tasksResult.error) {
-      console.error('Dashboard load error:', { profErr: profResult.error, projErr: projResult.error, meetsErr: meetsResult.error, tasksErr: tasksResult.error })
+    try {
+      const res = await fetch('/api/dashboard/data', {
+        headers: { Authorization: `Bearer ${session.access_token}` },
+      })
+      if (!res.ok) {
+        console.error('Dashboard load HTTP error:', res.status)
+        return false
+      }
+      const data = await res.json()
+      if (data.profile) setProfile(data.profile)
+      setProjects(data.projects || [])
+      setMeetings(data.meetings || [])
+      setOpenTasks(data.openTasks || [])
+      return true
+    } catch (err) {
+      console.error('Dashboard load network error:', err)
       return false
     }
+  }, [])
 
-    // Coherence guard: AuthProvider already confirmed this user has a profile
-    // in the DB (otherwise authProfile would be null and the user would have
-    // been redirected). If THIS load got back an empty profile + empty
-    // projects + empty meetings, that's the silent-RLS-empty bug — JWT was
-    // technically attached but the request went out before the auth context
-    // propagated through the supabase client. Treat as failure to trigger
-    // a retry + the yellow "Couldn't load your data" banner, instead of
-    // rendering a misleading "blank dashboard like a new account" state.
-    const noProfile = !profResult.data
-    const noProjects = !projResult.data || projResult.data.length === 0
-    const noMeetings = !meetsResult.data || meetsResult.data.length === 0
-    if (authProfile && noProfile && noProjects && noMeetings) {
-      console.warn('Dashboard load: AuthProvider has profile but DB queries all returned empty — likely RLS race, retrying')
-      return false
-    }
-
-    if (profResult.data) setProfile(profResult.data)
-    setProjects(projResult.data || [])
-    setMeetings(meetsResult.data || [])
-
-    const allMeetings = meetsResult.data || []
-    const meetingTitleById = new Map(allMeetings.map(m => [m.id, m.title]))
-    const enrichedTasks = (tasksResult.data || []).map(t => ({
-      id: t.id,
-      text: t.text,
-      owner: t.owner,
-      deadline: t.deadline,
-      meeting_id: t.meeting_id,
-      meeting_title: meetingTitleById.get(t.meeting_id) || 'Untitled meeting',
-    }))
-    setOpenTasks(enrichedTasks)
-    return true
-  }, [authProfile])
-
-  const runLoad = useCallback(async (userId: string) => {
+  const runLoad = useCallback(async () => {
     setLoadError(false)
-    let ok = await loadData(userId)
-    // Cold-start retry once after 1.5s — Supabase free tier wakes up on the
-    // second hit.
+    let ok = await loadData()
+    // Single retry at 1.5s for the rare case where the API route itself
+    // hits Supabase mid-cold-start. Service-role queries don't have RLS
+    // race issues, so we don't need the 3-attempt budget the old client-
+    // side path needed.
     if (!ok) {
       await new Promise(r => setTimeout(r, 1500))
-      ok = await loadData(userId)
-    }
-    // Second retry at 4s — covers the case where the first 1.5s wasn't enough
-    // for the instance to wake. Total budget is now ~5.5s, well under the 8s
-    // safety. After this we surface the yellow "Couldn't load" banner.
-    if (!ok) {
-      await new Promise(r => setTimeout(r, 2500))
-      ok = await loadData(userId)
+      ok = await loadData()
     }
     if (!ok) setLoadError(true)
     setLoading(false)
@@ -143,7 +112,7 @@ export default function Dashboard() {
 
     // Safety net: never let the spinner run more than 12s (covers the 1.5s retry)
     const timeout = setTimeout(() => setLoading(false), 12000)
-    runLoad(user.id).finally(() => clearTimeout(timeout))
+    runLoad().finally(() => clearTimeout(timeout))
 
     return () => clearTimeout(timeout)
   }, [user, authLoading, router, runLoad])
@@ -325,7 +294,7 @@ export default function Dashboard() {
               onClick={() => {
                 if (!user) return
                 setLoading(true)
-                runLoad(user.id)
+                runLoad()
               }}
               style={{
                 background: 'var(--blue)',
