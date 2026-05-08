@@ -6,6 +6,8 @@ import { packFieldToString } from '@/lib/supabase'
 import ActionTiers from '@/components/ActionTiers'
 import QuestionsView from '@/components/QuestionsView'
 import RisksView from '@/components/RisksView'
+import OutcomePill from '@/components/OutcomePill'
+import { BLOCK_ICONS } from '@/lib/packMeta'
 import styles from './share.module.css'
 
 export const metadata: Metadata = {
@@ -69,6 +71,7 @@ export default async function SharePage({ params }: { params: { token: string } 
 
         {meeting.pack?.snapshot && (
           <div className={styles.snapshot}>
+            <OutcomePill pack={meeting.pack} />
             <div className={styles.snapshotPill}>⚡ Executive snapshot</div>
             <p className={styles.snapshotBody}>{packFieldToString(meeting.pack.snapshot)}</p>
           </div>
@@ -83,7 +86,7 @@ export default async function SharePage({ params }: { params: { token: string } 
             >
               <div className={styles.blockHead}>
                 <div className={styles.blockType}>
-                  <div className={`${styles.blockDot} ${styles[`dot_${block.color}`]}`}/>
+                  <span className={styles.blockIcon} aria-hidden="true">{BLOCK_ICONS[block.id] || '•'}</span>
                   <span className={`${styles.blockLabel} ${styles[`label_${block.color}`]}`}>
                     {block.label}
                   </span>

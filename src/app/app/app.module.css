@@ -850,6 +850,16 @@
 .dot_fog    { background: var(--faint); }
 .dot_paper  { background: rgba(148,163,184,0.5); }
 
+.blockIcon {
+  font-size: 16px;
+  line-height: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+}
+
 .blockLabel {
   font-size: 11px;
   font-weight: 600;

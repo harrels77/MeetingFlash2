@@ -8,6 +8,8 @@ import { useAuth } from '@/lib/AuthProvider'
 import ActionTiers from '@/components/ActionTiers'
 import QuestionsView from '@/components/QuestionsView'
 import RisksView from '@/components/RisksView'
+import OutcomePill from '@/components/OutcomePill'
+import { BLOCK_ICONS } from '@/lib/packMeta'
 import ThemeToggle from '@/components/ThemeToggle'
 import { useEffect } from 'react'
 
@@ -767,6 +769,7 @@ async function createProject() {
 
           {pack?.snapshot && (
             <div className={styles.snapshot}>
+              <OutcomePill pack={pack} />
               <div className={styles.snapshotHead}>
                 <span className={styles.snapshotPill}>⚡ Executive snapshot</span>
                 <button
@@ -790,7 +793,7 @@ async function createProject() {
                 >
                   <div className={styles.blockHead}>
                     <div className={styles.blockType}>
-                      <div className={`${styles.blockDot} ${styles[`dot_${block.color}`]}`}/>
+                      <span className={styles.blockIcon} aria-hidden="true">{BLOCK_ICONS[block.id] || '•'}</span>
                       <span className={`${styles.blockLabel} ${styles[`label_${block.color}`]}`}>
                         {block.label}
                       </span>

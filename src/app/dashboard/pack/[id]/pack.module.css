@@ -225,6 +225,7 @@
 .blockType { display: flex; align-items: center; gap: 8px; }
 
 .blockDot { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
+.blockIcon { font-size: 16px; line-height: 1; display: inline-flex; align-items: center; justify-content: center; width: 20px; height: 20px; }
 .dot_spark  { background: var(--blue2); }
 .dot_ember  { background: var(--green); }
 .dot_danger { background: var(--amber); }

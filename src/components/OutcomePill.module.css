@@ -1,0 +1,36 @@
+/* Meeting-outcome pill — sits above the executive snapshot. */
+
+.pill {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0;
+  padding: 4px 4px;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 600;
+  margin-bottom: 12px;
+  max-width: 100%;
+}
+
+.seg {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 12px;
+  color: var(--muted);
+  position: relative;
+}
+.seg + .seg::before {
+  content: '·';
+  position: absolute;
+  left: -2px;
+  color: var(--border);
+  font-weight: 400;
+}
+
+.tone_neutral { color: var(--text); }
+.tone_critical { color: #FCA5A5; font-weight: 700; }
+:global([data-theme="light"]) .tone_critical { color: #B91C1C; }
+.tone_muted { color: var(--muted); }
