@@ -267,6 +267,11 @@ export default function AppPage() {
       setLoaderMsg(LOADER_MSGS[i])
     }, 1100)
 
+    // Hard 90s timeout — without this, a hang on the Anthropic API leaves
+    // the user stuck on the loader indefinitely (one user reported 40 min).
+    const controller = new AbortController()
+    const timeoutId = setTimeout(() => controller.abort(), 90_000)
+
     try {
       // Get auth token if logged in
       const { data: { session } } = await supabase.auth.getSession()
@@ -283,6 +288,7 @@ export default function AppPage() {
         method: 'POST',
         headers,
         body: JSON.stringify({ text, lang, style, projectId }),
+        signal: controller.signal,
       })
 
       const data = await res.json()
@@ -310,8 +316,13 @@ export default function AppPage() {
       }
     } catch (err) {
       console.error(err)
-      setError('Something went wrong. Please try again.')
+      if (err instanceof Error && err.name === 'AbortError') {
+        setError('The flash took too long and was cancelled. Please try again — if it keeps happening, paste shorter notes.')
+      } else {
+        setError('Something went wrong. Please try again.')
+      }
     } finally {
+      clearTimeout(timeoutId)
       clearInterval(interval)
       setLoading(false)
     }

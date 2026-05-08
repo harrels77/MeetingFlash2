@@ -191,33 +191,51 @@ Return ONLY raw JSON. No markdown. No explanation.${projectContext}
 Meeting transcript:
 ${text}`
 
-    const res = await fetch('https://api.anthropic.com/v1/messages', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'x-api-key': apiKey,
-        'anthropic-version': '2023-06-01',
-        'anthropic-beta': 'prompt-caching-2024-07-31',
-      },
-      body: JSON.stringify({
-        // Haiku 4.5 is roughly 3× faster than Sonnet 4 with comparable quality
-        // on tightly-structured JSON tasks like this one (the schema does most
-        // of the work — the model just fills slots). Switched in Phase 10 to
-        // address user feedback that packs took too long to load.
-        model: 'claude-haiku-4-5-20251001',
-        // 2500 is enough for a full 7-block pack; previous 4000 was a safety
-        // ceiling that almost never got close. Lower budget = faster response.
-        max_tokens: 2500,
-        system: [
-          {
-            type: 'text',
-            text: 'You are MeetingFlash, a professional post-meeting execution assistant. Return ONLY valid JSON — no markdown, no explanation.',
-            cache_control: { type: 'ephemeral' },
-          }
-        ],
-        messages: [{ role: 'user', content: prompt }],
-      }),
-    })
+    // Hard 75s timeout on the Anthropic call — without it a network hang or
+    // a stuck upstream leaves the request open indefinitely, the client loader
+    // spins forever, and the user sees no error. The client-side has its own
+    // 90s abort, so 75s here gives us headroom to still return a clean 504.
+    const upstreamController = new AbortController()
+    const upstreamTimeout = setTimeout(() => upstreamController.abort(), 75_000)
+
+    let res: Response
+    try {
+      res = await fetch('https://api.anthropic.com/v1/messages', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-api-key': apiKey,
+          'anthropic-version': '2023-06-01',
+          'anthropic-beta': 'prompt-caching-2024-07-31',
+        },
+        body: JSON.stringify({
+          // Haiku 4.5 is roughly 3× faster than Sonnet 4 with comparable quality
+          // on tightly-structured JSON tasks like this one (the schema does most
+          // of the work — the model just fills slots). Switched in Phase 10 to
+          // address user feedback that packs took too long to load.
+          model: 'claude-haiku-4-5-20251001',
+          // 2500 is enough for a full 7-block pack; previous 4000 was a safety
+          // ceiling that almost never got close. Lower budget = faster response.
+          max_tokens: 2500,
+          system: [
+            {
+              type: 'text',
+              text: 'You are MeetingFlash, a professional post-meeting execution assistant. Return ONLY valid JSON — no markdown, no explanation.',
+              cache_control: { type: 'ephemeral' },
+            }
+          ],
+          messages: [{ role: 'user', content: prompt }],
+        }),
+        signal: upstreamController.signal,
+      })
+    } catch (fetchErr) {
+      clearTimeout(upstreamTimeout)
+      if (fetchErr instanceof Error && fetchErr.name === 'AbortError') {
+        return NextResponse.json({ error: 'AI service timed out. Please try again.' }, { status: 504 })
+      }
+      throw fetchErr
+    }
+    clearTimeout(upstreamTimeout)
 
     if (!res.ok) {
       const err = await res.text()
