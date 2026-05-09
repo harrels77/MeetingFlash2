@@ -80,10 +80,31 @@ export default function Settings() {
   async function deleteAccount() {
     if (!profile) return
     setDeleting(true)
-    await supabase.from('meetings').delete().eq('user_id', profile.id)
-    await supabase.from('projects').delete().eq('user_id', profile.id)
-    await supabase.from('profiles').delete().eq('id', profile.id)
-    signOut()
+    try {
+      const { data: { session } } = await supabase.auth.getSession()
+      if (!session?.access_token) {
+        alert('Session expired. Please sign in again before deleting your account.')
+        setDeleting(false)
+        return
+      }
+      const res = await fetch('/api/account/delete', {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${session.access_token}` },
+      })
+      if (!res.ok) {
+        const body = await res.json().catch(() => ({}))
+        alert(`Couldn't delete your account: ${body.error || 'unknown error'}. Please try again or contact support.`)
+        setDeleting(false)
+        return
+      }
+      // Server has deleted profile, all data, AND the auth.users row.
+      // Sign out the client-side session and redirect home.
+      signOut()
+    } catch (err) {
+      console.error('Delete account error:', err)
+      alert('Network error while deleting your account. Please try again.')
+      setDeleting(false)
+    }
   }
 
   const usesLeft = profile?.plan === 'free'
