@@ -14,6 +14,8 @@ interface Profile {
   plan: string
   uses_this_month: number
   created_at: string
+  default_lang?: string | null
+  default_style?: string | null
 }
 
 export default function Settings() {
@@ -26,6 +28,11 @@ export default function Settings() {
   const [saved, setSaved]         = useState(false)
   const [deleting, setDeleting]   = useState(false)
   const [confirmDelete, setConfirmDelete] = useState(false)
+  const [defaultLang, setDefaultLang]     = useState<'EN' | 'FR' | 'ES' | 'DE'>('EN')
+  const [defaultStyle, setDefaultStyle]   = useState<'Concise' | 'Detailed' | 'Email'>('Concise')
+  const [savingPrefs, setSavingPrefs]     = useState(false)
+  const [prefsSaved, setPrefsSaved]       = useState(false)
+  const [openingPortal, setOpeningPortal] = useState(false)
 
   useEffect(() => {
     if (authLoading) return
@@ -56,6 +63,8 @@ export default function Settings() {
       if (data) {
         setProfile(data)
         setName(data.full_name || '')
+        if (data.default_lang) setDefaultLang(data.default_lang as 'EN' | 'FR' | 'ES' | 'DE')
+        if (data.default_style) setDefaultStyle(data.default_style as 'Concise' | 'Detailed' | 'Email')
       }
       clearTimeout(timeout)
       setLoading(false)
@@ -75,6 +84,47 @@ export default function Settings() {
     setSaving(false)
     setSaved(true)
     setTimeout(() => setSaved(false), 2000)
+  }
+
+  async function savePreferences() {
+    if (!profile) return
+    setSavingPrefs(true)
+    const { error } = await supabase
+      .from('profiles')
+      .update({ default_lang: defaultLang, default_style: defaultStyle })
+      .eq('id', profile.id)
+    setSavingPrefs(false)
+    if (!error) {
+      setProfile({ ...profile, default_lang: defaultLang, default_style: defaultStyle })
+      setPrefsSaved(true)
+      setTimeout(() => setPrefsSaved(false), 2000)
+    }
+  }
+
+  async function openBillingPortal() {
+    setOpeningPortal(true)
+    try {
+      const { data: { session } } = await supabase.auth.getSession()
+      if (!session?.access_token) {
+        alert('Session expired. Please sign in again.')
+        return
+      }
+      const res = await fetch('/api/stripe/portal', {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${session.access_token}` },
+      })
+      const body = await res.json()
+      if (res.ok && body.url) {
+        window.location.href = body.url
+      } else {
+        alert(body.error || 'Could not open billing portal. Please try again.')
+      }
+    } catch (err) {
+      console.error('Billing portal error:', err)
+      alert('Network error opening billing portal.')
+    } finally {
+      setOpeningPortal(false)
+    }
   }
 
   async function deleteAccount() {
@@ -167,10 +217,19 @@ export default function Settings() {
                   }
                 </div>
               </div>
-              {profile?.plan === 'free' && (
+              {profile?.plan === 'free' ? (
                 <Link href="/pricing" className={styles.upgradeBtn}>
                   Upgrade to Pro →
                 </Link>
+              ) : (
+                <button
+                  className={styles.upgradeBtn}
+                  onClick={openBillingPortal}
+                  disabled={openingPortal}
+                  type="button"
+                >
+                  {openingPortal ? 'Opening…' : 'Manage subscription →'}
+                </button>
               )}
             </div>
             <div className={styles.usageBar}>
@@ -213,6 +272,55 @@ export default function Settings() {
             <div className={styles.fieldGroup} style={{ marginTop: 20 }}>
               <label className={styles.label}>Email</label>
               <div className={styles.emailDisplay}>{profile?.email}</div>
+            </div>
+          </div>
+        </div>
+
+        {/* PREFERENCES — pre-fills /app on every flash so the user doesn't reselect lang/style each time */}
+        <div className={styles.section}>
+          <div className={styles.sectionTitle}>Flash preferences</div>
+          <div className={styles.card}>
+            <div className={styles.fieldGroup}>
+              <label className={styles.label}>Default output language</label>
+              <div className={styles.fieldRow}>
+                <select
+                  className={styles.input}
+                  value={defaultLang}
+                  onChange={e => setDefaultLang(e.target.value as 'EN' | 'FR' | 'ES' | 'DE')}
+                  disabled={profile?.plan === 'free'}
+                >
+                  <option value="EN">English</option>
+                  <option value="FR">Français</option>
+                  <option value="ES">Español</option>
+                  <option value="DE">Deutsch</option>
+                </select>
+              </div>
+              {profile?.plan === 'free' && (
+                <div style={{ fontSize: 12, color: 'var(--muted)', marginTop: 6 }}>
+                  Free plan is English-only. <Link href="/pricing" style={{ color: 'var(--blue3)' }}>Upgrade to Pro</Link> to unlock FR/ES/DE.
+                </div>
+              )}
+            </div>
+            <div className={styles.fieldGroup} style={{ marginTop: 20 }}>
+              <label className={styles.label}>Default style</label>
+              <div className={styles.fieldRow}>
+                <select
+                  className={styles.input}
+                  value={defaultStyle}
+                  onChange={e => setDefaultStyle(e.target.value as 'Concise' | 'Detailed' | 'Email')}
+                >
+                  <option value="Concise">Concise — sharp and minimum words</option>
+                  <option value="Detailed">Detailed — thorough, all relevant context</option>
+                  <option value="Email">Email — formatted for professional follow-up</option>
+                </select>
+                <button
+                  className={styles.saveBtn}
+                  onClick={savePreferences}
+                  disabled={savingPrefs}
+                >
+                  {prefsSaved ? '✓ Saved' : savingPrefs ? 'Saving…' : 'Save'}
+                </button>
+              </div>
             </div>
           </div>
         </div>

@@ -162,6 +162,10 @@ export default function AppPage() {
   const [text, setText]     = useState('')
   const [lang, setLang]     = useState('EN')
   const [style, setStyle]   = useState('Concise')
+  // Track whether the user has manually toggled lang/style this session.
+  // Without this flag, the profile-defaults effect would clobber a user's
+  // mid-session change every time their profile re-renders.
+  const userTouchedPrefsRef = useRef(false)
   const [loading, setLoading] = useState(false)
   const [loaderMsg, setLoaderMsg] = useState('')
   const [pack, setPack]     = useState<Pack | null>(null)
@@ -281,6 +285,16 @@ export default function AppPage() {
     })()
     return () => { cancelled = true }
   }, [projectId, user])
+
+  // Prefill lang/style from the user's saved preferences (set in /dashboard/settings).
+  // Only runs while the user hasn't touched the toggles this session — once
+  // they manually pick something, we respect that choice for the rest of the
+  // session even if the profile re-renders.
+  useEffect(() => {
+    if (!profile || userTouchedPrefsRef.current) return
+    if (profile.default_lang) setLang(profile.default_lang)
+    if (profile.default_style) setStyle(profile.default_style)
+  }, [profile])
 
   // Track guest free-pack usage in localStorage (only meaningful when not signed in)
   useEffect(() => {
@@ -772,6 +786,7 @@ async function createProject() {
                     className={`${styles.toggle} ${lang === k ? styles.toggleOn : ''}`}
                     onClick={() => {
                       if (locked) { setShowUpgradeModal(true); return }
+                      userTouchedPrefsRef.current = true
                       setLang(k)
                     }}
                     style={locked ? { opacity: 0.5, cursor: 'pointer' } : undefined}
@@ -789,7 +804,7 @@ async function createProject() {
                 <button
                   key={k}
                   className={`${styles.toggle} ${style === k ? styles.toggleOn : ''}`}
-                  onClick={() => setStyle(k)}
+                  onClick={() => { userTouchedPrefsRef.current = true; setStyle(k) }}
                 >{k}</button>
               ))}
             </div>

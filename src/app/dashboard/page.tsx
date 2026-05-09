@@ -50,6 +50,9 @@ export default function Dashboard() {
   const [hovered, setHovered]               = useState<string | null>(null)
   const [openTasks, setOpenTasks]           = useState<{ id: string; text: string; owner: string | null; deadline: string | null; meeting_id: string; meeting_title: string }[]>([])
   const [loadError, setLoadError]           = useState(false)
+  // Project filter on the Recent packs tab. 'all' = no filter, 'none' = packs
+  // without a project, otherwise = a project id.
+  const [projectFilter, setProjectFilter]   = useState<'all' | 'none' | string>('all')
 
   // Returns true on success, false if any of the underlying queries errored.
   // CRITICAL: only overwrites state on success — prevents the "dashboard goes
@@ -212,6 +215,33 @@ export default function Dashboard() {
   const usesLeft = effectiveProfile?.plan === 'free'
     ? Math.max(0, 5 - (effectiveProfile?.uses_this_month ?? 0))
     : Infinity
+
+  // === DERIVED METRICS ===
+
+  // Time saved this month — same heuristic as the post-flash toast on /app:
+  // ~3 min per action item + 8 min for the email + 2 min for slack/agenda
+  // formatting, floor 15 min per pack. Aggregates over packs created this
+  // calendar month (1st → today).
+  const monthStart = new Date()
+  monthStart.setDate(1)
+  monthStart.setHours(0, 0, 0, 0)
+  const minutesSavedThisMonth = meetings.reduce((acc, m) => {
+    const created = new Date(m.created_at)
+    if (created < monthStart) return acc
+    const actionsStr = typeof m.pack?.actions === 'string' ? m.pack.actions : ''
+    const actionsCount = actionsStr.split('\n').filter(l => l.trim().startsWith('•')).length
+    return acc + Math.max(15, actionsCount * 3 + 10)
+  }, 0)
+  const hoursSavedThisMonth = Math.floor(minutesSavedThisMonth / 60)
+  const minutesSavedRemainder = minutesSavedThisMonth % 60
+  const packsThisMonth = meetings.filter(m => new Date(m.created_at) >= monthStart).length
+
+  // Filter recent meetings by project (or "no project" or "all").
+  const filteredMeetings = projectFilter === 'all'
+    ? meetings
+    : projectFilter === 'none'
+      ? meetings.filter(m => !m.project_id)
+      : meetings.filter(m => m.project_id === projectFilter)
 
   if (loading) return (
     <div className={styles.loadingScreen}>
@@ -433,15 +463,96 @@ export default function Dashboard() {
         {/* RECENT PACKS */}
         {tab === 'recent' && (
           <div className={styles.content}>
+            {/* TIME SAVED THIS MONTH — value reinforcement at every dashboard
+                visit. Hidden if the user has zero packs (nothing to celebrate
+                yet) or zero packs THIS MONTH (don't show "0h saved" — it's
+                discouraging). */}
+            {meetings.length > 0 && minutesSavedThisMonth > 0 && (
+              <div style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: 16,
+                padding: '16px 20px',
+                marginBottom: 24,
+                background: 'linear-gradient(135deg, rgba(37,99,235,0.10) 0%, rgba(96,165,250,0.03) 100%)',
+                border: '1px solid rgba(37,99,235,0.22)',
+                borderRadius: 14,
+              }}>
+                <div style={{ fontSize: 28 }}>⏱️</div>
+                <div style={{ flex: 1 }}>
+                  <div style={{ fontSize: 22, fontWeight: 800, color: 'var(--text)', lineHeight: 1.1 }}>
+                    {hoursSavedThisMonth > 0
+                      ? <>~{hoursSavedThisMonth}h{minutesSavedRemainder > 0 ? ` ${minutesSavedRemainder}m` : ''}</>
+                      : <>~{minutesSavedThisMonth} min</>
+                    }
+                    <span style={{ fontSize: 13, fontWeight: 500, color: 'var(--muted)', marginLeft: 8 }}>
+                      saved this month
+                    </span>
+                  </div>
+                  <div style={{ fontSize: 12, color: 'var(--muted)', marginTop: 4 }}>
+                    Across {packsThisMonth} pack{packsThisMonth !== 1 ? 's' : ''} — that&apos;s admin time you got back.
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* PROJECT FILTER — only shown when at least one project exists,
+                otherwise the dropdown would be useless single-option. */}
+            {meetings.length > 0 && projects.length > 0 && (
+              <div style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: 10,
+                marginBottom: 16,
+                fontSize: 13,
+                color: 'var(--muted)',
+              }}>
+                <span>Filter:</span>
+                <select
+                  value={projectFilter}
+                  onChange={e => setProjectFilter(e.target.value)}
+                  style={{
+                    background: 'var(--surface)',
+                    border: '1px solid var(--border)',
+                    borderRadius: 8,
+                    padding: '6px 10px',
+                    fontSize: 13,
+                    fontFamily: 'var(--font)',
+                    color: 'var(--text)',
+                    cursor: 'pointer',
+                  }}
+                >
+                  <option value="all">All packs ({meetings.length})</option>
+                  <option value="none">No project ({meetings.filter(m => !m.project_id).length})</option>
+                  {projects.map(p => {
+                    const count = meetings.filter(m => m.project_id === p.id).length
+                    return <option key={p.id} value={p.id}>{p.name} ({count})</option>
+                  })}
+                </select>
+                {projectFilter !== 'all' && (
+                  <button
+                    onClick={() => setProjectFilter('all')}
+                    style={{ background: 'none', border: 'none', color: 'var(--blue3)', fontSize: 12, cursor: 'pointer', fontWeight: 600 }}
+                  >
+                    Clear filter
+                  </button>
+                )}
+              </div>
+            )}
+
             {meetings.length === 0 ? (
               <div className={styles.empty}>
                 <div className={styles.emptyGlyph}/>
                 <p>No packs yet. Flash your first meeting.</p>
                 <Link href="/app" className={styles.emptyBtn}>Flash a meeting →</Link>
               </div>
+            ) : filteredMeetings.length === 0 ? (
+              <div className={styles.empty}>
+                <p>No packs in this filter. <button onClick={() => setProjectFilter('all')} style={{ background: 'none', border: 'none', color: 'var(--blue3)', cursor: 'pointer', textDecoration: 'underline' }}>Show all packs</button></p>
+              </div>
             ) : (
               <div className={styles.meetingList}>
-                {meetings.map(m => (
+                {filteredMeetings.map(m => (
                   <div
                     key={m.id}
                     className={`${styles.meetingRow} ${selectMode && selected.includes(m.id) ? styles.meetingRowSelected : ''}`}

@@ -9,6 +9,8 @@ interface Profile {
   full_name: string | null
   plan: string
   uses_this_month: number
+  default_lang?: string | null
+  default_style?: string | null
 }
 
 interface AuthCtx {
