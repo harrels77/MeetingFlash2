@@ -380,6 +380,35 @@ export default function Settings() {
                 Sign out
               </button>
             </div>
+            <div className={styles.sessionRow} style={{ marginTop: 16, paddingTop: 16, borderTop: '1px solid var(--border)' }}>
+              <div>
+                <div className={styles.sessionTitle}>Hard reset session</div>
+                <div className={styles.sessionSub}>
+                  Wipes all locally-stored auth data (localStorage, sessionStorage, cookies) and signs you out. Use this if the app gets stuck in a weird state — wrong name in the nav, plan flickering between Pro/Free, or the dashboard refusing to load.
+                </div>
+              </div>
+              <button
+                className={styles.signOutBtn}
+                onClick={() => {
+                  // Nuke every storage Supabase or our app might be reading from.
+                  // Belt-and-braces: AuthProvider.signOut already clears sb-* keys,
+                  // but a stuck state often comes from non-sb keys (analytics,
+                  // cookies, sessionStorage) so we wipe wider here.
+                  try { localStorage.clear() } catch {}
+                  try { sessionStorage.clear() } catch {}
+                  try {
+                    document.cookie.split(';').forEach(c => {
+                      const eq = c.indexOf('=')
+                      const name = (eq > -1 ? c.substring(0, eq) : c).trim()
+                      document.cookie = `${name}=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/`
+                    })
+                  } catch {}
+                  signOut()
+                }}
+              >
+                Reset & sign out
+              </button>
+            </div>
           </div>
         </div>
 
