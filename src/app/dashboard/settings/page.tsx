@@ -2,7 +2,6 @@
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
-import { supabase } from '@/lib/supabase'
 import { useAuth } from '@/lib/AuthProvider'
 import ThemeToggle from '@/components/ThemeToggle'
 import styles from './settings.module.css'
@@ -28,7 +27,7 @@ export default function Settings() {
   // AuthProvider one — that desync was the root cause of the "Settings shows
   // No name set / Dashboard shows Pro plan" bug. We mutate via the API and
   // then call refetchProfile() to re-hydrate the global store.
-  const { user, profile, loading: authLoading, signOut, refetchProfile } = useAuth()
+  const { user, profile, accessToken, loading: authLoading, signOut, refetchProfile } = useAuth()
   const [loading, setLoading]     = useState(true)
   const [name, setName]           = useState('')
   const [saving, setSaving]       = useState(false)
@@ -53,11 +52,10 @@ export default function Settings() {
     // "?", "No name set", "Invalid Date" and a misleading "Team plan"
     // fallback in this page.
     async function fetchOnce(): Promise<Profile | null> {
-      const { data: { session } } = await supabase.auth.getSession()
-      if (!session?.access_token) return null
+      if (!accessToken) return null
       try {
         const res = await fetch('/api/account/me', {
-          headers: { Authorization: `Bearer ${session.access_token}` },
+          headers: { Authorization: `Bearer ${accessToken}` },
         })
         if (!res.ok) return null
         const body = await res.json()
@@ -93,12 +91,11 @@ export default function Settings() {
   // through the same /api/account/update endpoint. Returns the new profile
   // on success (so we can update local state) or null on error.
   async function postUpdate(updates: Record<string, unknown>): Promise<Profile | null> {
-    const { data: { session } } = await supabase.auth.getSession()
-    if (!session?.access_token) return null
+    if (!accessToken) return null
     try {
       const res = await fetch('/api/account/update', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${session.access_token}` },
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${accessToken}` },
         body: JSON.stringify(updates),
       })
       if (!res.ok) return null
@@ -140,14 +137,13 @@ export default function Settings() {
   async function openBillingPortal() {
     setOpeningPortal(true)
     try {
-      const { data: { session } } = await supabase.auth.getSession()
-      if (!session?.access_token) {
+      if (!accessToken) {
         alert('Session expired. Please sign in again.')
         return
       }
       const res = await fetch('/api/stripe/portal', {
         method: 'POST',
-        headers: { Authorization: `Bearer ${session.access_token}` },
+        headers: { Authorization: `Bearer ${accessToken}` },
       })
       const body = await res.json()
       if (res.ok && body.url) {
@@ -167,15 +163,14 @@ export default function Settings() {
     if (!profile) return
     setDeleting(true)
     try {
-      const { data: { session } } = await supabase.auth.getSession()
-      if (!session?.access_token) {
+      if (!accessToken) {
         alert('Session expired. Please sign in again before deleting your account.')
         setDeleting(false)
         return
       }
       const res = await fetch('/api/account/delete', {
         method: 'POST',
-        headers: { Authorization: `Bearer ${session.access_token}` },
+        headers: { Authorization: `Bearer ${accessToken}` },
       })
       if (!res.ok) {
         const body = await res.json().catch(() => ({}))
