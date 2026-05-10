@@ -7,21 +7,28 @@ import { useAuth } from '@/lib/AuthProvider'
 import ThemeToggle from '@/components/ThemeToggle'
 import styles from './settings.module.css'
 
+// Local shape used only for the API return types in this file. The canonical
+// Profile lives in AuthProvider — we read it via useAuth() and never store
+// our own copy.
 interface Profile {
   id: string
   email: string
   full_name: string | null
   plan: string
   uses_this_month: number
-  created_at: string
+  created_at?: string
   default_lang?: string | null
   default_style?: string | null
 }
 
 export default function Settings() {
   const router = useRouter()
-  const { user, loading: authLoading, signOut } = useAuth()
-  const [profile, setProfile]     = useState<Profile | null>(null)
+  // Single source of truth: useAuth().profile is the canonical store. The
+  // page used to keep its own local profile state which diverged from the
+  // AuthProvider one — that desync was the root cause of the "Settings shows
+  // No name set / Dashboard shows Pro plan" bug. We mutate via the API and
+  // then call refetchProfile() to re-hydrate the global store.
+  const { user, profile, loading: authLoading, signOut, refetchProfile } = useAuth()
   const [loading, setLoading]     = useState(true)
   const [name, setName]           = useState('')
   const [saving, setSaving]       = useState(false)
@@ -66,7 +73,10 @@ export default function Settings() {
         data = await fetchOnce()
       }
       if (data) {
-        setProfile(data)
+        // Push the fresh profile back into AuthProvider so the rest of the app
+        // (sidebar plan badge, /app prefill) sees the same state. Pure form
+        // state (name input, dropdowns) stays local — that's expected.
+        refetchProfile().catch(() => {})
         setName(data.full_name || '')
         if (data.default_lang) setDefaultLang(data.default_lang as 'EN' | 'FR' | 'ES' | 'DE')
         if (data.default_style) setDefaultStyle(data.default_style as 'Concise' | 'Detailed' | 'Email')
@@ -105,7 +115,7 @@ export default function Settings() {
     const updated = await postUpdate({ full_name: name })
     setSaving(false)
     if (updated) {
-      setProfile(updated)
+      await refetchProfile().catch(() => {})
       setSaved(true)
       setTimeout(() => setSaved(false), 2000)
     } else {
@@ -119,7 +129,7 @@ export default function Settings() {
     const updated = await postUpdate({ default_lang: defaultLang, default_style: defaultStyle })
     setSavingPrefs(false)
     if (updated) {
-      setProfile(updated)
+      await refetchProfile().catch(() => {})
       setPrefsSaved(true)
       setTimeout(() => setPrefsSaved(false), 2000)
     } else {
@@ -220,9 +230,10 @@ export default function Settings() {
                 </div>
                 <div className={styles.accountEmail}>{profile?.email}</div>
                 <div className={styles.accountDate}>
-                  Member since {new Date(profile?.created_at || '').toLocaleDateString('en-GB', {
-                    month: 'long', year: 'numeric'
-                  })}
+                  {profile?.created_at
+                    ? <>Member since {new Date(profile.created_at).toLocaleDateString('en-GB', { month: 'long', year: 'numeric' })}</>
+                    : <>Member since —</>
+                  }
                 </div>
               </div>
             </div>

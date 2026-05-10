@@ -9,6 +9,7 @@ interface Profile {
   full_name: string | null
   plan: string
   uses_this_month: number
+  created_at?: string
   default_lang?: string | null
   default_style?: string | null
 }
@@ -18,6 +19,13 @@ interface AuthCtx {
   profile: Profile | null
   loading: boolean
   signOut: () => Promise<void>
+  // Re-fetches the profile from the DB and updates the global store. Called
+  // by pages that mutate the profile (settings save) so every component
+  // reading from useAuth().profile reflects the change immediately — without
+  // each page maintaining its own duplicate local profile state, which is
+  // what caused the desync bug ("dashboard shows packs / settings shows
+  // No name set, Team plan / next nav both work again").
+  refetchProfile: () => Promise<void>
 }
 
 const Ctx = createContext<AuthCtx>({
@@ -25,6 +33,7 @@ const Ctx = createContext<AuthCtx>({
   profile: null,
   loading: true,
   signOut: async () => {},
+  refetchProfile: async () => {},
 })
 
 export function AuthProvider({ children }: { children: ReactNode }) {
@@ -230,8 +239,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     window.location.replace('/')
   }
 
+  // Manual refresh, used after a profile mutation (e.g. settings save) so the
+  // global store reflects the change without each page keeping a duplicate
+  // local copy that drifts. Safe to call when user is null — it just no-ops.
+  const refetchProfile = async () => {
+    if (!user) return
+    await loadProfile(user.id, user.email || '').catch(() => {})
+  }
+
   return (
-    <Ctx.Provider value={{ user, profile, loading, signOut }}>
+    <Ctx.Provider value={{ user, profile, loading, signOut, refetchProfile }}>
       {children}
     </Ctx.Provider>
   )

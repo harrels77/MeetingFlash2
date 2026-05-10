@@ -9,14 +9,6 @@ import ThemeToggle from '@/components/ThemeToggle'
 import styles from './dashboard.module.css'
 
 
-interface Profile {
-  id: string
-  email: string
-  full_name: string | null
-  plan: string
-  uses_this_month: number
-}
-
 interface Project {
   id: string
   name: string
@@ -33,8 +25,13 @@ interface Meeting {
 
 export default function Dashboard() {
   const router = useRouter()
-  const { user, profile: authProfile, loading: authLoading } = useAuth()
-  const [profile, setProfile]   = useState<Profile | null>(null)
+  // Single source of truth: useAuth().profile is the canonical store.
+  // The dashboard previously had its own local `profile` state that could
+  // desync from AuthProvider (one would load while the other failed on
+  // cold-start, producing the "Settings shows No name set / Dashboard
+  // shows Pro plan" inconsistency). Now we read from useAuth() and drop
+  // the local copy entirely.
+  const { user, profile, loading: authLoading, refetchProfile } = useAuth()
   const [projects, setProjects] = useState<Project[]>([])
   const [meetings, setMeetings] = useState<Meeting[]>([])
   const [tab, setTab]           = useState<'recent' | 'projects'>('recent')
@@ -82,14 +79,14 @@ export default function Dashboard() {
       const data = await res.json()
 
       // Coherence guard: AuthProvider has already confirmed this user has a
-      // real profile in the DB (otherwise authProfile would be null and we'd
+      // real profile in the DB (otherwise profile would be null and we'd
       // have redirected to /login). If the API somehow returned a fully
       // empty payload — no profile, no projects, no meetings — that's an
       // upstream blip, not the truth. Trigger a retry instead of rendering
       // a blank "new account" dashboard, which is what was happening
       // intermittently on navigation.
       if (
-        authProfile &&
+        profile &&
         !data.profile &&
         (!data.projects || data.projects.length === 0) &&
         (!data.meetings || data.meetings.length === 0)
@@ -98,7 +95,12 @@ export default function Dashboard() {
         return false
       }
 
-      if (data.profile) setProfile(data.profile)
+      // If the API got a fresher profile (e.g. uses_this_month bumped after
+      // a recent flash), push it back into the AuthProvider store so the
+      // sidebar badge stays in sync without us keeping a duplicate copy.
+      if (data.profile && data.profile.uses_this_month !== profile?.uses_this_month) {
+        refetchProfile().catch(() => {})
+      }
       setProjects(data.projects || [])
       setMeetings(data.meetings || [])
       setOpenTasks(data.openTasks || [])
@@ -107,7 +109,7 @@ export default function Dashboard() {
       console.error('Dashboard load network error:', err)
       return false
     }
-  }, [authProfile])
+  }, [profile, refetchProfile])
 
   const runLoad = useCallback(async () => {
     setLoadError(false)
@@ -226,12 +228,10 @@ export default function Dashboard() {
     return lines.join(' · ') || 'No summary available'
   }
 
-  // Prefer the local profile (freshest, includes uses_this_month after a flash)
-  // but fall back to AuthProvider's profile so the sidebar badge never shows
-  // a contradictory "FREE / Unlimited" when local load hasn't completed yet.
-  const effectiveProfile = profile ?? authProfile
-  const usesLeft = effectiveProfile?.plan === 'free'
-    ? Math.max(0, 5 - (effectiveProfile?.uses_this_month ?? 0))
+  // Single source of truth — profile comes from useAuth() above. No more
+  // local copy that could desync from the AuthProvider store.
+  const usesLeft = profile?.plan === 'free'
+    ? Math.max(0, 5 - (profile?.uses_this_month ?? 0))
     : Infinity
 
   // === DERIVED METRICS ===
@@ -296,20 +296,20 @@ export default function Dashboard() {
 
         <div className={styles.sidebarBottom}>
           <div className={styles.planBadge}>
-            <span className={styles.planName}>{effectiveProfile?.plan ?? '—'}</span>
+            <span className={styles.planName}>{profile?.plan ?? '—'}</span>
             <span className={styles.planUses}>
-              {effectiveProfile?.plan === 'free'
+              {profile?.plan === 'free'
                 ? `${usesLeft} / 5 left`
-                : effectiveProfile?.plan === 'pro' || effectiveProfile?.plan === 'team'
+                : profile?.plan === 'pro' || profile?.plan === 'team'
                   ? 'Unlimited'
                   : '—'}
             </span>
           </div>
-          {effectiveProfile?.plan === 'free' && (
+          {profile?.plan === 'free' && (
             <Link href="/pricing" className={styles.upgradeBtn}>Upgrade to Pro →</Link>
           )}
           <div className={styles.userRow}>
-            <div className={styles.userEmail}>{effectiveProfile?.email ?? user?.email}</div>
+            <div className={styles.userEmail}>{profile?.email ?? user?.email}</div>
             <Link href="/dashboard/settings" className={styles.settingsLink}>⚙</Link>
           </div>
         </div>
