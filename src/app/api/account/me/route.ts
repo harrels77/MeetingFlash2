@@ -40,5 +40,46 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ error: 'Database error' }, { status: 500 })
   }
 
-  return NextResponse.json({ profile: data ?? null })
+  if (data) {
+    return NextResponse.json({ profile: data })
+  }
+
+  // No profile row exists yet — create one. This is the canonical place to
+  // do that now (used to live in AuthProvider, but client-side creation
+  // collided with RLS races and the handle_new_user trigger to silently
+  // produce missing/duplicated rows). Doing it here with the service role
+  // is race-free.
+  const { data: newProf, error: insertError } = await adminClient
+    .from('profiles')
+    .insert({
+      id: user.id,
+      email: user.email,
+      plan: 'free',
+      uses_this_month: 0,
+    })
+    .select()
+    .single()
+
+  if (insertError) {
+    // Most likely a race with the handle_new_user trigger — re-read.
+    const { data: retried } = await adminClient
+      .from('profiles')
+      .select('*')
+      .eq('id', user.id)
+      .single()
+    if (retried) return NextResponse.json({ profile: retried, created: false })
+    console.error('Profile insert error:', insertError)
+    return NextResponse.json({ error: 'Could not create profile' }, { status: 500 })
+  }
+
+  // Brand-new account → fire-and-forget welcome email.
+  if (newProf) {
+    fetch(`${process.env.NEXT_PUBLIC_APP_URL || ''}/api/email/welcome`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email: user.email, name: '' }),
+    }).catch(() => {})
+  }
+
+  return NextResponse.json({ profile: newProf, created: true })
 }

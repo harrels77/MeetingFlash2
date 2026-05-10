@@ -41,65 +41,46 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [profile, setProfile] = useState<Profile | null>(null)
   const [loading, setLoading] = useState(true)
 
-  async function loadProfile(userId: string, email: string) {
-    // Confirm the JWT is attached to the supabase client before querying.
-    // Without this, the profile request goes out without auth, RLS returns
-    // 0 rows (PGRST116), and the code below thinks "this is a brand-new
-    // user, let me create a Free profile" — which then conflicts with the
-    // existing Pro row and leaves profile=null. Symptom: "Account" placeholder
-    // and free-mode UI even though the user is a paying Pro.
-    async function waitForToken(attempts = 4): Promise<boolean> {
+  async function loadProfile(_userId: string, _email: string) {
+    // Profile load now goes through /api/account/me — server-side, service
+    // role, no RLS race possible. The route also handles the new-user case
+    // (creates the profile with default values if missing). We just need a
+    // valid access_token to send.
+    //
+    // Wait for the JWT to be attached, then fetch with up to 3 attempts at
+    // 0 / 1.5s / 3s backoff. Supabase free tier may need a beat to wake up
+    // even server-side, so the retries still earn their keep.
+    async function waitForToken(attempts = 4): Promise<string | null> {
       for (let i = 0; i < attempts; i++) {
         const { data: { session } } = await supabase.auth.getSession()
-        if (session?.access_token) return true
+        if (session?.access_token) return session.access_token
         await new Promise(r => setTimeout(r, 500))
       }
-      return false
+      return null
     }
 
-    async function fetchOnce() {
-      const { data, error } = await supabase
-        .from('profiles')
-        .select('*')
-        .eq('id', userId)
-        .single()
-      return { data, errorCode: error?.code ?? null }
+    const token = await waitForToken()
+    if (!token) return  // bail; onAuthStateChange will retry when token arrives
+
+    async function fetchOnce(t: string) {
+      try {
+        const res = await fetch('/api/account/me', {
+          headers: { Authorization: `Bearer ${t}` },
+        })
+        if (!res.ok) return null
+        const body = await res.json()
+        return body.profile ?? null
+      } catch {
+        return null
+      }
     }
 
-    const tokenReady = await waitForToken()
-    if (!tokenReady) return  // bail; onAuthStateChange will retry when token arrives
-
-    // Up to 3 attempts with backoff — Supabase free tier can take several
-    // seconds to wake on a true cold start.
     const delays = [0, 1500, 3000]
     let data = null
-    let errorCode: string | null = null
     for (const delay of delays) {
       if (delay > 0) await new Promise(r => setTimeout(r, delay))
-      const r = await fetchOnce()
-      data = r.data
-      errorCode = r.errorCode
+      data = await fetchOnce(token)
       if (data) break
-    }
-
-    if (!data) {
-      // Only create a new profile when we're confident the row truly doesn't
-      // exist (PGRST116 after multiple attempts). A persistent hard error
-      // leaves profile=null and the next auth event will retry.
-      if (errorCode === 'PGRST116') {
-        const { data: newProf } = await supabase
-          .from('profiles')
-          .insert({ id: userId, email, plan: 'free', uses_this_month: 0 })
-          .select()
-          .single()
-        data = newProf
-        // Send welcome email for new accounts (fire and forget)
-        fetch('/api/email/welcome', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ email, name: data?.full_name || '' }),
-        }).catch(() => {})
-      }
     }
 
     if (data) setProfile(data)
