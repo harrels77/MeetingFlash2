@@ -1,5 +1,5 @@
 'use client'
-import { createContext, useContext, useEffect, useState, ReactNode } from 'react'
+import { createContext, useContext, useEffect, useRef, useState, ReactNode } from 'react'
 import { supabase } from '@/lib/supabase'
 import type { User } from '@supabase/supabase-js'
 
@@ -44,28 +44,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [profile, setProfile] = useState<Profile | null>(null)
   const [loading, setLoading] = useState(true)
   const [accessToken, setAccessToken] = useState<string | null>(null)
+  // Mirror of accessToken in a ref so non-reactive code paths (background
+  // recovery interval) can read the latest value without re-creating the
+  // effect on every token rotation.
+  const accessTokenRef = useRef<string | null>(null)
+  useEffect(() => { accessTokenRef.current = accessToken }, [accessToken])
 
-  async function loadProfile(_userId: string, _email: string) {
-    // Profile load now goes through /api/account/me — server-side, service
-    // role, no RLS race possible. The route also handles the new-user case
-    // (creates the profile with default values if missing). We just need a
-    // valid access_token to send.
-    //
-    // Wait for the JWT to be attached, then fetch with up to 3 attempts at
-    // 0 / 1.5s / 3s backoff. Supabase free tier may need a beat to wake up
-    // even server-side, so the retries still earn their keep.
-    async function waitForToken(attempts = 4): Promise<string | null> {
-      for (let i = 0; i < attempts; i++) {
-        const { data: { session } } = await supabase.auth.getSession()
-        if (session?.access_token) return session.access_token
-        await new Promise(r => setTimeout(r, 500))
-      }
-      return null
-    }
-
-    const token = await waitForToken()
-    if (!token) return  // bail; onAuthStateChange will retry when token arrives
-
+  // Profile load goes through /api/account/me (service role server-side, no
+  // RLS race possible). Caller passes the token explicitly — never call
+  // supabase.auth.getSession() inside this function. That call hangs forever
+  // on dev when Supabase tries an internal token refresh that doesn't
+  // resolve, which used to leave profile=null and the nav stuck on "Account".
+  async function loadProfile(token: string) {
+    if (!token) return
     async function fetchOnce(t: string) {
       try {
         const res = await fetch('/api/account/me', {
@@ -79,6 +70,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
     }
 
+    // 3 attempts at 0/1.5s/3s backoff — Supabase free tier sometimes takes a
+    // beat to wake even server-side.
     const delays = [0, 1500, 3000]
     let data = null
     for (const delay of delays) {
@@ -120,7 +113,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     if (data?.session?.user && !error) {
       setUser(data.session.user)
       setAccessToken(data.session.access_token ?? null)
-      await loadProfile(data.session.user.id, data.session.user.email || '').catch(() => {})
+      if (data.session.access_token) {
+        await loadProfile(data.session.access_token).catch(() => {})
+      }
       return { user: data.session.user }
     }
 
@@ -158,8 +153,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       if (session?.user) {
         setUser(session.user)
         setAccessToken(session.access_token ?? null)
-        loadProfile(session.user.id, session.user.email || '')
-          .finally(() => { clearTimeout(timeout); setLoading(false) })
+        const t = session.access_token
+        if (t) {
+          loadProfile(t).finally(() => { clearTimeout(timeout); setLoading(false) })
+        } else {
+          clearTimeout(timeout); setLoading(false)
+        }
       } else {
         // No session, but tokens may exist in localStorage — try refresh
         // before giving up. Without this, a stale refresh-token leaves the
@@ -181,7 +180,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         if (session?.user) {
           setUser(session.user)
           setAccessToken(session.access_token ?? null)
-          await loadProfile(session.user.id, session.user.email || '').catch(() => {})
+          if (session.access_token) {
+            await loadProfile(session.access_token).catch(() => {})
+          }
           setLoading(false)
           return
         }
@@ -205,7 +206,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     if (!user || profile) return
     const id = setInterval(() => {
-      loadProfile(user.id, user.email || '').catch(() => {})
+      const t = accessTokenRef.current
+      if (t) loadProfile(t).catch(() => {})
     }, 4000)
     return () => clearInterval(id)
   }, [user, profile])
@@ -235,7 +237,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   // local copy that drifts. Safe to call when user is null — it just no-ops.
   const refetchProfile = async () => {
     if (!user) return
-    await loadProfile(user.id, user.email || '').catch(() => {})
+    const t = accessTokenRef.current
+    if (!t) return
+    await loadProfile(t).catch(() => {})
   }
 
   return (
