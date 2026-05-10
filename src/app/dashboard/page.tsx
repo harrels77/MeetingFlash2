@@ -57,26 +57,35 @@ export default function Dashboard() {
   // returned an error (not empty data) and the previous logic blindly did
   // setMeetings([]) / setProjects([]) etc., wiping the visible state.
   const loadData = useCallback(async (): Promise<boolean> => {
-    // Server-side fetch via /api/dashboard/data — uses the service role key
-    // on the server so RLS races on Supabase cold-starts can't return silent
-    // empty results. The route verifies the caller via the Authorization
-    // header before fetching, so security is unchanged. See the route file
-    // for the full rationale.
-    const { data: { session } } = await supabase.auth.getSession()
+    console.log('[dashboard] loadData: start')
+    const { data: { session }, error: sessionErr } = await supabase.auth.getSession()
+    console.log('[dashboard] loadData: getSession result', {
+      hasSession: !!session,
+      hasToken: !!session?.access_token,
+      tokenPrefix: session?.access_token?.slice(0, 12),
+      sessionErr,
+    })
     if (!session?.access_token) {
-      console.warn('Dashboard load: no session JWT yet, will retry')
+      console.warn('[dashboard] loadData: no session JWT yet, will retry')
       return false
     }
 
     try {
+      console.log('[dashboard] loadData: fetching /api/dashboard/data')
       const res = await fetch('/api/dashboard/data', {
         headers: { Authorization: `Bearer ${session.access_token}` },
       })
+      console.log('[dashboard] loadData: response status', res.status)
       if (!res.ok) {
-        console.error('Dashboard load HTTP error:', res.status)
+        console.error('[dashboard] loadData: HTTP error', res.status)
         return false
       }
       const data = await res.json()
+      console.log('[dashboard] loadData: payload', {
+        hasProfile: !!data.profile,
+        projectsCount: data.projects?.length,
+        meetingsCount: data.meetings?.length,
+      })
 
       // Coherence guard: AuthProvider has already confirmed this user has a
       // real profile in the DB (otherwise profile would be null and we'd
@@ -127,14 +136,15 @@ export default function Dashboard() {
   }, [loadData])
 
   useEffect(() => {
-    // Wait for AuthProvider to finish its initial check (instant from React context)
+    console.log('[dashboard] useEffect fire', { authLoading, hasUser: !!user, userId: user?.id })
     if (authLoading) return
-
-    // Not signed in → redirect to login immediately, no spinner
     if (!user) { router.replace('/login'); return }
 
-    // Safety net: never let the spinner run more than 12s (covers the 1.5s retry)
-    const timeout = setTimeout(() => setLoading(false), 12000)
+    console.log('[dashboard] useEffect: triggering runLoad')
+    const timeout = setTimeout(() => {
+      console.warn('[dashboard] 12s safety timeout fired — runLoad never finished')
+      setLoading(false)
+    }, 12000)
     runLoad().finally(() => clearTimeout(timeout))
 
     return () => clearTimeout(timeout)
