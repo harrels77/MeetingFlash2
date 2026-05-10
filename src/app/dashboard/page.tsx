@@ -50,6 +50,10 @@ export default function Dashboard() {
   // Project filter on the Recent packs tab. 'all' = no filter, 'none' = packs
   // without a project, otherwise = a project id.
   const [projectFilter, setProjectFilter]   = useState<'all' | 'none' | string>('all')
+  // Expand/collapse for the open-actions widget. Default shows the first 5;
+  // clicking "+N more" reveals the rest. Kept as a simple boolean since the
+  // widget is single-instance per dashboard.
+  const [tasksExpanded, setTasksExpanded]   = useState(false)
 
   // Returns true on success, false if any of the underlying queries errored.
   // CRITICAL: only overwrites state on success — prevents the "dashboard goes
@@ -440,7 +444,7 @@ export default function Dashboard() {
               <span style={{ fontSize: 12, color: 'var(--muted)' }}>Pick one and close it ↓</span>
             </div>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-              {openTasks.slice(0, 5).map(t => (
+              {(tasksExpanded ? openTasks : openTasks.slice(0, 5)).map(t => (
                 <Link
                   key={t.id}
                   href={`/dashboard/pack/${t.meeting_id}`}
@@ -474,9 +478,26 @@ export default function Dashboard() {
               ))}
             </div>
             {openTasks.length > 5 && (
-              <div style={{ marginTop: 10, fontSize: 12, color: 'var(--muted)', textAlign: 'right' }}>
-                +{openTasks.length - 5} more — open a pack to mark them done
-              </div>
+              <button
+                onClick={() => setTasksExpanded(v => !v)}
+                style={{
+                  marginTop: 10,
+                  width: '100%',
+                  background: 'none',
+                  border: 'none',
+                  fontSize: 12,
+                  fontWeight: 600,
+                  color: 'var(--blue3)',
+                  cursor: 'pointer',
+                  padding: 6,
+                  textAlign: 'right',
+                  fontFamily: 'inherit',
+                }}
+              >
+                {tasksExpanded
+                  ? `Show less ↑`
+                  : `+${openTasks.length - 5} more — show all ↓`}
+              </button>
             )}
           </div>
         )}
