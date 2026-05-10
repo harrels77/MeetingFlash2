@@ -18,13 +18,15 @@ interface AuthCtx {
   user: User | null
   profile: Profile | null
   loading: boolean
+  // The current Supabase access_token, kept in sync with onAuthStateChange.
+  // Pages that need to call our /api/* routes should use this rather than
+  // calling supabase.auth.getSession() themselves — the latter occasionally
+  // hangs forever on dev (Supabase tries an internal token refresh that
+  // never resolves), which silently breaks data loads. Confirmed via
+  // diagnostic logs: "loadData: start" fired but "getSession result" never
+  // came back, even past the 12s safety timeout.
+  accessToken: string | null
   signOut: () => Promise<void>
-  // Re-fetches the profile from the DB and updates the global store. Called
-  // by pages that mutate the profile (settings save) so every component
-  // reading from useAuth().profile reflects the change immediately — without
-  // each page maintaining its own duplicate local profile state, which is
-  // what caused the desync bug ("dashboard shows packs / settings shows
-  // No name set, Team plan / next nav both work again").
   refetchProfile: () => Promise<void>
 }
 
@@ -32,6 +34,7 @@ const Ctx = createContext<AuthCtx>({
   user: null,
   profile: null,
   loading: true,
+  accessToken: null,
   signOut: async () => {},
   refetchProfile: async () => {},
 })
@@ -40,6 +43,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser]       = useState<User | null>(null)
   const [profile, setProfile] = useState<Profile | null>(null)
   const [loading, setLoading] = useState(true)
+  const [accessToken, setAccessToken] = useState<string | null>(null)
 
   async function loadProfile(_userId: string, _email: string) {
     // Profile load now goes through /api/account/me — server-side, service
@@ -108,12 +112,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     if (!hasSbTokens) {
       setUser(null)
       setProfile(null)
+      setAccessToken(null)
       return { user: null }
     }
 
     const { data, error } = await supabase.auth.refreshSession()
     if (data?.session?.user && !error) {
       setUser(data.session.user)
+      setAccessToken(data.session.access_token ?? null)
       await loadProfile(data.session.user.id, data.session.user.email || '').catch(() => {})
       return { user: data.session.user }
     }
@@ -130,6 +136,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     } catch { /* ignore */ }
     setUser(null)
     setProfile(null)
+    setAccessToken(null)
     return { user: null }
   }
 
@@ -150,6 +157,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       sessionResolved = true
       if (session?.user) {
         setUser(session.user)
+        setAccessToken(session.access_token ?? null)
         loadProfile(session.user.id, session.user.email || '')
           .finally(() => { clearTimeout(timeout); setLoading(false) })
       } else {
@@ -172,6 +180,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       async (event, session) => {
         if (session?.user) {
           setUser(session.user)
+          setAccessToken(session.access_token ?? null)
           await loadProfile(session.user.id, session.user.email || '').catch(() => {})
           setLoading(false)
           return
@@ -217,6 +226,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     } catch { /* localStorage may be unavailable in some contexts */ }
     setUser(null)
     setProfile(null)
+    setAccessToken(null)
     window.location.replace('/')
   }
 
@@ -229,7 +239,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }
 
   return (
-    <Ctx.Provider value={{ user, profile, loading, signOut, refetchProfile }}>
+    <Ctx.Provider value={{ user, profile, loading, accessToken, signOut, refetchProfile }}>
       {children}
     </Ctx.Provider>
   )

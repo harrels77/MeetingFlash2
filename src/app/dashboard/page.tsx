@@ -25,13 +25,13 @@ interface Meeting {
 
 export default function Dashboard() {
   const router = useRouter()
-  // Single source of truth: useAuth().profile is the canonical store.
-  // The dashboard previously had its own local `profile` state that could
-  // desync from AuthProvider (one would load while the other failed on
-  // cold-start, producing the "Settings shows No name set / Dashboard
-  // shows Pro plan" inconsistency). Now we read from useAuth() and drop
-  // the local copy entirely.
-  const { user, profile, loading: authLoading, refetchProfile } = useAuth()
+  // Single source of truth: useAuth() exposes user, profile and accessToken.
+  // We read from there instead of calling supabase.auth.getSession() locally,
+  // because that call sometimes hangs forever on dev (Supabase tries an
+  // internal token refresh that never resolves) and was the actual cause of
+  // the "loadData: start" log without any follow-up — the fetch never even
+  // got a chance to fire.
+  const { user, profile, accessToken, loading: authLoading, refetchProfile } = useAuth()
   const [projects, setProjects] = useState<Project[]>([])
   const [meetings, setMeetings] = useState<Meeting[]>([])
   const [tab, setTab]           = useState<'recent' | 'projects'>('recent')
@@ -57,23 +57,16 @@ export default function Dashboard() {
   // returned an error (not empty data) and the previous logic blindly did
   // setMeetings([]) / setProjects([]) etc., wiping the visible state.
   const loadData = useCallback(async (): Promise<boolean> => {
-    console.log('[dashboard] loadData: start')
-    const { data: { session }, error: sessionErr } = await supabase.auth.getSession()
-    console.log('[dashboard] loadData: getSession result', {
-      hasSession: !!session,
-      hasToken: !!session?.access_token,
-      tokenPrefix: session?.access_token?.slice(0, 12),
-      sessionErr,
-    })
-    if (!session?.access_token) {
-      console.warn('[dashboard] loadData: no session JWT yet, will retry')
+    console.log('[dashboard] loadData: start, hasToken:', !!accessToken)
+    if (!accessToken) {
+      console.warn('[dashboard] loadData: no accessToken in context yet, will retry')
       return false
     }
 
     try {
       console.log('[dashboard] loadData: fetching /api/dashboard/data')
       const res = await fetch('/api/dashboard/data', {
-        headers: { Authorization: `Bearer ${session.access_token}` },
+        headers: { Authorization: `Bearer ${accessToken}` },
       })
       console.log('[dashboard] loadData: response status', res.status)
       if (!res.ok) {
@@ -118,7 +111,7 @@ export default function Dashboard() {
       console.error('Dashboard load network error:', err)
       return false
     }
-  }, [profile, refetchProfile])
+  }, [accessToken, profile, refetchProfile])
 
   const runLoad = useCallback(async () => {
     setLoadError(false)
