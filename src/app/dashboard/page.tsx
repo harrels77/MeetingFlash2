@@ -80,6 +80,24 @@ export default function Dashboard() {
         return false
       }
       const data = await res.json()
+
+      // Coherence guard: AuthProvider has already confirmed this user has a
+      // real profile in the DB (otherwise authProfile would be null and we'd
+      // have redirected to /login). If the API somehow returned a fully
+      // empty payload — no profile, no projects, no meetings — that's an
+      // upstream blip, not the truth. Trigger a retry instead of rendering
+      // a blank "new account" dashboard, which is what was happening
+      // intermittently on navigation.
+      if (
+        authProfile &&
+        !data.profile &&
+        (!data.projects || data.projects.length === 0) &&
+        (!data.meetings || data.meetings.length === 0)
+      ) {
+        console.warn('Dashboard load: API returned empty for a known user — retrying')
+        return false
+      }
+
       if (data.profile) setProfile(data.profile)
       setProjects(data.projects || [])
       setMeetings(data.meetings || [])
@@ -89,7 +107,7 @@ export default function Dashboard() {
       console.error('Dashboard load network error:', err)
       return false
     }
-  }, [])
+  }, [authProfile])
 
   const runLoad = useCallback(async () => {
     setLoadError(false)

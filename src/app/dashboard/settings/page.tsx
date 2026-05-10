@@ -41,18 +41,23 @@ export default function Settings() {
     // Safety net: never let the spinner spin more than 12s (covers a cold-start retry)
     const timeout = setTimeout(() => setLoading(false), 12000)
 
-    // Same root cause as the dashboard data-loss bug: Supabase free tier cold
-    // start returns an error on the first hit, the page silently kept empty
-    // state, and the user thought their saved name was lost. Retry once before
-    // giving up.
-    async function fetchOnce() {
-      const { data, error } = await supabase
-        .from('profiles')
-        .select('*')
-        .eq('id', user!.id)
-        .single()
-      if (error) return null
-      return data
+    // Server-side fetch via /api/account/me — uses service_role to bypass
+    // the RLS race conditions that were silently returning null and rendering
+    // "?", "No name set", "Invalid Date" and a misleading "Team plan"
+    // fallback in this page.
+    async function fetchOnce(): Promise<Profile | null> {
+      const { data: { session } } = await supabase.auth.getSession()
+      if (!session?.access_token) return null
+      try {
+        const res = await fetch('/api/account/me', {
+          headers: { Authorization: `Bearer ${session.access_token}` },
+        })
+        if (!res.ok) return null
+        const body = await res.json()
+        return body.profile ?? null
+      } catch {
+        return null
+      }
     }
     async function load() {
       let data = await fetchOnce()
@@ -74,30 +79,51 @@ export default function Settings() {
     return () => clearTimeout(timeout)
   }, [user, authLoading, router])
 
+  // Generic server-side update helper — funnels both saveName and savePrefs
+  // through the same /api/account/update endpoint. Returns the new profile
+  // on success (so we can update local state) or null on error.
+  async function postUpdate(updates: Record<string, unknown>): Promise<Profile | null> {
+    const { data: { session } } = await supabase.auth.getSession()
+    if (!session?.access_token) return null
+    try {
+      const res = await fetch('/api/account/update', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${session.access_token}` },
+        body: JSON.stringify(updates),
+      })
+      if (!res.ok) return null
+      const body = await res.json()
+      return body.profile ?? null
+    } catch {
+      return null
+    }
+  }
+
   async function saveName() {
     if (!profile) return
     setSaving(true)
-    await supabase
-      .from('profiles')
-      .update({ full_name: name })
-      .eq('id', profile.id)
+    const updated = await postUpdate({ full_name: name })
     setSaving(false)
-    setSaved(true)
-    setTimeout(() => setSaved(false), 2000)
+    if (updated) {
+      setProfile(updated)
+      setSaved(true)
+      setTimeout(() => setSaved(false), 2000)
+    } else {
+      alert('Could not save your name. Please try again.')
+    }
   }
 
   async function savePreferences() {
     if (!profile) return
     setSavingPrefs(true)
-    const { error } = await supabase
-      .from('profiles')
-      .update({ default_lang: defaultLang, default_style: defaultStyle })
-      .eq('id', profile.id)
+    const updated = await postUpdate({ default_lang: defaultLang, default_style: defaultStyle })
     setSavingPrefs(false)
-    if (!error) {
-      setProfile({ ...profile, default_lang: defaultLang, default_style: defaultStyle })
+    if (updated) {
+      setProfile(updated)
       setPrefsSaved(true)
       setTimeout(() => setPrefsSaved(false), 2000)
+    } else {
+      alert('Could not save preferences. Please try again.')
     }
   }
 
@@ -209,7 +235,12 @@ export default function Settings() {
           <div className={styles.card}>
             <div className={styles.planRow}>
               <div>
-                <div className={styles.planName}>{profile?.plan === 'free' ? 'Free plan' : profile?.plan === 'pro' ? 'Pro plan' : 'Team plan'}</div>
+                <div className={styles.planName}>{
+                  profile?.plan === 'free' ? 'Free plan'
+                  : profile?.plan === 'pro' ? 'Pro plan'
+                  : profile?.plan === 'team' ? 'Team plan'
+                  : '— Loading…'
+                }</div>
                 <div className={styles.planDetail}>
                   {profile?.plan === 'free'
                     ? `${usesLeft} of 5 packs remaining this month`
