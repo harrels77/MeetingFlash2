@@ -69,8 +69,7 @@ export const metadata: Metadata = {
   },
   category: 'productivity',
   manifest: '/manifest.json',
-  // Paste your Search Console verification token here once you've claimed the domain
-  // verification: { google: 'XXXXXXXXXXXXXXXXXXXXXX' },
+  verification: { google: 'A3rgfyop9UvIzL0VkxhsstDiZHvrQMfkhCIjPQZuXJU' },
 }
 
 const organizationLd = {

@@ -264,7 +264,8 @@ The user is non-coder, motivated, and worried about retention. These three piece
 - Both use `from: 'MeetingFlash <hello@meetingflash.work>'`
 - Domain `meetingflash.work` purchased and connected to Vercel
 - All email calls are fire-and-forget with `.catch(() => {})` — fail silently until activated
-- Domain verified in Resend, `RESEND_API_KEY` added to Vercel — but account flagged by Resend, awaiting support resolution
+- Domain verified in Resend, `RESEND_API_KEY` added to Vercel — account flagged by Resend on 2026-04-25 (verification request). Réponse envoyée le 2026-05-15 (détail des 2 types d'emails transactionnels, site associé, processus d'inscription). En attente de réactivation par Resend.
+- `hello@meetingflash.work` created and configured on **ImprovMX** (email forwarding) — 2026-05-15
 - Welcome triggers: `AuthProvider.loadProfile` when inserting new profile
 - Nudge triggers: `/api/flash` after `increment_uses` when `plan === 'free' && uses_this_month >= 3` — the literal "3" mismatch with the new 5-pack limit is intentional (user said don't touch email infra). When Resend reactivates, also bump nudge threshold + the email body copy to "5".
 
