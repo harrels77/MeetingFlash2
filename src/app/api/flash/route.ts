@@ -308,7 +308,7 @@ ${text}`
             .select('plan, uses_this_month, email, full_name')
             .eq('id', user.id)
             .single()
-          if (prof?.plan === 'free' && prof.uses_this_month >= 3) {
+          if (prof?.plan === 'free' && prof.uses_this_month >= 5) {
             fetch(`${process.env.NEXT_PUBLIC_APP_URL}/api/email/nudge`, {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },

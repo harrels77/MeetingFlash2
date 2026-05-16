@@ -36,7 +36,7 @@ export async function POST(req: NextRequest) {
               Welcome, ${displayName}.
             </h1>
             <p style="margin:0 0 24px;font-size:15px;color:#94A3B8;line-height:1.6;">
-              You're in. You have <strong style="color:#60A5FA;">3 free Execution Packs</strong> this month — no prompts, no setup required.
+              You're in. You have <strong style="color:#60A5FA;">5 free Execution Packs</strong> this month — no prompts, no setup required.
             </p>
           </td>
         </tr>

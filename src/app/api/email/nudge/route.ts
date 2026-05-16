@@ -16,7 +16,7 @@ export async function POST(req: NextRequest) {
     await resend.emails.send({
       from: 'MeetingFlash <hello@meetingflash.work>',
       to: email,
-      subject: "You've used all 3 free packs this month ⚡",
+      subject: "You've used all 5 free packs this month ⚡",
       html: `
 <!DOCTYPE html>
 <html>
@@ -36,7 +36,7 @@ export async function POST(req: NextRequest) {
               You've hit your limit, ${displayName}.
             </h1>
             <p style="margin:0 0 24px;font-size:15px;color:#94A3B8;line-height:1.6;">
-              You've used all 3 free packs this month. Your next meeting is already scheduled — don't let it end without a complete execution plan.
+              You've used all 5 free packs this month. Your next meeting is already scheduled — don't let it end without a complete execution plan.
             </p>
           </td>
         </tr>
