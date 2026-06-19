@@ -11,7 +11,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: 'Free Meeting Action Items Extractor — MeetingFlash',
     description: 'Extract action items with owners and deadlines from raw meeting notes in 20 seconds. Free, no signup.',
-    url: 'https://meetingflash.work/tools/meeting-action-items-extractor',
+    url: 'https://www.meetingflash.work/tools/meeting-action-items-extractor',
     type: 'website',
   },
 }
@@ -40,7 +40,7 @@ const pageJsonLd = [
     '@context': 'https://schema.org',
     '@type': 'WebApplication',
     name: 'Free Meeting Action Items Extractor',
-    url: 'https://meetingflash.work/tools/meeting-action-items-extractor',
+    url: 'https://www.meetingflash.work/tools/meeting-action-items-extractor',
     applicationCategory: 'BusinessApplication',
     operatingSystem: 'Web',
     offers: { '@type': 'Offer', price: '0', priceCurrency: 'USD' },

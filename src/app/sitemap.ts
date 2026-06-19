@@ -2,7 +2,7 @@ import { MetadataRoute } from 'next'
 import { articles } from '@/lib/blog'
 
 export default function sitemap(): MetadataRoute.Sitemap {
-  const base = 'https://meetingflash.work'
+  const base = 'https://www.meetingflash.work'
   const now = new Date()
 
   return [

@@ -10,7 +10,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: 'MeetingFlash Blog',
     description: 'Practical guides for teams who want to get more done after every meeting.',
-    url: 'https://meetingflash.work/blog',
+    url: 'https://www.meetingflash.work/blog',
     type: 'website',
   },
 }

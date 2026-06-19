@@ -11,7 +11,7 @@ export function generateStaticParams() {
 export async function generateMetadata({ params }: { params: { slug: string } }): Promise<Metadata> {
   const article = getArticle(params.slug)
   if (!article) return {}
-  const url = `https://meetingflash.work/blog/${article.slug}`
+  const url = `https://www.meetingflash.work/blog/${article.slug}`
   return {
     title: `${article.title} — MeetingFlash`,
     description: article.description,
@@ -40,25 +40,25 @@ function articleJsonLd(article: { slug: string; title: string; description: stri
       '@type': 'BlogPosting',
       mainEntityOfPage: {
         '@type': 'WebPage',
-        '@id': `https://meetingflash.work/blog/${article.slug}`,
+        '@id': `https://www.meetingflash.work/blog/${article.slug}`,
       },
       headline: article.title,
       description: article.description,
-      image: 'https://meetingflash.work/opengraph-image',
+      image: 'https://www.meetingflash.work/opengraph-image',
       datePublished: article.date,
       dateModified: article.date,
       articleSection: article.category,
       author: {
         '@type': 'Person',
         name: 'Simon Harrel',
-        url: 'https://meetingflash.work',
+        url: 'https://www.meetingflash.work',
       },
       publisher: {
         '@type': 'Organization',
         name: 'MeetingFlash',
         logo: {
           '@type': 'ImageObject',
-          url: 'https://meetingflash.work/logo.png',
+          url: 'https://www.meetingflash.work/logo.png',
         },
       },
     },
@@ -66,9 +66,9 @@ function articleJsonLd(article: { slug: string; title: string; description: stri
       '@context': 'https://schema.org',
       '@type': 'BreadcrumbList',
       itemListElement: [
-        { '@type': 'ListItem', position: 1, name: 'Home', item: 'https://meetingflash.work' },
-        { '@type': 'ListItem', position: 2, name: 'Blog', item: 'https://meetingflash.work/blog' },
-        { '@type': 'ListItem', position: 3, name: article.title, item: `https://meetingflash.work/blog/${article.slug}` },
+        { '@type': 'ListItem', position: 1, name: 'Home', item: 'https://www.meetingflash.work' },
+        { '@type': 'ListItem', position: 2, name: 'Blog', item: 'https://www.meetingflash.work/blog' },
+        { '@type': 'ListItem', position: 3, name: article.title, item: `https://www.meetingflash.work/blog/${article.slug}` },
       ],
     },
   ]

@@ -264,7 +264,7 @@ The user is non-coder, motivated, and worried about retention. These three piece
 - Both use `from: 'MeetingFlash <hello@meetingflash.work>'`
 - Domain `meetingflash.work` purchased and connected to Vercel
 - All email calls are fire-and-forget with `.catch(() => {})` — fail silently until activated
-- Domain verified in Resend, `RESEND_API_KEY` added to Vercel — account flagged by Resend on 2026-04-25 (verification request). Réponse envoyée le 2026-05-15 (détail des 2 types d'emails transactionnels, site associé, processus d'inscription). En attente de réactivation par Resend.
+- Domain verified in Resend, `RESEND_API_KEY` added to Vercel — account reactivated by Resend on 2026-05-15. Emails are live.
 - `hello@meetingflash.work` created and configured on **ImprovMX** (email forwarding) — 2026-05-15
 - Welcome triggers: `AuthProvider.loadProfile` when inserting new profile
 - Nudge triggers: `/api/flash` after `increment_uses` when `plan === 'free' && uses_this_month >= 3` — the literal "3" mismatch with the new 5-pack limit is intentional (user said don't touch email infra). When Resend reactivates, also bump nudge threshold + the email body copy to "5".
@@ -594,11 +594,7 @@ This section is the **source of truth for what's left to do**. Update as items s
 - **Orphan meetings on legacy user_ids** — discovered 2026-05-10 that some old meetings are tied to `aba82af8-1a27-4250-b70d-00d1f201130d` (2 packs) while the founder's current auth.users.id is `cd9399cf-a0f5-4821-9970-6ba5871dcc79` (6 packs). The 6 are live; the 2 are inaccessible. Optional cleanup: `UPDATE public.meetings SET user_id = '<current_id>' WHERE user_id = '<orphan_id>';` to consolidate.
 
 ### P0 — Blocked on external action (no code work possible right now)
-- **Resend email account reactivation** — Resend flagged the account, awaiting their support response. Until lifted, all `/api/email/*` routes silently no-op (fire-and-forget with `.catch(()=>{})`). Once reactivated:
-  - **Welcome email copy fix**: `src/app/api/email/welcome/route.ts:39` says "3 free Execution Packs" → bump to **5** (matches current Free plan limit).
-  - **Nudge email copy fix**: `src/app/api/email/nudge/route.ts:19+39` say "3 free packs" → bump to **5**.
-  - **Nudge trigger threshold**: `src/app/api/flash/route.ts:182` checks `uses_this_month >= 3` → bump to `>= 5` so the nudge fires at the actual limit, not earlier.
-  - All three are intentionally NOT touched yet because the user said skip email infra changes until Resend reactivates. Don't fix in isolation.
+- **Resend email account reactivated** — 2026-05-15. All 3 copy fixes shipped: welcome email "5 free Execution Packs", nudge email subject + body "5 free packs", nudge trigger `uses_this_month >= 5` in `/api/flash/route.ts`. Emails are live.
 - **Search Console domain claim** — `meetingflash.work` not yet registered on https://search.google.com/search-console. Slot ready in `src/app/layout.tsx` as commented `verification: { google: '...' }`. When the user claims the domain, paste the token and uncomment.
 
 ### P1 — Pack render polish (next design pass, ~2-3h total)

@@ -9,7 +9,7 @@ export default function robots(): MetadataRoute.Robots {
         disallow: ['/dashboard', '/api/', '/auth/', '/share/', '/login', '/signup'],
       },
     ],
-    sitemap: 'https://meetingflash.work/sitemap.xml',
-    host: 'https://meetingflash.work',
+    sitemap: 'https://www.meetingflash.work/sitemap.xml',
+    host: 'https://www.meetingflash.work',
   }
 }

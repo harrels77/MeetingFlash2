@@ -11,7 +11,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: 'AI Meeting Recap Tool for Agencies — MeetingFlash',
     description: 'Send client-ready discovery, status, and retrospective recaps in 20 seconds. Built for agencies.',
-    url: 'https://meetingflash.work/for-agencies',
+    url: 'https://www.meetingflash.work/for-agencies',
     type: 'website',
   },
 }
@@ -45,11 +45,11 @@ const pageJsonLd = [
     '@type': 'WebPage',
     name: 'AI Meeting Recap Tool for Agencies — MeetingFlash',
     description: 'Send client-ready discovery, status, and retrospective recaps in 20 seconds. Built for agencies.',
-    url: 'https://meetingflash.work/for-agencies',
+    url: 'https://www.meetingflash.work/for-agencies',
     isPartOf: {
       '@type': 'WebSite',
       name: 'MeetingFlash',
-      url: 'https://meetingflash.work',
+      url: 'https://www.meetingflash.work',
     },
   },
   {

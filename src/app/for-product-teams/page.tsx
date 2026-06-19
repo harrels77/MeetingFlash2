@@ -11,7 +11,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: 'AI Meeting Recap Tool for Product Teams — MeetingFlash',
     description: 'Sprint retros, planning, 1-on-1s, and stakeholder reviews — turned into structured commitments in 20 seconds.',
-    url: 'https://meetingflash.work/for-product-teams',
+    url: 'https://www.meetingflash.work/for-product-teams',
     type: 'website',
   },
 }
@@ -45,8 +45,8 @@ const pageJsonLd = [
     '@type': 'WebPage',
     name: 'AI Meeting Recap Tool for Product Teams — MeetingFlash',
     description: 'Sprint retros, planning, 1-on-1s, and stakeholder reviews turned into structured commitments in 20 seconds.',
-    url: 'https://meetingflash.work/for-product-teams',
-    isPartOf: { '@type': 'WebSite', name: 'MeetingFlash', url: 'https://meetingflash.work' },
+    url: 'https://www.meetingflash.work/for-product-teams',
+    isPartOf: { '@type': 'WebSite', name: 'MeetingFlash', url: 'https://www.meetingflash.work' },
   },
   {
     '@context': 'https://schema.org',

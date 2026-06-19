@@ -11,7 +11,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: 'Free Discovery Call Recap Tool — MeetingFlash',
     description: 'Turn discovery call notes into a polished recap email and action list in 20 seconds. Free, no signup.',
-    url: 'https://meetingflash.work/tools/discovery-call-recap-tool',
+    url: 'https://www.meetingflash.work/tools/discovery-call-recap-tool',
     type: 'website',
   },
 }
@@ -40,7 +40,7 @@ const pageJsonLd = [
     '@context': 'https://schema.org',
     '@type': 'WebApplication',
     name: 'Free Discovery Call Recap Tool',
-    url: 'https://meetingflash.work/tools/discovery-call-recap-tool',
+    url: 'https://www.meetingflash.work/tools/discovery-call-recap-tool',
     applicationCategory: 'BusinessApplication',
     operatingSystem: 'Web',
     offers: { '@type': 'Offer', price: '0', priceCurrency: 'USD' },

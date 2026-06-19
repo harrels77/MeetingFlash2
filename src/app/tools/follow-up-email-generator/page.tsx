@@ -11,7 +11,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: 'Free Follow-Up Email Generator — MeetingFlash',
     description: 'Paste your meeting notes, get a polished follow-up email in 20 seconds. Free, no signup.',
-    url: 'https://meetingflash.work/tools/follow-up-email-generator',
+    url: 'https://www.meetingflash.work/tools/follow-up-email-generator',
     type: 'website',
   },
 }
@@ -40,7 +40,7 @@ const pageJsonLd = [
     '@context': 'https://schema.org',
     '@type': 'WebApplication',
     name: 'Free Follow-Up Email Generator',
-    url: 'https://meetingflash.work/tools/follow-up-email-generator',
+    url: 'https://www.meetingflash.work/tools/follow-up-email-generator',
     applicationCategory: 'BusinessApplication',
     operatingSystem: 'Web',
     offers: { '@type': 'Offer', price: '0', priceCurrency: 'USD' },

@@ -1,7 +1,7 @@
 // Helper to generate Schema.org BreadcrumbList JSON-LD for any page.
 // Pass an ordered list of crumbs (Home is added automatically as the first one).
 
-const SITE = 'https://meetingflash.work'
+const SITE = 'https://www.meetingflash.work'
 
 export function buildBreadcrumb(crumbs: Array<{ name: string; path: string }>) {
   return {

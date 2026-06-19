@@ -7,7 +7,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: 'MeetingFlash — Free meeting notes to action items',
     description: 'Paste raw meeting notes. Get a complete Execution Pack in 20 seconds. No signup needed for the first one.',
-    url: 'https://meetingflash.work/app',
+    url: 'https://www.meetingflash.work/app',
     type: 'website',
   },
 }

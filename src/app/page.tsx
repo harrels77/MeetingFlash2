@@ -41,10 +41,10 @@ const HOME_JSON_LD = [
     '@context': 'https://schema.org',
     '@type': 'WebSite',
     name: 'MeetingFlash',
-    url: 'https://meetingflash.work',
+    url: 'https://www.meetingflash.work',
     potentialAction: {
       '@type': 'SearchAction',
-      target: 'https://meetingflash.work/blog?q={search_term_string}',
+      target: 'https://www.meetingflash.work/blog?q={search_term_string}',
       'query-input': 'required name=search_term_string',
     },
   },
@@ -53,7 +53,7 @@ const HOME_JSON_LD = [
     '@type': 'SoftwareApplication',
     name: 'MeetingFlash',
     description: 'AI-powered post-meeting execution tool. Paste raw meeting notes, get decisions, action items, follow-up email, Slack message, and next agenda in under 20 seconds.',
-    url: 'https://meetingflash.work',
+    url: 'https://www.meetingflash.work',
     applicationCategory: 'BusinessApplication',
     operatingSystem: 'Web',
     offers: [

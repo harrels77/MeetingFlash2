@@ -4,7 +4,7 @@ import { AuthProvider } from '@/lib/AuthProvider'
 import { Analytics } from '@vercel/analytics/next'
 import SwRegister from '@/components/SwRegister'
 
-const SITE_URL = 'https://meetingflash.work'
+const SITE_URL = 'https://www.meetingflash.work'
 
 export const viewport: Viewport = {
   themeColor: [
