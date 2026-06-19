@@ -50,6 +50,7 @@ const pricingJsonLd = [
     '@type': 'Product',
     name: 'MeetingFlash',
     description: 'AI-powered post-meeting execution tool. Paste raw meeting notes, get a complete Execution Pack in under 20 seconds.',
+    image: 'https://www.meetingflash.work/opengraph-image',
     brand: { '@type': 'Brand', name: 'MeetingFlash' },
     offers: [
       {
