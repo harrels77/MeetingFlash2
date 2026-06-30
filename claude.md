@@ -286,7 +286,7 @@ The user is non-coder, motivated, and worried about retention. These three piece
 - Responsive: stacks columns on mobile, hides sidebar on dashboard mockup, tighter padding
 
 ### Blog
-- **9 static articles** in `src/lib/blog.ts` (Article[] data array). Slugs:
+- **14 static articles** in `src/lib/blog.ts` (Article[] data array). Slugs:
   - `how-to-write-effective-meeting-notes`
   - `post-meeting-workflow-for-teams`
   - `how-to-write-follow-up-email-after-meeting`
@@ -296,6 +296,11 @@ The user is non-coder, motivated, and worried about retention. These three piece
   - `discovery-call-recap-template` (agency ICP — links to /app discovery template)
   - `sprint-retrospective-template` (product team ICP)
   - `client-status-update-email-template` (agency ICP)
+  - `how-to-write-meeting-minutes-with-ai` (AI/automation — added 2026-06)
+  - `best-ai-meeting-assistants-2026` (Tools — capture-vs-execution landscape, added 2026-06)
+  - `meeting-summary-vs-meeting-minutes` (Productivity — definitional/long-tail, added 2026-06)
+  - `client-follow-up-emails-after-meeting` (Communication — agency ICP, added 2026-06)
+  - `fireflies-vs-otter-vs-meetingflash` (Tools — honest competitor comparison, added 2026-06)
 - Blog index at `/blog`, articles at `/blog/[slug]`
 - `generateStaticParams()` used — pre-rendered at build time
 - Each article ends with a CTA block linking to `/app`, then a 3-card "Related reading" block (`getRelatedArticles()` in blog.ts: same-category first, then fill) — that's the internal-linking surface for SEO

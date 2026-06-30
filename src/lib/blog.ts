@@ -716,6 +716,290 @@ A client who gets 12 perfect status emails over a 12-week project will refer you
 For more on follow-ups specifically after meetings (vs weekly cadence), see [How to Write a Professional Follow-Up Email After a Meeting](/blog/how-to-write-follow-up-email-after-meeting).
     `.trim(),
   },
+  {
+    slug: 'how-to-write-meeting-minutes-with-ai',
+    title: 'How to Write Better Meeting Minutes with AI',
+    description: 'Meeting minutes do not have to take an hour. Learn how to use AI to turn rough notes into clear, structured minutes — what to capture, what AI gets right, and where you still need a human.',
+    date: '2026-06-29',
+    readTime: '6 min',
+    category: 'AI & Automation',
+    content: `
+## What meeting minutes are actually for
+
+Meeting minutes are the official record of what happened: who attended, what was decided, what was agreed, and who is responsible for what next. Unlike rough personal notes, minutes are written to be read by people who were not in the room — or by the same people three months later when memories have faded.
+
+That is a higher bar than most notes clear. Good minutes have to be accurate, neutral, and structured enough that someone can scan them in 30 seconds and know exactly what they owe.
+
+## Why writing them manually is painful
+
+The person taking minutes is usually also trying to participate in the meeting. You cannot fully think and fully transcribe at the same time. So minutes get written from memory afterward, which means:
+
+- Decisions get blurred with discussion ("we talked about pricing" instead of "we decided to raise the starter tier to $29").
+- Action items lose their owners and deadlines.
+- The write-up eats 30–60 minutes you did not plan for.
+- They get sent late, or never.
+
+## How AI changes the job
+
+The shift is simple: **you stop writing minutes and start reviewing them.**
+
+During the meeting, you capture rough fragments — names, decisions, dates, half-sentences. No structure required. After the meeting, AI does the structuring: it separates decisions from discussion, attaches owners and deadlines to action items, and surfaces the open questions.
+
+Your job becomes a 60-second review instead of a 60-minute write-up. You are checking accuracy, not generating prose.
+
+This is the same shift covered in [How to Summarize Meeting Notes with AI](/blog/how-to-summarize-meeting-notes-with-ai) — the goal is not to capture more, it is to structure what was captured so it triggers action.
+
+## A workflow that works
+
+1. **Capture rough during the meeting.** Bullet fragments are fine: "Maya owns onboarding redesign, ship by sprint 4", "budget approved 48k", "open: do we kill the old admin panel?"
+2. **Paste into an AI tool right after.** Within seconds you get structured minutes: decisions, action items with owners and deadlines, open questions.
+3. **Review for accuracy.** This is the part you cannot skip — see below.
+4. **Send within the hour.** Speed is most of the value of minutes.
+
+## What AI gets right — and where you still need a human
+
+AI is excellent at: pulling action items out of messy text, attaching the right owner when a name is mentioned, keeping deadlines literal, and separating what was decided from what was merely discussed.
+
+AI is not a substitute for your judgment on: whether a decision was actually final or still tentative, sensitive wording for anything political, and confirming attribution when your notes were ambiguous. Minutes are an official record — always read them before they go out. The tool gets you 90% there in seconds; the last 10% is a human confirming nothing important was misread.
+
+## The structure to aim for
+
+Good AI-assisted minutes land on something like this:
+
+- **Attendees** and date
+- **Decisions made** — final decisions only, each with a one-line rationale
+- **Action items** — [Person] → [task] by [date]
+- **Open questions** — unresolved items that become the next agenda
+
+If you want the distinction between this kind of formal record and a quick recap, read [Meeting Summary vs Meeting Minutes](/blog/meeting-summary-vs-meeting-minutes).
+
+## Try it on your last meeting
+
+Take the notes from your most recent meeting — however rough — and paste them into [MeetingFlash](/app). You will get structured minutes (decisions, action items with owners, open questions) plus a follow-up email, in about 20 seconds. The first one is free, no signup needed. Then all you do is read it and send it.
+    `.trim(),
+  },
+  {
+    slug: 'best-ai-meeting-assistants-2026',
+    title: 'Best AI Meeting Assistants in 2026',
+    description: 'A practical, honest rundown of the AI meeting assistants worth knowing in 2026 — transcription bots, recording tools, and execution tools — and how to pick the right one for how you actually work.',
+    date: '2026-06-29',
+    readTime: '7 min',
+    category: 'Tools',
+    content: `
+## There are two kinds of AI meeting assistant
+
+Before comparing tools, understand the split — because picking the wrong category is the most common mistake.
+
+**Capture tools** join your call (or record it), transcribe the audio, and generate a summary from the transcript. The value is that you do not have to take notes at all.
+
+**Execution tools** start from notes you already took and turn them into structured, ready-to-use outputs — decisions, action items, a follow-up email. The value is finished work, not a transcript.
+
+Neither is "better." They solve different problems. Here is the honest landscape in 2026.
+
+## Capture tools (transcription + recording)
+
+**Otter** — one of the most established live-transcription tools. Strong real-time transcript, speaker labels, decent AI summaries. Best when you want a searchable verbatim record of what was said.
+
+**Fireflies** — a recorder bot that joins your calls, transcribes, and produces summaries and action items from the transcript. Strong integrations and a searchable archive of past calls.
+
+**Fathom** and **tl;dv** — both record video calls, transcribe, and clip highlights. Popular with sales teams who want to revisit exact moments of a call.
+
+The tradeoff for all capture tools: a bot has to join, the call gets recorded, and you end up with a long transcript that still needs to be turned into action. For a deeper head-to-head, see [Fireflies vs Otter vs MeetingFlash](/blog/fireflies-vs-otter-vs-meetingflash).
+
+## Execution tools (notes in, finished work out)
+
+**MeetingFlash** — you paste your raw notes (no recording, no bot) and get a complete Execution Pack: decisions with rationale, action items with owners and deadlines, open questions, risks, a client-ready follow-up email, a Slack message, and the next agenda. It also keeps persistent project memory across meetings. Best when you take your own notes and want the post-meeting work done, not a transcript to read.
+
+**Fellow** — meeting-management software with agendas, notes, and action-item tracking, plus some AI assistance. Best for teams that want a structured meeting workflow tool.
+
+## How to choose
+
+Ask yourself four questions:
+
+- **Do you need a verbatim recording?** If yes (legal, sales review, training), a capture tool like Otter or Fireflies fits. If no, you are paying a privacy and clutter cost you do not need.
+- **Do you already take notes?** If you jot fragments during calls anyway, an execution tool turns those into finished work without a bot ever joining.
+- **What do you do with the output?** If your real job is sending a recap, assigning tasks, and prepping the next meeting, you want execution, not a transcript.
+- **How sensitive are your meetings?** No-recording tools sidestep the "is this call being recorded?" conversation entirely.
+
+## The honest summary
+
+If you want a searchable archive of exactly what was said, use a transcription tool. If you want the 20 minutes of post-meeting admin to disappear, use an execution tool.
+
+Want to feel the difference? Paste notes from your last meeting into [MeetingFlash](/app) — first pack free, no signup — and see a finished Execution Pack in about 20 seconds.
+    `.trim(),
+  },
+  {
+    slug: 'meeting-summary-vs-meeting-minutes',
+    title: 'Meeting Summary vs Meeting Minutes: What is the Difference?',
+    description: 'Meeting summary and meeting minutes are not the same thing. Here is the practical difference, when to use each, and how to produce both in seconds.',
+    date: '2026-06-29',
+    readTime: '5 min',
+    category: 'Productivity',
+    content: `
+## Same meeting, two different documents
+
+People use "summary" and "minutes" interchangeably, but they are different deliverables with different jobs. Using the wrong one makes you look either sloppy (a casual summary where minutes were expected) or stiff (formal minutes where a quick recap would do).
+
+Here is the practical difference.
+
+## Meeting minutes: the official record
+
+Minutes are the formal, neutral record of a meeting. They exist to be referenced later — sometimes much later, sometimes by people who were not there.
+
+Minutes typically include:
+
+- Date, time, attendees, apologies
+- Decisions made (often with who proposed and who approved)
+- Action items with owners and deadlines
+- Sometimes a brief record of what was discussed for each agenda item
+
+Tone is neutral and factual. Minutes are common for board meetings, committees, client governance, and anything with a compliance or accountability dimension.
+
+## Meeting summary: the fast recap
+
+A summary is a shorter, less formal capture of the essentials — what was decided and what happens next. It is written for people who need the gist quickly, not a legal record.
+
+A good summary is scannable in 30 seconds: the key decisions, the main action items, and the next step. It is what you drop into a follow-up email or a Slack channel right after a call.
+
+## The key differences at a glance
+
+- **Formality:** minutes are formal and structured; summaries are lighter.
+- **Audience:** minutes serve a record/accountability need; summaries serve speed.
+- **Completeness:** minutes aim to be complete; summaries deliberately leave out detail.
+- **Permanence:** minutes are archived and referenced; summaries are often disposable.
+
+## When to use each
+
+Use **minutes** when there is a governance, legal, or accountability reason to have an exact record — board meetings, client steering committees, formal project reviews.
+
+Use a **summary** for the everyday: internal syncs, client check-ins, discovery calls, standups. The goal is to capture decisions and actions fast and move on.
+
+For the format of strong everyday notes, see [How to Write Effective Meeting Notes](/blog/how-to-write-effective-meeting-notes).
+
+## Can one tool do both?
+
+Yes — because both are built from the same raw input. If you capture decisions, owners, deadlines, and open questions during the meeting, you can render that into formal minutes or a quick summary depending on who is reading.
+
+That is how [MeetingFlash](/app) works: you paste rough notes once and get a structured Execution Pack — decisions, action items with owners, open questions, plus a follow-up email and Slack message. Use the structured outputs as minutes; use the email or Slack draft as your summary. For the minutes-specific workflow, see [How to Write Better Meeting Minutes with AI](/blog/how-to-write-meeting-minutes-with-ai).
+
+Paste your last meeting's notes into [MeetingFlash](/app) — first one free, no signup — and you will have both in about 20 seconds.
+    `.trim(),
+  },
+  {
+    slug: 'client-follow-up-emails-after-meeting',
+    title: 'How to Write Client Follow-Up Emails After a Meeting',
+    description: 'For agencies and freelancers, the follow-up email after a client meeting is part of the sale. Here is the structure, tone, and examples that build trust and move deals forward.',
+    date: '2026-06-29',
+    readTime: '6 min',
+    category: 'Communication',
+    content: `
+## The client follow-up is part of the sale
+
+When you send a follow-up email after an internal meeting, you are recording decisions. When you send one after a client meeting, you are doing something else entirely: you are demonstrating how it feels to work with you.
+
+A prospect who gets a sharp, specific recap an hour after the call learns that you are organized, that you listened, and that things will not slip through the cracks. A prospect who gets nothing — or a vague "great chatting!" — learns the opposite. The follow-up email is a live sample of your professionalism. Treat it that way.
+
+## The structure that works
+
+A strong client follow-up has five parts:
+
+1. **A warm, specific opener.** Reference something real from the call — not "I hope this email finds you well." Try "Great speaking today — really liked your point about phasing the migration."
+2. **A recap of what was agreed.** The scope, the budget, the timeline, in their words. This confirms alignment and protects you from scope drift later.
+3. **Clear next steps with owners.** Yours and theirs. "I'll send the SOW by Monday; you'll share brand assets by Tuesday." Nothing floating without an owner.
+4. **Open questions.** Anything unresolved, surfaced honestly. This becomes the agenda for the next call and shows you are tracking the details.
+5. **A confident close.** A clear next touchpoint: "I'll follow up Thursday once you've reviewed."
+
+## Tone: warm but specific
+
+The most common failure is sounding like a template. Phrases like "per our conversation" and "I hope this finds you well" signal that the email could have been sent to anyone. The fix is specificity: a real detail from the call, the actual dollar figure, the actual names. Specific beats polished.
+
+For the underlying mechanics of follow-up emails in general, see [How to Write a Professional Follow-Up Email After a Meeting](/blog/how-to-write-follow-up-email-after-meeting).
+
+## A short example
+
+> Hi Sarah — great speaking today, and thanks for walking me through the rebrand goals.
+>
+> Quick recap of where we landed: 12-week scope on Shopify Plus, $48k across three milestones (kickoff / midpoint / launch), kickoff May 6th.
+>
+> Next steps:
+> - Me → SOW + first invoice by Monday
+> - You → brand assets and access by Tuesday
+> - Me → kickoff agenda by Wednesday
+>
+> One open item: we still need to confirm whether legacy product data needs migrating — I'll follow up Thursday once you've checked with your team.
+>
+> Looking forward to kicking this off.
+
+Notice there is not a single generic phrase in it. Every line references something specific from the call.
+
+## Speed matters as much as quality
+
+A perfect follow-up sent two days later loses most of its value. The prospect has moved on, talked to other vendors, lost the momentum. Aim to send within the hour. That is hard to do manually after every call — which is exactly where automation helps.
+
+## Draft it in seconds
+
+If you jot a few bullets during the call — decisions, budget, who-owns-what, open questions — you can paste them into [MeetingFlash](/app) and get a client-ready follow-up email (plus the action items and recap behind it) in about 20 seconds. There is also a dedicated [follow-up email generator](/tools/follow-up-email-generator) if the email is all you need. For recurring projects, pair it with a [client status update template](/blog/client-status-update-email-template) for your weekly cadence.
+
+Try it on your last client call — the first pack is free, no signup needed.
+    `.trim(),
+  },
+  {
+    slug: 'fireflies-vs-otter-vs-meetingflash',
+    title: 'Fireflies vs Otter vs MeetingFlash',
+    description: 'Fireflies, Otter, and MeetingFlash solve the meeting problem in fundamentally different ways. An honest comparison of recording vs transcription vs execution — and who each is actually for.',
+    date: '2026-06-29',
+    readTime: '7 min',
+    category: 'Tools',
+    content: `
+## These three are not the same kind of tool
+
+It is tempting to line up Fireflies, Otter, and MeetingFlash as three versions of the same thing. They are not — and that is the most useful thing to understand before choosing. Two of them are built around **capturing** a meeting; one is built around **executing** on it. Here is an honest look at each.
+
+## Otter: live transcription
+
+Otter is, at its core, a real-time transcription tool. It listens to a meeting and produces a running transcript with speaker labels, plus AI-generated summaries on top.
+
+**Strong for:** a searchable, verbatim record of exactly what was said; accessibility; revisiting long calls word-for-word.
+
+**The tradeoff:** you end up with a transcript — a lot of text that still has to be turned into decisions and actions. And the meeting has to be recorded and transcribed, which is not always welcome.
+
+## Fireflies: a recording bot with a searchable archive
+
+Fireflies sends a bot to join your calls. It records, transcribes, and generates summaries and action items from the transcript, then stores everything in a searchable archive with integrations into your other tools.
+
+**Strong for:** teams that want an automatic, hands-off archive of every call; sales orgs that revisit conversations; no-note-taking workflows.
+
+**The tradeoff:** a bot joins every meeting, calls are recorded, and the output is still transcript-derived. You are managing a library of past calls rather than finishing the work from the current one.
+
+## MeetingFlash: execution from your own notes
+
+MeetingFlash takes a different starting point. There is no bot and no recording. You paste the notes you took — even rough fragments — and it returns a complete Execution Pack: decisions with rationale, action items with owners and deadlines, open questions, risks, a client-ready follow-up email, a Slack message, and the next agenda. Tie meetings to a project and it carries persistent memory across calls, cross-referencing prior decisions and still-open commitments.
+
+**Strong for:** people who take their own notes and want the post-meeting work done — the recap, the assignments, the follow-up email — without a recording or a transcript to wade through.
+
+**The tradeoff:** it does not give you a verbatim record. If you specifically need to know the exact words someone said, that is a transcription job, not this.
+
+## The real decision
+
+The choice comes down to three questions:
+
+- **Recording or not?** Fireflies and Otter record and transcribe. MeetingFlash never records — you bring the notes. If "is this being recorded?" is an awkward question in your meetings, that matters.
+- **Transcript or finished work?** Capture tools hand you a transcript and a summary. MeetingFlash hands you the actual deliverables you would otherwise spend 20 minutes writing.
+- **Single calls or cross-meeting context?** MeetingFlash's project memory connects meetings over time; transcription archives store calls but do not build that running context into each new recap.
+
+## Who should use which
+
+- Need a verbatim, searchable record of every call → **Otter** or **Fireflies**.
+- Sales team that revisits exact moments of conversations → **Fireflies** or a video recorder.
+- You take notes and want the recap, tasks, and follow-up email done instantly, no recording → **MeetingFlash**.
+
+Many people end up using a capture tool for the calls that need a record and an execution tool for the daily ones that just need to turn into action. For the wider landscape, see [Best AI Meeting Assistants in 2026](/blog/best-ai-meeting-assistants-2026).
+
+## See the execution approach
+
+The fastest way to understand the difference is to feel it. Paste notes from your last meeting into [MeetingFlash](/app) — first pack free, no signup — and watch raw bullets become a finished recap, task list, and follow-up email in about 20 seconds.
+    `.trim(),
+  },
 ]
 
 export function getArticle(slug: string): Article | undefined {
