@@ -77,24 +77,66 @@ export default function FollowUpEmailGeneratorPage() {
 
       <section className={s.hero}>
         <div className={s.container}>
-          <div className={s.heroBadge}>
-            <span className={s.heroBadgeDot} />
-            Free tool
-          </div>
-          <h1 className={s.h1}>
-            Free follow-up email generator. <span className={s.h1Accent}>Sent before they finish their coffee.</span>
-          </h1>
-          <p className={s.heroSub}>
-            Paste your raw meeting notes — get a polished follow-up email in 20 seconds. No prompt to write, no signup for the first one.
-          </p>
-          <div className={s.heroActions}>
-            <Link href="/app" className={s.btnPrimary}>Generate my email →</Link>
-            <Link href="#how" className={s.btnGhost}>See an example ↓</Link>
-          </div>
-          <div className={s.trustStrip}>
-            <span>✓ Free, no credit card</span>
-            <span>✓ Owners + deadlines included</span>
-            <span>✓ Ready-to-send, not a template</span>
+          <div className={s.heroSplit}>
+            <div className={s.heroSplitContent}>
+              <div className={s.heroBadgeSerif}>
+                <span className={s.heroBadgeDot} />
+                Free tool · no signup
+              </div>
+              <h1 className={s.h1Left}>
+                Free follow-up email generator. <span className={s.h1Accent}>Sent before they finish their coffee.</span>
+              </h1>
+              <p className={s.heroSubLeft}>
+                Paste your raw meeting notes — get a polished follow-up email in 20 seconds. No prompt to write, no signup for the first one.
+              </p>
+              <div className={s.heroActionsLeft}>
+                <Link href="/app" className={s.btnPrimary}>Generate my email →</Link>
+                <Link href="#how" className={s.btnGhost}>See an example ↓</Link>
+              </div>
+              <div className={s.heroStats}>
+                <div className={s.heroStat}>
+                  <span className={s.heroStatN}>20s</span>
+                  <span className={s.heroStatL}>draft time</span>
+                </div>
+                <div className={s.heroStatDiv} />
+                <div className={s.heroStat}>
+                  <span className={s.heroStatN}>0</span>
+                  <span className={s.heroStatL}>prompts to write</span>
+                </div>
+                <div className={s.heroStatDiv} />
+                <div className={s.heroStat}>
+                  <span className={s.heroStatN}>Free</span>
+                  <span className={s.heroStatL}>no credit card</span>
+                </div>
+              </div>
+            </div>
+
+            <div className={s.heroCard}>
+              <div className={s.mockup}>
+                <div className={s.mockupHead}>
+                  <div className={s.mockupDots}><span /><span /><span /></div>
+                  <div className={s.mockupTitle}>Generated follow-up email</div>
+                </div>
+                <div className={s.mockupBody}>
+                  <div className={`${s.mockBlock} ${s.mockBlockPaper}`}>
+                    <div className={s.mockBlockLabel}>Subject</div>
+                    <div className={s.mockBlockContent}>
+                      Acme rebuild — kickoff May 6, recap &amp; next steps
+                    </div>
+                  </div>
+                  <div className={`${s.mockBlock} ${s.mockBlockBlue}`}>
+                    <div className={s.mockBlockLabel}>Body</div>
+                    <div className={s.mockBlockContent}>
+                      Hi Sarah, great speaking today. Confirming we&apos;re aligned on the 12-week scope and $48k budget across 3 milestones. Kickoff May 6th.<br /><br />
+                      Next steps:<br />
+                      • <strong>You</strong> → SOW + first invoice (Mon)<br />
+                      • <strong>Sarah</strong> → brand assets &amp; access (Tue)<br />
+                      • <strong>You</strong> → kickoff agenda (Wed)
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </section>

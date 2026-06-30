@@ -77,24 +77,61 @@ export default function ActionItemsExtractorPage() {
 
       <section className={s.hero}>
         <div className={s.container}>
-          <div className={s.heroBadge}>
-            <span className={s.heroBadgeDot} />
-            Free tool
-          </div>
-          <h1 className={s.h1}>
-            Extract action items <span className={s.h1Accent}>with owners and deadlines.</span>
-          </h1>
-          <p className={s.heroSub}>
-            Paste your meeting notes — get a clean list of action items, each with the right person attributed and the deadline mentioned. Free for your first one.
-          </p>
-          <div className={s.heroActions}>
-            <Link href="/app" className={s.btnPrimary}>Extract my action items →</Link>
-            <Link href="#example" className={s.btnGhost}>See an example ↓</Link>
-          </div>
-          <div className={s.trustStrip}>
-            <span>✓ Free, no credit card</span>
-            <span>✓ Names + deadlines attributed</span>
-            <span>✓ Copy-paste to Linear / Jira / Notion</span>
+          <div className={s.heroSplit}>
+            <div className={s.heroSplitContent}>
+              <div className={s.heroBadgeSerif}>
+                <span className={s.heroBadgeDot} />
+                Free tool · no signup
+              </div>
+              <h1 className={s.h1Left}>
+                Extract action items <span className={s.h1Accent}>with owners and deadlines.</span>
+              </h1>
+              <p className={s.heroSubLeft}>
+                Paste your meeting notes — get a clean list of action items, each with the right person attributed and the deadline mentioned. Free for your first one.
+              </p>
+              <div className={s.heroActionsLeft}>
+                <Link href="/app" className={s.btnPrimary}>Extract my action items →</Link>
+                <Link href="#example" className={s.btnGhost}>See an example ↓</Link>
+              </div>
+              <div className={s.heroStats}>
+                <div className={s.heroStat}>
+                  <span className={s.heroStatN}>20s</span>
+                  <span className={s.heroStatL}>extract time</span>
+                </div>
+                <div className={s.heroStatDiv} />
+                <div className={s.heroStat}>
+                  <span className={s.heroStatN}>0</span>
+                  <span className={s.heroStatL}>prompts to write</span>
+                </div>
+                <div className={s.heroStatDiv} />
+                <div className={s.heroStat}>
+                  <span className={s.heroStatN}>Free</span>
+                  <span className={s.heroStatL}>no credit card</span>
+                </div>
+              </div>
+            </div>
+
+            <div className={s.heroCard}>
+              <div className={s.mockup}>
+                <div className={s.mockupHead}>
+                  <div className={s.mockupDots}><span /><span /><span /></div>
+                  <div className={s.mockupTitle}>Extracted action items</div>
+                </div>
+                <div className={s.mockupBody}>
+                  <div className={`${s.mockBlock} ${s.mockBlockGreen}`}>
+                    <div className={s.mockBlockLabel}>Action items</div>
+                    <div className={s.mockBlockContent}>
+                      ✓ <strong>Maya</strong> → Define story-breakdown criteria<br />
+                      &nbsp;&nbsp;&nbsp;Due: next sprint planning · Priority: high<br /><br />
+                      ✓ <strong>DevOps</strong> → Add CI rule blocking Fri-PM merges<br />
+                      &nbsp;&nbsp;&nbsp;Due: Wednesday · Priority: medium<br /><br />
+                      ✓ <strong>EM</strong> → Add Monday tech-debt slot to calendar<br />
+                      &nbsp;&nbsp;&nbsp;Due: today · Priority: low
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </section>

@@ -77,24 +77,65 @@ export default function DiscoveryCallRecapToolPage() {
 
       <section className={s.hero}>
         <div className={s.container}>
-          <div className={s.heroBadge}>
-            <span className={s.heroBadgeDot} />
-            Free tool
-          </div>
-          <h1 className={s.h1}>
-            Discovery call recap. <span className={s.h1Accent}>Sent before they leave the meeting.</span>
-          </h1>
-          <p className={s.heroSub}>
-            Paste your raw discovery call notes — get a polished recap email, scope confirmation, action items with owners and deadlines, and open questions. The recap email is part of the sale. Send it fast.
-          </p>
-          <div className={s.heroActions}>
-            <Link href="/app" className={s.btnPrimary}>Generate my recap →</Link>
-            <Link href="/blog/discovery-call-recap-template" className={s.btnGhost}>Read the template guide ↓</Link>
-          </div>
-          <div className={s.trustStrip}>
-            <span>✓ Free for your first one</span>
-            <span>✓ Scope, budget, timeline confirmed</span>
-            <span>✓ Email + Slack message generated</span>
+          <div className={s.heroSplit}>
+            <div className={s.heroSplitContent}>
+              <div className={s.heroBadgeSerif}>
+                <span className={s.heroBadgeDot} />
+                Free tool · no signup
+              </div>
+              <h1 className={s.h1Left}>
+                Discovery call recap. <span className={s.h1Accent}>Sent before they leave the meeting.</span>
+              </h1>
+              <p className={s.heroSubLeft}>
+                Paste your raw discovery call notes — get a polished recap email, scope confirmation, action items with owners and deadlines, and open questions. The recap email is part of the sale. Send it fast.
+              </p>
+              <div className={s.heroActionsLeft}>
+                <Link href="/app" className={s.btnPrimary}>Generate my recap →</Link>
+                <Link href="/blog/discovery-call-recap-template" className={s.btnGhost}>Read the template guide ↓</Link>
+              </div>
+              <div className={s.heroStats}>
+                <div className={s.heroStat}>
+                  <span className={s.heroStatN}>20s</span>
+                  <span className={s.heroStatL}>recap time</span>
+                </div>
+                <div className={s.heroStatDiv} />
+                <div className={s.heroStat}>
+                  <span className={s.heroStatN}>6</span>
+                  <span className={s.heroStatL}>outputs per call</span>
+                </div>
+                <div className={s.heroStatDiv} />
+                <div className={s.heroStat}>
+                  <span className={s.heroStatN}>Free</span>
+                  <span className={s.heroStatL}>first one</span>
+                </div>
+              </div>
+            </div>
+
+            <div className={s.heroCard}>
+              <div className={s.mockup}>
+                <div className={s.mockupHead}>
+                  <div className={s.mockupDots}><span /><span /><span /></div>
+                  <div className={s.mockupTitle}>Discovery call · Acme Corp</div>
+                </div>
+                <div className={s.mockupBody}>
+                  <div className={`${s.mockBlock} ${s.mockBlockBlue}`}>
+                    <div className={s.mockBlockLabel}>Decisions</div>
+                    <div className={s.mockBlockContent}>
+                      • Scope locked: Shopify Plus rebuild, 12-week timeline<br />
+                      • Budget approved at $48k, 3 milestones<br />
+                      • Kickoff scheduled for May 6th
+                    </div>
+                  </div>
+                  <div className={`${s.mockBlock} ${s.mockBlockGreen}`}>
+                    <div className={s.mockBlockLabel}>Action items</div>
+                    <div className={s.mockBlockContent}>
+                      ✓ <strong>You</strong> → SOW + first invoice (Mon)<br />
+                      ✓ <strong>Sarah (Acme)</strong> → Brand assets + access (Tue)
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </section>
