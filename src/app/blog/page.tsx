@@ -1,5 +1,7 @@
 import Link from 'next/link'
+import Image from 'next/image'
 import type { Metadata } from 'next'
+import MobileNav from '@/components/MobileNav'
 import { articles } from '@/lib/blog'
 import styles from './blog.module.css'
 
@@ -18,10 +20,7 @@ export const metadata: Metadata = {
 export default function BlogIndex() {
   return (
     <div className={styles.page}>
-      <nav className={styles.nav}>
-        <Link href="/" className={styles.navLogo}>⚡ MeetingFlash</Link>
-        <Link href="/app" className={styles.navCta}>Try free →</Link>
-      </nav>
+      <MobileNav />
 
       <div className={styles.content}>
         <div className={styles.header}>
@@ -52,7 +51,10 @@ export default function BlogIndex() {
       </div>
 
       <footer className={styles.footer}>
-        <Link href="/" className={styles.footerLogo}>⚡ MeetingFlash</Link>
+        <Link href="/" className={styles.footerLogo}>
+          <Image src="/logo.png" alt="MeetingFlash" width={22} height={22} style={{ borderRadius: 5 }} />
+          MeetingFlash
+        </Link>
         <p className={styles.footerSub}>Turn meeting notes into execution — instantly.</p>
         <Link href="/app" className={styles.footerCta}>Try free →</Link>
       </footer>

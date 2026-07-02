@@ -31,7 +31,7 @@ Effective meeting notes have four components:
 
 **1. Decisions made** — Not discussed, not proposed. Decisions that were actually made. "We decided to push the launch to May 2nd" is useful. "Launch date was discussed" is not.
 
-**2. Action items with owners** — Every action item needs a person's name and a deadline. "Tom will send the feature list by Friday" is actionable. "Feature list needed" is not.
+**2. Action items with owners** — Every action item needs a person's name and a deadline. "Tom will send the feature list by Friday" is actionable. "Feature list needed" is not. (This is where most notes break down — see [Meeting Action Items: Why They Fail and How to Fix It](/blog/meeting-action-items-best-practices).)
 
 **3. Open questions** — Things that came up but weren't resolved. These become the agenda for your next meeting.
 
@@ -95,7 +95,7 @@ The goal isn't to replace thinking. It's to eliminate the part that's purely mec
 
 Your meeting ends. Everyone leaves. And then... nothing happens.
 
-Sound familiar? You're not alone. Research consistently shows that more than 60% of action items from meetings are never completed. Not because people don't care, but because there's no system to ensure they do.
+Sound familiar? You're not alone. Research consistently shows that more than 60% of [action items from meetings are never completed](/blog/meeting-action-items-best-practices). Not because people don't care, but because there's no system to ensure they do.
 
 A post-meeting workflow solves this. It's the set of steps you follow every time a meeting ends to make sure nothing slips through the cracks.
 
@@ -202,7 +202,7 @@ Keep it clear and searchable. "Quick follow-up" is too vague. "Follow-up: Produc
 
 **Too much detail.** A follow-up email is not a transcript. If it takes more than 60 seconds to read, it's too long.
 
-**Vague action items.** "Follow up on pricing" is not an action item. "Sarah → Send updated pricing proposal by Tuesday" is.
+**Vague action items.** "Follow up on pricing" is not an action item. "Sarah → Send updated pricing proposal by Tuesday" is. (For the full breakdown of [why action items fail and how to fix it](/blog/meeting-action-items-best-practices), we wrote a dedicated guide.)
 
 **No deadlines.** Every action item needs a deadline. "Soon" doesn't count.
 
@@ -758,7 +758,7 @@ This is the same shift covered in [How to Summarize Meeting Notes with AI](/blog
 
 ## What AI gets right — and where you still need a human
 
-AI is excellent at: pulling action items out of messy text, attaching the right owner when a name is mentioned, keeping deadlines literal, and separating what was decided from what was merely discussed.
+AI is excellent at: pulling action items out of messy text, attaching the right owner when a name is mentioned, keeping deadlines literal, and separating what was decided from what was merely discussed. (The owner-plus-deadline discipline is the whole game — see [why most action items are never completed](/blog/meeting-action-items-best-practices).)
 
 AI is not a substitute for your judgment on: whether a decision was actually final or still tentative, sensitive wording for anything political, and confirming attribution when your notes were ambiguous. Minutes are an official record — always read them before they go out. The tool gets you 90% there in seconds; the last 10% is a human confirming nothing important was misread.
 

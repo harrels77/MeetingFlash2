@@ -3,6 +3,7 @@
   background: var(--bg);
   color: var(--text);
   font-family: var(--font);
+  padding-top: 60px; /* offset the fixed MobileNav (60px) */
 }
 
 /* NAV */
@@ -310,6 +311,9 @@
 }
 
 .footerLogo {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
   font-size: 15px;
   font-weight: 700;
   color: var(--text);

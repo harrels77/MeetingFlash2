@@ -1,6 +1,8 @@
 import Link from 'next/link'
+import Image from 'next/image'
 import { notFound } from 'next/navigation'
 import type { Metadata } from 'next'
+import MobileNav from '@/components/MobileNav'
 import { articles, getArticle, getRelatedArticles } from '@/lib/blog'
 import styles from '../blog.module.css'
 
@@ -142,10 +144,7 @@ export default function ArticlePage({ params }: { params: { slug: string } }) {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(articleJsonLd(article)) }}
       />
-      <nav className={styles.nav}>
-        <Link href="/" className={styles.navLogo}>⚡ MeetingFlash</Link>
-        <Link href="/app" className={styles.navCta}>Try free →</Link>
-      </nav>
+      <MobileNav />
 
       <div className={styles.articleContent}>
         <div className={styles.articleMeta}>
@@ -189,7 +188,10 @@ export default function ArticlePage({ params }: { params: { slug: string } }) {
       </div>
 
       <footer className={styles.footer}>
-        <Link href="/" className={styles.footerLogo}>⚡ MeetingFlash</Link>
+        <Link href="/" className={styles.footerLogo}>
+          <Image src="/logo.png" alt="MeetingFlash" width={22} height={22} style={{ borderRadius: 5 }} />
+          MeetingFlash
+        </Link>
         <p className={styles.footerSub}>Turn meeting notes into execution — instantly.</p>
         <Link href="/app" className={styles.footerCta}>Try free →</Link>
       </footer>
