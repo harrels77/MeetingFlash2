@@ -144,7 +144,7 @@ export default function DiscoveryCallRecapToolPage() {
         <div className={s.container}>
           <div className={s.sectionHead}>
             <div className={s.sectionPill}>What you get</div>
-            <h2 className={s.sectionTitle}>Six outputs from one paste.</h2>
+            <h2 className={s.sectionTitle}>One paste of notes becomes six ready-to-send outputs.</h2>
             <p className={s.sectionLede}>
               A discovery call recap isn&apos;t just an email — it&apos;s a complete handoff package the prospect can act on.
             </p>

@@ -129,7 +129,7 @@ export default function PricingPage() {
         <div className={s.container}>
           <div className={s.sectionHead}>
             <div className={s.sectionPill}>Pricing FAQ</div>
-            <h2 className={s.sectionTitle}>Honest answers.</h2>
+            <h2 className={s.sectionTitle}>The pricing questions everyone asks.</h2>
           </div>
           <div className={s.faqList}>
             {FAQ_ITEMS.map((item, i) => (
@@ -146,7 +146,7 @@ export default function PricingPage() {
       </section>
 
       <section className={s.ctaBanner}>
-        <h2 className={s.ctaBannerTitle}>Try one Pack free.<br />No credit card.</h2>
+        <h2 className={s.ctaBannerTitle}>Try one Execution Pack free, no card required.</h2>
         <p className={s.ctaBannerSub}>
           See exactly what an Execution Pack looks like before you commit to anything.
         </p>

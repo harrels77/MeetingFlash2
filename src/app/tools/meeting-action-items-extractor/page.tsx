@@ -140,7 +140,7 @@ export default function ActionItemsExtractorPage() {
         <div className={s.container}>
           <div className={s.sectionHead}>
             <div className={s.sectionPill}>Example</div>
-            <h2 className={s.sectionTitle}>Raw notes in. Action items out.</h2>
+            <h2 className={s.sectionTitle}>Paste raw notes, get action items with owners and deadlines.</h2>
           </div>
 
           <div className={s.split}>

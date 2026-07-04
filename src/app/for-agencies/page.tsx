@@ -108,7 +108,7 @@ export default function ForAgenciesPage() {
         <div className={s.container}>
           <div className={s.sectionHead}>
             <div className={s.sectionPill}>The 4 meetings agencies run on repeat</div>
-            <h2 className={s.sectionTitle}>One tool. Every meeting type.</h2>
+            <h2 className={s.sectionTitle}>Every meeting an agency runs, handled the same way.</h2>
             <p className={s.sectionLede}>
               MeetingFlash extracts decisions, owners, deadlines, and follow-ups from raw notes — whatever the meeting format.
             </p>

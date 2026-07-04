@@ -25,7 +25,7 @@ export default function BlogIndex() {
       <div className={styles.content}>
         <div className={styles.header}>
           <div className={styles.pill}>Blog</div>
-          <h1 className={styles.title}>Better meetings, better execution.</h1>
+          <h1 className={styles.title}>Guides for everything that happens after the meeting.</h1>
           <p className={styles.sub}>Practical guides for teams who want to get more done after every meeting.</p>
         </div>
 

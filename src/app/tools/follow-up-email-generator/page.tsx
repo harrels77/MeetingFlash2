@@ -145,7 +145,7 @@ export default function FollowUpEmailGeneratorPage() {
         <div className={s.container}>
           <div className={s.sectionHead}>
             <div className={s.sectionPill}>How it works</div>
-            <h2 className={s.sectionTitle}>Three steps. 20 seconds total.</h2>
+            <h2 className={s.sectionTitle}>Three steps that take 20 seconds in total.</h2>
           </div>
           <div className={s.cardGrid}>
             <div className={s.card}>

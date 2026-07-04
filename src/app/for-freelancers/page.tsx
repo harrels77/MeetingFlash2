@@ -144,7 +144,7 @@ export default function ForFreelancersPage() {
         <div className={s.container}>
           <div className={s.sectionHead}>
             <div className={s.sectionPill}>Built for solo work</div>
-            <h2 className={s.sectionTitle}>Run client calls. Don&apos;t run the admin.</h2>
+            <h2 className={s.sectionTitle}>You run the client calls, and the admin runs itself.</h2>
           </div>
 
           <div className={s.split}>
@@ -234,7 +234,7 @@ export default function ForFreelancersPage() {
       </section>
 
       <section className={s.ctaBanner}>
-        <h2 className={s.ctaBannerTitle}>Charge for delivery.<br />Skip the paperwork.</h2>
+        <h2 className={s.ctaBannerTitle}>Spend your billable hours on delivery, not paperwork.</h2>
         <p className={s.ctaBannerSub}>
           Try MeetingFlash on your last client call. No signup needed for the first one.
         </p>

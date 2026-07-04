@@ -260,8 +260,7 @@ export default function Home() {
       <section className={s.compare} id="compare">
         <div className={`${s.sectionPill} ${s.reveal}`}>Why MeetingFlash</div>
         <h2 className={`${s.sectionTitle} ${s.reveal}`}>
-          ChatGPT writes.<br />
-          <span className={s.titleAccent}>MeetingFlash executes.</span>
+          Why not just paste it <span className={s.titleAccent}>into ChatGPT?</span>
         </h2>
 
         <div className={`${s.compareGrid} ${s.reveal}`}>
@@ -402,7 +401,7 @@ export default function Home() {
       <div className={s.bentoIcon}>📤</div>
       <h3 className={s.bentoTitle}>Recap sent before the next meeting</h3>
       <p className={s.bentoDesc}>
-        The follow-up email goes out the same minute the call ends. Clients perceive you differently when you respond at machine speed.
+        The follow-up email goes out the same minute the call ends. Your client reads it while the meeting is still fresh in their mind.
       </p>
     </div>
   </div>
@@ -423,7 +422,7 @@ export default function Home() {
       {/* ── PRICING ── */}
       <section className={s.pricing} id="pricing">
         <div className={`${s.sectionPill} ${s.reveal}`}>Pricing</div>
-        <h2 className={`${s.sectionTitle} ${s.reveal}`}>Simple. Honest. No surprises.</h2>
+        <h2 className={`${s.sectionTitle} ${s.reveal}`}>One price, and the free plan actually stays free.</h2>
         <p className={`${s.pricingSub} ${s.reveal}`}>Start free. Upgrade when you're ready.</p>
 
         <div className={`${s.reveal}`} style={{ display:'flex', alignItems:'center', justifyContent:'center', gap:12, marginBottom:32 }}>
@@ -504,7 +503,7 @@ export default function Home() {
       {/* ── FAQ ── */}
       <section className={s.sectionBlock} id="faq" style={{ paddingBottom: 40 }}>
         <div className={`${s.sectionPill} ${s.reveal}`}>FAQ</div>
-        <h2 className={`${s.sectionTitle} ${s.reveal}`}>Honest answers,<br />before you ask.</h2>
+        <h2 className={`${s.sectionTitle} ${s.reveal}`}>Questions people ask before trying it.</h2>
         <div className={`${s.reveal}`} style={{ maxWidth: 760, margin: '40px auto 0', display: 'flex', flexDirection: 'column', gap: 12 }}>
           {FAQ_ITEMS.map((item, i) => (
             <details
@@ -547,10 +546,10 @@ export default function Home() {
       <section className={s.ctaBanner}>
         <div className={s.ctaGlow} />
         <h2 className={`${s.ctaBannerTitle} ${s.reveal}`}>
-          Your next meeting ends<br />with total clarity.
+          Your next meeting can end with the recap already sent.
         </h2>
         <p className={`${s.ctaBannerSub} ${s.reveal}`}>
-          Join teams who never leave a meeting without a complete execution plan.
+          Paste the notes from your last meeting and see what comes back.
         </p>
         <HeroCta className={`${s.btnPrimary} ${s.reveal}`} />
       </section>
@@ -564,7 +563,7 @@ export default function Home() {
               MeetingFlash
             </Link>
             <p className={s.footerTagline}>
-              Built for teams who believe every meeting<br />should end with total clarity.
+              Raw meeting notes in, client-ready recap out —<br />in about 20 seconds.
             </p>
           </div>
           <div className={s.footerCols}>
@@ -597,7 +596,7 @@ export default function Home() {
         </div>
         <div className={s.footerBottom}>
           <span>© 2026 MeetingFlash</span>
-          <span className={s.footerAccent}>Built differently.</span>
+          <span className={s.footerAccent}>Made by one person who answers his own email.</span>
         </div>
       </footer>
     </div>

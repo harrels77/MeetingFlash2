@@ -102,7 +102,7 @@ export default function ForProductTeamsPage() {
         <div className={s.container}>
           <div className={s.sectionHead}>
             <div className={s.sectionPill}>The product team meeting stack</div>
-            <h2 className={s.sectionTitle}>One tool. Every recurring meeting.</h2>
+            <h2 className={s.sectionTitle}>Every recurring product meeting, from standup to retro.</h2>
             <p className={s.sectionLede}>
               The meetings product teams run on repeat — captured in a structure that drives follow-through.
             </p>
