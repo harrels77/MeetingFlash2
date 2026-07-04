@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import Link from 'next/link'
 import MobileNav from '@/components/MobileNav'
 import { buildBreadcrumb } from '@/lib/breadcrumb'
+import SiteFooter from '@/components/SiteFooter'
 import s from '@/styles/marketing.module.css'
 import PricingCards from '@/components/PricingCards'
 
@@ -153,14 +154,7 @@ export default function PricingPage() {
         <Link href="/app" className={s.btnPrimary}>Run your first Flash free →</Link>
       </section>
 
-      <footer className={s.miniFooter}>
-        <Link href="/">Home</Link>
-        <Link href="/blog">Blog</Link>
-        <Link href="/for-agencies">For agencies</Link>
-        <Link href="/for-product-teams">For product teams</Link>
-        <Link href="/for-freelancers">For freelancers</Link>
-        <div style={{ marginTop: 16 }}>© 2026 MeetingFlash · hello@meetingflash.work</div>
-      </footer>
+      <SiteFooter />
     </div>
   )
 }

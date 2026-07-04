@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import { Zap, CreditCard, BookOpen, Target, ArrowLeft, ArrowRight } from 'lucide-react'
+import SiteFooter from '@/components/SiteFooter'
 import s from '@/styles/marketing.module.css'
 
 export const metadata: Metadata = {
@@ -66,15 +67,7 @@ export default function NotFound() {
         </div>
       </section>
 
-      <footer className={s.miniFooter}>
-        <Link href="/">Home</Link>
-        <Link href="/blog">Blog</Link>
-        <Link href="/pricing">Pricing</Link>
-        <Link href="/for-agencies">For agencies</Link>
-        <Link href="/for-product-teams">For product teams</Link>
-        <Link href="/for-freelancers">For freelancers</Link>
-        <div style={{ marginTop: 16 }}>© 2026 MeetingFlash · hello@meetingflash.work</div>
-      </footer>
+      <SiteFooter />
     </div>
   )
 }
