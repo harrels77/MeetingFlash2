@@ -685,8 +685,9 @@
 
 .compareRow {
   display: flex;
-  align-items: flex-start;
-  gap: 12px;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 16px;
   padding: 10px 0;
   border-bottom: 1px solid var(--border);
   font-size: 14px;
@@ -696,8 +697,32 @@
 .compareRow:last-child { border-bottom: none; }
 .compareCardFeatured .compareRow { color: var(--text); }
 
-.compareCross { color: rgba(229,72,77,0.6); flex-shrink: 0; font-size: 12px; margin-top: 2px; font-weight: 700; }
-.compareCheck { color: var(--green); flex-shrink: 0; font-size: 12px; margin-top: 2px; font-weight: 700; }
+.compareLede {
+  max-width: 560px;
+  margin: -32px auto 0;
+  color: var(--muted);
+  font-size: var(--text-base);
+  line-height: 1.6;
+}
+
+.compareTime {
+  flex-shrink: 0;
+  font-family: var(--mono);
+  font-size: var(--text-xs);
+  color: var(--faint);
+  white-space: nowrap;
+}
+.compareCardFeatured .compareTime { color: var(--accent-text); }
+
+.compareTotal {
+  margin-top: 16px;
+  padding-top: 14px;
+  border-top: 1px solid var(--border2);
+  font-size: var(--text-sm);
+  font-weight: 600;
+  color: var(--text);
+}
+.compareCardFeatured .compareTotal { color: var(--accent-text); }
 
 /* ── GENERIC CENTERED SECTION (outcomes, FAQ) ── */
 .sectionBlock {

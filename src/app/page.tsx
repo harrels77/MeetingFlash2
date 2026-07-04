@@ -264,34 +264,41 @@ export default function Home() {
           Why not just paste it <span className={s.titleAccent}>into ChatGPT?</span>
         </h2>
 
+        <p className={`${s.compareLede} ${s.reveal}`}>
+          You can. Here is what the next twenty minutes look like in each case.
+        </p>
+
         <div className={`${s.compareGrid} ${s.reveal}`}>
           <div className={s.compareCard}>
-            <div className={s.compareCardHead}>ChatGPT / Generic AI</div>
+            <div className={s.compareCardHead}>With a general-purpose AI</div>
             {[
-              'Requires a well-crafted prompt every time',
-              'Forgets everything after the session',
-              'Returns unstructured text to reformat',
-              'No project context or meeting history',
-              'You still have to write the follow-up email',
-            ].map(t => (
+              ['Write a prompt explaining the format you want', '~3 min'],
+              ['Paste the transcript, wait, reformat the output', '~8 min'],
+              ['Draft the follow-up email from the summary', '~7 min'],
+              ['Retype the action items into your task tracker', '~4 min'],
+              ['Next meeting, it remembers none of this', 'every time'],
+            ].map(([t, d]) => (
               <div key={t} className={s.compareRow}>
-                <span className={s.compareCross}>✕</span>{t}
+                <span>{t}</span>
+                <span className={s.compareTime}>{d}</span>
               </div>
             ))}
+            <div className={s.compareTotal}>Roughly 20 minutes, after every meeting</div>
           </div>
           <div className={`${s.compareCard} ${s.compareCardFeatured}`}>
-            <div className={s.compareCardHead}>MeetingFlash</div>
+            <div className={s.compareCardHead}>With MeetingFlash</div>
             {[
-              'Zero prompts — paste and get results',
-              'Remembers all decisions across meetings',
-              '7 structured, copy-ready outputs',
-              'Full project memory and history',
-              'Follow-up email generated and ready to send',
-            ].map(t => (
+              ['Paste your raw notes as they are', '5 sec'],
+              ['Get all 7 outputs, formatted and ready', '20 sec'],
+              ['Send the email, post the Slack message', '~1 min'],
+              ['Decisions and tasks carry into the next call', 'automatic'],
+            ].map(([t, d]) => (
               <div key={t} className={s.compareRow}>
-                <span className={s.compareCheck}>✓</span>{t}
+                <span>{t}</span>
+                <span className={s.compareTime}>{d}</span>
               </div>
             ))}
+            <div className={s.compareTotal}>About 90 seconds, then you move on</div>
           </div>
         </div>
       </section>
