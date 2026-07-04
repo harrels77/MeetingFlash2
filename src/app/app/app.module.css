@@ -1021,6 +1021,13 @@
 .label_fog    { color: var(--muted); }
 .label_paper  { color: var(--muted); }
 
+.blockBtns {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
 .cpBtn {
   background: none;
   border: 1px solid var(--border2);

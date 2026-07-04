@@ -9,10 +9,39 @@ import ActionTiers from '@/components/ActionTiers'
 import QuestionsView from '@/components/QuestionsView'
 import RisksView from '@/components/RisksView'
 import OutcomePill from '@/components/OutcomePill'
-import { BLOCK_ICONS } from '@/lib/packMeta'
+import { BLOCK_ICONS, gmailComposeUrl } from '@/lib/packMeta'
 import ThemeToggle from '@/components/ThemeToggle'
 import { useEffect } from 'react'
 
+
+// ── Transcript upload ────────────────────────────────────────────────
+// Accepts the files meeting tools export natively: .txt (raw), .vtt (Zoom /
+// Meet / Teams), .srt. VTT/SRT are stripped of cue numbers, timestamps and
+// voice tags so the model receives clean prose.
+function parseTranscriptFile(name: string, raw: string): string {
+  const ext = name.toLowerCase().split('.').pop()
+  if (ext !== 'vtt' && ext !== 'srt') return raw.trim()
+  const lines = raw.split(/\r?\n/)
+  const out: string[] = []
+  for (const line of lines) {
+    const l = line.trim()
+    if (!l) continue
+    if (/^WEBVTT/i.test(l)) continue
+    if (/^NOTE(\s|$)/.test(l)) continue
+    if (/^\d+$/.test(l)) continue // SRT cue number
+    if (/\d{1,2}:\d{2}(:\d{2})?[.,]\d{3}\s*-->/.test(l)) continue // timestamps
+    // <v Speaker Name>text</v>  →  Speaker Name: text
+    const voiced = l.match(/^<v\s+([^>]+)>(.*?)(<\/v>)?$/i)
+    if (voiced) { out.push(`${voiced[1].trim()}: ${voiced[2].trim()}`); continue }
+    out.push(l.replace(/<[^>]+>/g, ''))
+  }
+  // Merge consecutive duplicate captions (VTT often repeats lines across cues)
+  const merged: string[] = []
+  for (const l of out) if (merged[merged.length - 1] !== l) merged.push(l)
+  return merged.join('\n').trim()
+}
+
+const MAX_TRANSCRIPT_BYTES = 1_000_000 // 1 MB — well past any real meeting
 
 type Pack = {
   snapshot?: string
@@ -191,6 +220,24 @@ export default function AppPage() {
   const [creatingProject, setCreatingProject]     = useState(false)
   const [templateBanner, setTemplateBanner]       = useState<string | null>(null)
   const outputRef = useRef<HTMLDivElement>(null)
+  const fileInputRef = useRef<HTMLInputElement>(null)
+
+  function handleTranscriptFile(file: File) {
+    if (file.size > MAX_TRANSCRIPT_BYTES) {
+      setError('File is too large (max 1 MB). Paste the relevant part instead.')
+      return
+    }
+    const reader = new FileReader()
+    reader.onload = () => {
+      const parsed = parseTranscriptFile(file.name, String(reader.result || ''))
+      if (!parsed) { setError('Could not read any text from that file.'); return }
+      setText(parsed)
+      setTemplateBanner(null)
+      setError('')
+    }
+    reader.onerror = () => setError('Could not read that file. Try pasting the text instead.')
+    reader.readAsText(file)
+  }
   const [showUpgradeModal, setShowUpgradeModal]   = useState(false)
 
   // Derived auth state — sourced from AuthProvider so it's consistent across pages
@@ -588,6 +635,25 @@ async function createProject() {
                   </div>
                 )}
               </div>
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept=".txt,.vtt,.srt,.md,text/plain,text/vtt"
+                style={{ display: 'none' }}
+                onChange={e => {
+                  const f = e.target.files?.[0]
+                  if (f) handleTranscriptFile(f)
+                  e.target.value = ''
+                }}
+              />
+              <button
+                className={styles.sampleBtn}
+                onClick={() => fileInputRef.current?.click()}
+                title="Upload a transcript file (.txt, .vtt, .srt)"
+                type="button"
+              >
+                Upload transcript
+              </button>
               <button className={styles.sampleBtn} onClick={() => setText(SAMPLE)}>
                 Load sample ↗
               </button>
@@ -940,12 +1006,25 @@ async function createProject() {
                         {block.label}
                       </span>
                     </div>
-                    <button
-                      className={`${styles.cpBtn} ${copied === block.id ? styles.cpDone : ''}`}
-                      onClick={() => copy(block.id, block.content)}
-                    >
-                      {copied === block.id ? '✓' : 'Copy'}
-                    </button>
+                    <div className={styles.blockBtns}>
+                      {block.id === 'email' && (
+                        <a
+                          className={styles.cpBtn}
+                          href={gmailComposeUrl(block.content)}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          title="Open this email pre-filled in Gmail"
+                        >
+                          Open in Gmail
+                        </a>
+                      )}
+                      <button
+                        className={`${styles.cpBtn} ${copied === block.id ? styles.cpDone : ''}`}
+                        onClick={() => copy(block.id, block.content)}
+                      >
+                        {copied === block.id ? '✓' : 'Copy'}
+                      </button>
+                    </div>
                   </div>
                   <div className={styles.blockContent}>
                     {block.id === 'actions' ? <ActionTiers text={block.content} />

@@ -7,7 +7,7 @@ import ActionTiers from '@/components/ActionTiers'
 import QuestionsView from '@/components/QuestionsView'
 import RisksView from '@/components/RisksView'
 import OutcomePill from '@/components/OutcomePill'
-import { BLOCK_ICONS } from '@/lib/packMeta'
+import { BLOCK_ICONS, gmailComposeUrl } from '@/lib/packMeta'
 import ThemeToggle from '@/components/ThemeToggle'
 import styles from './pack.module.css'
 
@@ -281,12 +281,25 @@ export default function PackDetail() {
                     </button>
                   </div>
                 ) : (
-                  <button
-                    className={`${styles.cpBtn} ${copied === block.id ? styles.cpDone : ''}`}
-                    onClick={() => copy(block.id, packFieldToString(meeting.pack[block.id]) || '—')}
-                  >
-                    {copied === block.id ? '✓' : 'Copy'}
-                  </button>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexShrink: 0 }}>
+                    {block.id === 'email' && (
+                      <a
+                        className={styles.cpBtn}
+                        href={gmailComposeUrl(packFieldToString(meeting.pack[block.id]) || '')}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        title="Open this email pre-filled in Gmail"
+                      >
+                        Open in Gmail
+                      </a>
+                    )}
+                    <button
+                      className={`${styles.cpBtn} ${copied === block.id ? styles.cpDone : ''}`}
+                      onClick={() => copy(block.id, packFieldToString(meeting.pack[block.id]) || '—')}
+                    >
+                      {copied === block.id ? '✓' : 'Copy'}
+                    </button>
+                  </div>
                 )}
               </div>
               <div className={styles.blockContent}>

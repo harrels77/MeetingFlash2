@@ -63,3 +63,19 @@ export function metricsToSegments(m: PackMetrics): { label: string; tone: 'neutr
   if (m.openQuestions > 0) out.push({ label: `${m.openQuestions} open question${m.openQuestions !== 1 ? 's' : ''}`, tone: 'muted' })
   return out
 }
+
+// ── "Open in Gmail" on the follow-up email block ─────────────────────
+// The generated email usually starts with "Subject: …". Split it out so the
+// compose window opens with subject + body already in place.
+export function emailParts(text: string): { subject: string; body: string } {
+  const lines = text.split('\n')
+  const first = (lines[0] || '').trim()
+  const m = first.match(/^(?:subject|objet)\s*:\s*(.+)$/i)
+  if (m) return { subject: m[1].trim(), body: lines.slice(1).join('\n').trim() }
+  return { subject: 'Meeting recap', body: text.trim() }
+}
+
+export function gmailComposeUrl(text: string): string {
+  const { subject, body } = emailParts(text)
+  return `https://mail.google.com/mail/?view=cm&fs=1&su=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`
+}
