@@ -179,7 +179,7 @@ export default function MobileNav() {
       {/* MOBILE MENU — rendu uniquement sur mobile via CSS */}
       {open && (
         <div className={styles.mobileMenu}>
-          <Link href="#features" className={styles.mobileLink} onClick={() => setOpen(false)}>
+          <Link href="/#features" className={styles.mobileLink} onClick={() => setOpen(false)}>
             Features
           </Link>
           <Link href="/pricing" className={styles.mobileLink} onClick={() => setOpen(false)}>

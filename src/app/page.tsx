@@ -125,7 +125,7 @@ export default function Home() {
             <span className={s.miniOutput} style={{color:'var(--blue3)'}}>📌 Launch set for April 28th</span>
             <span className={s.miniOutput} style={{color:'var(--green)'}}>✓ Tom → Feature list (Fri)</span>
             <span className={s.miniOutput} style={{color:'var(--green)'}}>✓ Freeze subscriptions Q2</span>
-            <span className={s.miniOutput} style={{color:'#FCD34D)'}}>⚠ Interview timeline tight</span>
+            <span className={s.miniOutput} style={{color:'var(--amber)'}}>⚠ Interview timeline tight</span>
           </div>
         </div>
       </div>
@@ -378,7 +378,7 @@ export default function Home() {
 </section>
 
 {/* ── OUTCOMES ── */}
-<section className={s.testimonials}>
+<section className={s.sectionBlock}>
   <div className={`${s.sectionPill} ${s.reveal}`}>What changes</div>
   <h2 className={`${s.sectionTitle} ${s.reveal}`}>
     What changes when you stop<br />writing recaps yourself.
@@ -435,7 +435,7 @@ export default function Home() {
             <span style={{ position:'absolute', top:3, left: annual ? 22 : 3, width:18, height:18, borderRadius:'50%', background:'#fff', transition:'left 0.2s' }} />
           </button>
           <span style={{ color: annual ? 'var(--text)' : 'var(--muted)', fontSize:14, fontWeight:500 }}>
-            Annual <span style={{ color:'var(--green)', fontSize:12, fontWeight:600 }}>Save 20%</span>
+            Annual <span style={{ color:'var(--green)', fontSize:12, fontWeight:600 }}>Save 33%</span>
           </span>
         </div>
 
@@ -502,7 +502,7 @@ export default function Home() {
       </section>
 
       {/* ── FAQ ── */}
-      <section className={s.testimonials} id="faq" style={{ paddingBottom: 40 }}>
+      <section className={s.sectionBlock} id="faq" style={{ paddingBottom: 40 }}>
         <div className={`${s.sectionPill} ${s.reveal}`}>FAQ</div>
         <h2 className={`${s.sectionTitle} ${s.reveal}`}>Honest answers,<br />before you ask.</h2>
         <div className={`${s.reveal}`} style={{ maxWidth: 760, margin: '40px auto 0', display: 'flex', flexDirection: 'column', gap: 12 }}>
