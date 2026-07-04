@@ -82,14 +82,12 @@ persistent project memory, structured ready-to-use outputs.
 ---
 
 ## Design System
-- Background: `#060C18`
-- Surface: `#111D35`
-- Blue primary: `#2563EB`
-- Blue bright: `#3B82F6`
-- Accent: `#60A5FA`
-- Text: `#F8FAFC`
-- Muted: `#94A3B8`
-- Fonts: Plus Jakarta Sans + Instrument Serif + JetBrains Mono
+**La référence complète est `DESIGN-SYSTEM.md` à la racine (adopté 2026-07-04). Toute modification visuelle s'y conforme.** Résumé :
+- Palette propriétaire "Flash Blue" (plus AUCUN hex Tailwind) : fond encre `#0A101F`, accent `#2E62FF`, accent texte `#7C9BFF`, spark `#FFC53D` (1 dose max par page), états sémantiques `--success/--warning/--danger` (+ variantes `-text/-soft/-border`)
+- Les alias historiques `--blue/--blue2/--blue3/--green/--amber/--red` existent encore, mappés sur la nouvelle palette — les retirer à terme
+- Typo : **titres H1/H2/prix en Instrument Serif 400** (voix display), corps/UI en Plus Jakarta Sans (400-700 seulement, 300/800 non chargés), JetBrains Mono pour les données. Échelle typo/espacements/radius en tokens dans globals.css
+- **Icônes : Lucide uniquement** (`lucide-react`), strokeWidth 1.75, tailles fixes, `aria-hidden` — JAMAIS d'emoji comme icône sur les surfaces marketing. (Les emojis des blocs de pack côté produit /app + /dashboard sont encore là — migration à arbitrer.)
+- Interdits (liste complète dans DESIGN-SYSTEM.md §7) : gradient text, tableau ✕/✓ concurrent, titres staccato "X. Y. Z.", `<br />` dans les headings, hex hors globals.css, styles inline marketing
 - All CSS variables defined in `src/styles/globals.css`
 - Dark/light theme via `[data-theme="light"]` on `<html>` — CSS vars override in globals.css
 
@@ -242,6 +240,16 @@ The landing was rewritten in two pre-launch passes after external reviewer round
 ` — mixed currencies confused users since Pro is `$12`). All prices on the landing are USD.
 - **Brand mark = `/logo.png` everywhere.** Login, signup, share page, dashboard sidebar, ProductShowcase mockups all use `<Image src="/logo.png" />`. The old "blue square" placeholder is gone — don't re-introduce it on new pages.
 
+### Refonte D.A. 2026-07-04 (AUDIT.md → FIXES.md, 15 items livrés)
+- **Section Compare** : le tableau "✕ ChatGPT / ✓ MeetingFlash" est REMPLACÉ par un avant/après factuel (deux timelines chiffrées, H2 "Why not just paste it into ChatGPT?"). Ne pas réintroduire de croix rouges sur les concurrents.
+- **Pricing = un seul composant** : `src/components/PricingCards.tsx` (ex-PricingClient), rendu par `/` ET `/pricing`. La section pricing dupliquée de la landing (qui affichait un "Save 20%" faux — le vrai chiffre est 33%) n'existe plus.
+- **Mockup Discovery partagé** : `src/components/DiscoveryMockup.tsx`, utilisé par la landing et /for-agencies. Ne pas re-dupliquer.
+- **Footer unique** : `src/components/SiteFooter.tsx` (+ Footer.module.css) sur landing + 3 ICP + 3 tools. Logo = `/logo.png` (le carré bleu placeholder est mort). Les classes `miniFooter` ont été supprimées de marketing.module.css.
+- **Titres** : tous les staccato "X. Y. Z." réécrits en phrases complètes (règles DESIGN-SYSTEM.md §6). "Simple. Honest. No surprises." / "Built differently." / "Join teams who…" sont interdits de retour.
+- **H1 /for-agencies** : "The meeting recap tool built for agency client work." — ne plus dupliquer le H1 "coffee" de la home.
+- **Code mort supprimé** : Nav.tsx + Nav.module.css (2e nav jamais importée), Ticker.*, classes .testimonial*/.social*, middleware.ts (no-op qui appelait Supabase sans pont cookies sur chaque requête — si un vrai refresh session serveur est voulu un jour, utiliser @supabase/ssr avec cookie handlers).
+- FAQ landing : `<details>` stylées via page.module.css (.faqItem), icône Plus Lucide qui pivote à l'ouverture. Note fondateur : classes .makerNote/.makerText (serif italique).
+
 ### Post-flash Guest CTA (`src/app/app/page.tsx`)
 After a guest finishes their 1 free pack, the CTA copy below the result is: *"That took 20 seconds. Save this pack, and get 4 more like it this month — free, no credit card."* Button label: **"Save this pack"** (not "Create free account" — action-oriented beats generic). This is the conversion moment from guest → free signup; don't soften it back to a generic CTA.
 
@@ -308,10 +316,9 @@ The user is non-coder, motivated, and worried about retention. These three piece
 - "Blog" link added to MobileNav (desktop + mobile)
 
 ### HeroCta Labels (src/components/HeroCta.tsx)
-- Guest, no pack used → `'Try with sample notes →'`
-- Guest, pack used → `'Continue Flashing →'`
-- Logged in, 0 meetings → `'Try with sample notes →'` (queries DB)
-- Logged in, has meetings → `'Continue →'` (queries DB)
+- Guest ou loading → `'Try it free'` + icône ArrowRight (Lucide)
+- Logged in → `'Continue'` + ArrowRight
+- (Hiérarchie verbale unifiée 2026-07-04 : le CTA primaire invité est "Try it free" partout — nav, hero, CTA banners ICP. "Try with sample notes" / "Run your first Flash" retirés.)
 
 ### Share Page
 - Public read-only pack view at `/share/[token]`
@@ -636,5 +643,5 @@ What NOT to add: density toggle, more block colors, dark/light forcing — alrea
 
 ---
 
-*Last updated: 2026-05-14 (Phase 11 — server-side data architecture: /api/dashboard/data + /api/account/me + /api/account/update + /api/account/delete + /api/stripe/portal, all using service_role server-side so RLS races on free-tier cold-start can no longer return silent empty data. Single source of truth for auth: useAuth() exposes profile, accessToken, refetchProfile — pages no longer keep duplicate local copies. AuthProvider.loadProfile rewritten to take token directly, eliminating the supabase.auth.getSession() hang. Settings overhaul: Flash preferences card, Manage subscription button, Hard reset session escape hatch, "Loading…" placeholders instead of misleading "Team plan" / "Invalid Date" fallbacks. Dashboard: time-saved stat + project filter + clickable "+N more — show all" on the open-actions widget. Pack output prompt: decision rationale required, in-meeting-resolved risks excluded, prioritized inferred questions, [CRITICAL]/[MEDIUM]/[LOW] severity badges via <RisksView />, "Inferred" legend on /share for clarity, conditional next-agenda format. Per-block emoji icons + <OutcomePill /> above snapshot. 30s/25s flash timeouts wrapping getSession. Diagnostic [dashboard] logs still in — strip once Phase 11 is confirmed stable in prod.)*
+*Last updated: 2026-07-04 (Refonte D.A. — AUDIT.md/FIXES.md/DESIGN-SYSTEM.md à la racine. Palette propriétaire + serif display + Lucide + tokens sémantiques ; pricing/mockup/footer unifiés en composants ; middleware supprimé ; titres réécrits. Les 3 fichiers d'audit sont la référence pour toute passe visuelle future.)*
 *Primary AI assistant: Claude (claude.ai + Claude Code)*
