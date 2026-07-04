@@ -6,6 +6,8 @@ import { supabase, packFieldToString } from '@/lib/supabase'
 import ActionTiers from '@/components/ActionTiers'
 import QuestionsView from '@/components/QuestionsView'
 import RisksView from '@/components/RisksView'
+import EmailPreview from '@/components/EmailPreview'
+import SlackPreview from '@/components/SlackPreview'
 import OutcomePill from '@/components/OutcomePill'
 import { BLOCK_ICONS, gmailComposeUrl } from '@/lib/packMeta'
 import ThemeToggle from '@/components/ThemeToggle'
@@ -309,7 +311,11 @@ export default function PackDetail() {
                     ? <QuestionsView text={packFieldToString(meeting.pack?.[block.id])} />
                     : block.id === 'risks'
                       ? <RisksView text={packFieldToString(meeting.pack?.[block.id])} />
-                      : (packFieldToString(meeting.pack?.[block.id]) || '—')}
+                      : block.id === 'email'
+                        ? <EmailPreview text={packFieldToString(meeting.pack?.[block.id])} />
+                        : block.id === 'slack'
+                          ? <SlackPreview text={packFieldToString(meeting.pack?.[block.id])} />
+                          : (packFieldToString(meeting.pack?.[block.id]) || '—')}
               </div>
             </div>
           ))}

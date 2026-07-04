@@ -7,7 +7,8 @@ import ProductShowcase from '@/components/ProductShowcase'
 import PricingCards from '@/components/PricingCards'
 import DiscoveryMockup from '@/components/DiscoveryMockup'
 import SiteFooter from '@/components/SiteFooter'
-import { Layers, Brain, Lock, Globe, ClipboardList, Search, Target, RefreshCw, Timer, Send, Zap, Check, Pin, AlertTriangle, ArrowRight, ArrowDown, Plus } from 'lucide-react'
+import HeroDemo from '@/components/HeroDemo'
+import { Layers, Brain, Lock, Globe, ClipboardList, Search, Target, RefreshCw, Timer, Send, ArrowRight, ArrowDown, Plus } from 'lucide-react'
 import s from './page.module.css'
 
 const LOGOS = ['Notion', 'Slack', 'Linear', 'Figma', 'Loom', 'Asana', 'Jira', 'Zoom', 'Google Meet', 'Teams']
@@ -102,38 +103,6 @@ export default function Home() {
     return () => revealRef.current?.disconnect()
   }, [])
 
-  function MiniBeforeAfter() {
-    return (
-      <div className={s.miniDemo}>
-        <div className={s.miniDemoLeft}>
-          <div className={s.miniDemoTag}>Raw notes</div>
-          <div className={s.miniDemoContent}>
-            <span className={s.miniLine}>Sarah: launch April 28th</span>
-            <span className={s.miniLine}>Tom: feature list by Friday</span>
-            <span className={s.miniLine}>freeze tool subscriptions Q2</span>
-            <span className={s.miniLine}>interviews start April 22nd</span>
-          </div>
-        </div>
-
-        <div className={s.miniDemoArrow}>
-          <div className={s.miniDemoArrowLine} />
-          <div className={s.miniDemoArrowLabel}>20 seconds</div>
-          <div className={s.miniDemoArrowIcon}><Zap size={16} strokeWidth={1.75} aria-hidden="true" /></div>
-        </div>
-
-        <div className={s.miniDemoRight}>
-          <div className={s.miniDemoTag} style={{color:'var(--blue3)'}}>Execution Pack</div>
-          <div className={s.miniDemoContent}>
-            <span className={s.miniOutput} style={{color:'var(--blue3)'}}><Pin size={12} strokeWidth={1.75} aria-hidden="true" /> Launch set for April 28th</span>
-            <span className={s.miniOutput} style={{color:'var(--green)'}}><Check size={12} strokeWidth={1.75} aria-hidden="true" /> Tom → Feature list (Fri)</span>
-            <span className={s.miniOutput} style={{color:'var(--green)'}}><Check size={12} strokeWidth={1.75} aria-hidden="true" /> Freeze subscriptions Q2</span>
-            <span className={s.miniOutput} style={{color:'var(--amber)'}}><AlertTriangle size={12} strokeWidth={1.75} aria-hidden="true" /> Interview timeline tight</span>
-          </div>
-        </div>
-      </div>
-    )
-  }
-
   return (
     <div className={s.root}>
       <script
@@ -175,7 +144,7 @@ export default function Home() {
             <span className={s.heroStatN}>20s</span>
             <span className={s.heroStatL}>avg. time</span>
           </div>
-          <MiniBeforeAfter />
+          <HeroDemo />
 
           <div className={s.heroStatDiv} />
           <div className={s.heroStat}>

@@ -8,6 +8,8 @@ import { useAuth } from '@/lib/AuthProvider'
 import ActionTiers from '@/components/ActionTiers'
 import QuestionsView from '@/components/QuestionsView'
 import RisksView from '@/components/RisksView'
+import EmailPreview from '@/components/EmailPreview'
+import SlackPreview from '@/components/SlackPreview'
 import OutcomePill from '@/components/OutcomePill'
 import { BLOCK_ICONS, gmailComposeUrl } from '@/lib/packMeta'
 import ThemeToggle from '@/components/ThemeToggle'
@@ -1030,6 +1032,8 @@ async function createProject() {
                     {block.id === 'actions' ? <ActionTiers text={block.content} />
                       : block.id === 'questions' ? <QuestionsView text={block.content} />
                       : block.id === 'risks' ? <RisksView text={block.content} />
+                      : block.id === 'email' ? <EmailPreview text={block.content} />
+                      : block.id === 'slack' ? <SlackPreview text={block.content} />
                       : block.content}
                   </div>
                 </div>

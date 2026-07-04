@@ -412,3 +412,49 @@
   .taskRow { flex-direction: column; gap: 10px; }
   .taskActions { flex-wrap: wrap; }
 }
+/* ── PRINT / PDF ─────────────────────────────────────────────────────
+   "Export PDF" calls window.print(). Without this block the print dump
+   included the nav, copy buttons and dark background. Here: white page,
+   black text, chrome hidden, content full width, footer credit. */
+@media print {
+  .page {
+    background: #fff !important;
+    color: #000 !important;
+  }
+  .nav { display: none !important; }
+  .content {
+    max-width: 100% !important;
+    padding: 0 !important;
+  }
+  .title { color: #000 !important; }
+  .headerMeta, .date, .lang, .style { color: #444 !important; }
+  .snapshot {
+    background: #f4f6fb !important;
+    border: 1px solid #d5dbe8 !important;
+    box-shadow: none !important;
+  }
+  .snapshotBody { color: #111 !important; }
+  .snapshotPill { color: #1E4FD6 !important; background: none !important; }
+  .block {
+    background: #fff !important;
+    border: 1px solid #d5dbe8 !important;
+    box-shadow: none !important;
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+  .blockHead { border-bottom: 1px solid #e3e7f0 !important; }
+  .blockContent { color: #111 !important; }
+  .cpBtn { display: none !important; }
+  /* Le task tracker est interactif — pas sa place sur un PDF client */
+  .taskTracker { display: none !important; }
+  /* Footer credit on every printed page */
+  .content::after {
+    content: 'Generated with MeetingFlash — meetingflash.work';
+    display: block;
+    margin-top: 24px;
+    padding-top: 12px;
+    border-top: 1px solid #d5dbe8;
+    font-size: 11px;
+    color: #666;
+  }
+}
