@@ -31,6 +31,6 @@
 }
 
 .tone_neutral { color: var(--text); }
-.tone_critical { color: #FCA5A5; font-weight: 700; }
-:global([data-theme="light"]) .tone_critical { color: #B91C1C; }
+.tone_critical { color: var(--danger-text); font-weight: 700; }
+:global([data-theme="light"]) .tone_critical { color: var(--danger-text); }
 .tone_muted { color: var(--muted); }

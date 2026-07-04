@@ -111,20 +111,20 @@
 .sampleBtn:hover { color: var(--text); border-color: var(--border3); }
 
 .clearBtn {
-  background: rgba(239,68,68,0.06);
-  border: 1px solid rgba(239,68,68,0.35);
+  background: rgba(229,72,77,0.06);
+  border: 1px solid rgba(229,72,77,0.35);
   font-family: var(--font);
   font-size: 12px;
   font-weight: 600;
-  color: #FCA5A5;
+  color: var(--danger-text);
   padding: 5px 12px;
   cursor: pointer;
   transition: all 0.15s;
   border-radius: 6px;
 }
-.clearBtn:hover { background: rgba(239,68,68,0.12); border-color: rgba(239,68,68,0.55); color: #FECACA; }
-:global([data-theme="light"]) .clearBtn { color: #B91C1C; background: rgba(239,68,68,0.05); border-color: rgba(239,68,68,0.3); }
-:global([data-theme="light"]) .clearBtn:hover { color: #991B1B; background: rgba(239,68,68,0.10); }
+.clearBtn:hover { background: rgba(229,72,77,0.12); border-color: rgba(229,72,77,0.55); color: var(--danger-text); }
+:global([data-theme="light"]) .clearBtn { color: var(--danger-text); background: rgba(229,72,77,0.05); border-color: rgba(229,72,77,0.3); }
+:global([data-theme="light"]) .clearBtn:hover { color: var(--danger-text); background: rgba(229,72,77,0.10); }
 
 .templateWrap { position: relative; }
 
@@ -199,8 +199,8 @@
   gap: 10px;
   padding: 10px 14px;
   margin-bottom: 10px;
-  background: linear-gradient(135deg, rgba(37,99,235,0.10) 0%, rgba(96,165,250,0.05) 100%);
-  border: 1px solid rgba(37,99,235,0.28);
+  background: linear-gradient(135deg, rgba(46,98,255,0.10) 0%, rgba(124,155,255,0.05) 100%);
+  border: 1px solid rgba(46,98,255,0.28);
   border-radius: 10px;
   font-size: 13px;
   line-height: 1.45;
@@ -251,7 +251,7 @@
   border-radius: 10px;
 }
 .ta::placeholder { color: var(--faint); }
-.ta:focus { border-color: rgba(37,99,235,0.4); background: var(--surface2); }
+.ta:focus { border-color: rgba(46,98,255,0.4); background: var(--surface2); }
 
 .charCount {
   font-size: 11px;
@@ -305,24 +305,24 @@
   border-radius: 8px;
   appearance: none;
 }
-.select:focus { border-color: rgba(37,99,235,0.4); }
+.select:focus { border-color: rgba(46,98,255,0.4); }
 .select option { background: var(--surface); color: var(--text); }
 
 /* When a project is selected, tint the select itself so the user can see at a
    glance they're working in project context (memory injected, etc). */
 .selectActive {
-  background: linear-gradient(135deg, rgba(37,99,235,0.10) 0%, rgba(96,165,250,0.04) 100%);
-  border-color: rgba(37,99,235,0.35);
+  background: linear-gradient(135deg, rgba(46,98,255,0.10) 0%, rgba(124,155,255,0.04) 100%);
+  border-color: rgba(46,98,255,0.35);
   color: var(--text);
   font-weight: 600;
 }
 
 .error {
-  border: 1px solid rgba(239,68,68,0.3);
-  background: rgba(239,68,68,0.08);
+  border: 1px solid rgba(229,72,77,0.3);
+  background: rgba(229,72,77,0.08);
   padding: 10px 14px;
   font-size: 13px;
-  color: #FCA5A5;
+  color: var(--danger-text);
   border-radius: 8px;
 }
 
@@ -350,7 +350,7 @@
   transition: all 0.15s;
   white-space: nowrap;
 }
-.newProjectInlineBtn:hover { background: rgba(37,99,235,0.1); }
+.newProjectInlineBtn:hover { background: rgba(46,98,255,0.1); }
 
 /* Project workspace banner — replaces the dropdown+label when a project is
    selected, turning the project from a tag into a "you are here" affordance. */
@@ -359,8 +359,8 @@
   flex-direction: column;
   gap: 14px;
   padding: 14px 16px;
-  background: linear-gradient(135deg, rgba(37,99,235,0.10) 0%, rgba(96,165,250,0.04) 100%);
-  border: 1px solid rgba(37,99,235,0.28);
+  background: linear-gradient(135deg, rgba(46,98,255,0.10) 0%, rgba(124,155,255,0.04) 100%);
+  border: 1px solid rgba(46,98,255,0.28);
   border-radius: 12px;
   margin-bottom: 10px;
 }
@@ -371,7 +371,7 @@
   gap: 14px;
 }
 .projectFiles {
-  border-top: 1px dashed rgba(37,99,235,0.22);
+  border-top: 1px dashed rgba(46,98,255,0.22);
   padding-top: 12px;
   display: flex;
   flex-direction: column;
@@ -385,7 +385,7 @@
   color: var(--blue3);
   margin-bottom: 4px;
 }
-:global([data-theme="light"]) .projectFilesLabel { color: #1E40AF; }
+:global([data-theme="light"]) .projectFilesLabel { color: var(--accent); }
 
 .projectFilesList {
   list-style: none;
@@ -409,7 +409,7 @@
   font-size: 13px;
   transition: all 0.12s;
 }
-.projectFileLink:hover { border-color: rgba(37,99,235,0.5); background: rgba(37,99,235,0.04); }
+.projectFileLink:hover { border-color: rgba(46,98,255,0.5); background: rgba(46,98,255,0.04); }
 .projectFileIcon { font-size: 13px; line-height: 1; flex-shrink: 0; opacity: 0.85; }
 .projectFileTitle {
   flex: 1;
@@ -509,7 +509,7 @@
 .createProjectInput {
   flex: 1;
   background: var(--surface2);
-  border: 1px solid rgba(37,99,235,0.3);
+  border: 1px solid rgba(46,98,255,0.3);
   border-right: none;
   color: var(--text);
   font-family: var(--font);
@@ -518,7 +518,7 @@
   outline: none;
   border-radius: 8px 0 0 8px;
 }
-.createProjectInput:focus { border-color: rgba(37,99,235,0.5); }
+.createProjectInput:focus { border-color: rgba(46,98,255,0.5); }
 .createProjectInput::placeholder { color: var(--faint); }
 
 .createProjectSubmit {
@@ -556,8 +556,8 @@
   align-items: center;
   gap: 8px;
   padding: 10px 14px;
-  background: linear-gradient(135deg, rgba(37,99,235,0.12) 0%, rgba(96,165,250,0.05) 100%);
-  border: 1px solid rgba(37,99,235,0.32);
+  background: linear-gradient(135deg, rgba(46,98,255,0.12) 0%, rgba(124,155,255,0.05) 100%);
+  border: 1px solid rgba(46,98,255,0.32);
   border-radius: 10px;
   font-size: 13px;
   animation: blockIn 0.35s cubic-bezier(0.22, 1, 0.36, 1) both;
@@ -566,7 +566,7 @@
   width: 8px; height: 8px;
   background: var(--blue3);
   border-radius: 50%;
-  box-shadow: 0 0 0 3px rgba(96,165,250,0.18);
+  box-shadow: 0 0 0 3px rgba(124,155,255,0.18);
   flex-shrink: 0;
 }
 .projectActiveLabel {
@@ -627,7 +627,7 @@
 .flashBtn:hover:not(:disabled) {
   background: var(--blue2);
   transform: translateY(-1px);
-  box-shadow: 0 8px 28px rgba(37,99,235,0.4);
+  box-shadow: 0 8px 28px rgba(46,98,255,0.4);
 }
 .flashBtn:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
 
@@ -671,8 +671,8 @@
 /* ── GUEST BANNER ── */
 .guestBanner {
   padding: 14px 18px;
-  background: rgba(37,99,235,0.08);
-  border: 1px solid rgba(37,99,235,0.2);
+  background: rgba(46,98,255,0.08);
+  border: 1px solid rgba(46,98,255,0.2);
   border-radius: 10px;
   display: flex;
   align-items: center;
@@ -744,8 +744,8 @@
 /* "Flash another →" — quick path to start a new pack from the output header.
    Same compact pill as Copy All, but tinted to feel like a primary action. */
 .flashAnotherBtn {
-  background: linear-gradient(135deg, rgba(37,99,235,0.14) 0%, rgba(96,165,250,0.06) 100%);
-  border: 1px solid rgba(37,99,235,0.35);
+  background: linear-gradient(135deg, rgba(46,98,255,0.14) 0%, rgba(124,155,255,0.06) 100%);
+  border: 1px solid rgba(46,98,255,0.35);
   font-family: var(--font);
   font-size: 12px;
   font-weight: 600;
@@ -756,8 +756,8 @@
   border-radius: 6px;
 }
 .flashAnotherBtn:hover {
-  background: linear-gradient(135deg, rgba(37,99,235,0.22) 0%, rgba(96,165,250,0.10) 100%);
-  border-color: rgba(37,99,235,0.55);
+  background: linear-gradient(135deg, rgba(46,98,255,0.22) 0%, rgba(124,155,255,0.10) 100%);
+  border-color: rgba(46,98,255,0.55);
 }
 
 /* Footer version under the last pack block — visually the next step after
@@ -776,11 +776,11 @@
   border-radius: 12px;
   letter-spacing: -0.2px;
   transition: all 0.18s;
-  box-shadow: 0 6px 24px rgba(37,99,235,0.25);
+  box-shadow: 0 6px 24px rgba(46,98,255,0.25);
 }
 .flashAnotherFooter:hover {
   transform: translateY(-1px);
-  box-shadow: 0 10px 32px rgba(37,99,235,0.38);
+  box-shadow: 0 10px 32px rgba(46,98,255,0.38);
 }
 
 /* ── EMPTY STATE ── */
@@ -828,8 +828,8 @@
 
 .emptyHintN {
   font-size: 18px;
-  font-weight: 800;
-  color: rgba(37,99,235,0.2);
+  font-weight: 700;
+  color: rgba(46,98,255,0.2);
   line-height: 1;
   flex-shrink: 0;
 }
@@ -876,8 +876,8 @@
 
 /* ── EXECUTIVE SNAPSHOT (the wow block — sits above the regular blocks) ── */
 .snapshot {
-  background: linear-gradient(135deg, rgba(37,99,235,0.10) 0%, rgba(96,165,250,0.06) 100%);
-  border: 1px solid rgba(37,99,235,0.30);
+  background: linear-gradient(135deg, rgba(46,98,255,0.10) 0%, rgba(124,155,255,0.06) 100%);
+  border: 1px solid rgba(46,98,255,0.30);
   border-radius: 12px;
   padding: 18px 20px;
   margin-bottom: 16px;
@@ -885,7 +885,7 @@
   animation: blockIn 0.55s cubic-bezier(0.22, 1, 0.36, 1) both;
   box-shadow:
     0 1px 0 rgba(255,255,255,0.04) inset,
-    0 8px 24px rgba(37,99,235,0.12);
+    0 8px 24px rgba(46,98,255,0.12);
 }
 
 .snapshotHead {
@@ -1034,7 +1034,7 @@
   border-radius: 4px;
 }
 .cpBtn:hover { color: var(--text); border-color: var(--border3); }
-.cpDone { color: var(--green) !important; border-color: rgba(34,197,94,0.3) !important; }
+.cpDone { color: var(--green) !important; border-color: rgba(47,191,113,0.3) !important; }
 
 .blockContent {
   padding: 14px 16px;

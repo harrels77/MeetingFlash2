@@ -973,20 +973,20 @@ async function createProject() {
       {showUpgradeModal && (
         <div style={{ position:'fixed', inset:0, background:'rgba(0,0,0,0.7)', display:'flex', alignItems:'center', justifyContent:'center', zIndex:1000 }}
           onClick={() => setShowUpgradeModal(false)}>
-          <div style={{ background:'#0d1117', border:'1px solid #1e2a3a', borderRadius:16, padding:40, maxWidth:420, width:'90%', textAlign:'center' }}
+          <div style={{ background:'var(--surface)', border:'1px solid var(--border2)', borderRadius:16, padding:40, maxWidth:420, width:'90%', textAlign:'center' }}
             onClick={e => e.stopPropagation()}>
             <div style={{ fontSize:36, marginBottom:12 }}>⚡</div>
-            <h2 style={{ color:'#f0ede8', fontSize:22, fontWeight:700, marginBottom:8 }}>
+            <h2 style={{ color:'var(--text)', fontSize:22, fontWeight:700, marginBottom:8 }}>
               {isLoggedIn ? "You're out of packs" : 'Free pack used'}
             </h2>
-            <p style={{ color:'#7a7870', fontSize:15, marginBottom:28, lineHeight:1.6 }}>
+            <p style={{ color:'var(--muted)', fontSize:15, marginBottom:28, lineHeight:1.6 }}>
               {isLoggedIn
                 ? 'Upgrade to Pro for unlimited packs, project memory, full history and more.'
                 : 'Create a free account to get 5 packs per month — or go Pro for unlimited access.'}
             </p>
             <div style={{ display:'flex', flexDirection:'column', gap:10 }}>
               <button
-                style={{ background:'#2563EB', color:'#fff', border:'none', borderRadius:8, padding:'13px 24px', fontSize:15, fontWeight:600, cursor:'pointer' }}
+                style={{ background:'var(--accent)', color:'#fff', border:'none', borderRadius:8, padding:'13px 24px', fontSize:15, fontWeight:600, cursor:'pointer' }}
                 onClick={async () => {
                   const res = await fetch('/api/checkout', {
                     method: 'POST',
@@ -1000,12 +1000,12 @@ async function createProject() {
                 Go Pro — $12/month →
               </button>
               {!isLoggedIn && (
-                <Link href="/signup" style={{ background:'#1a2230', color:'#f0ede8', border:'1px solid #1e2a3a', borderRadius:8, padding:'13px 24px', fontSize:15, fontWeight:500, textDecoration:'none' }}>
+                <Link href="/signup" style={{ background:'var(--surface2)', color:'var(--text)', border:'1px solid var(--border2)', borderRadius:8, padding:'13px 24px', fontSize:15, fontWeight:500, textDecoration:'none' }}>
                   Create free account →
                 </Link>
               )}
               <button
-                style={{ background:'none', border:'none', color:'#7a7870', fontSize:13, cursor:'pointer', marginTop:4 }}
+                style={{ background:'none', border:'none', color:'var(--muted)', fontSize:13, cursor:'pointer', marginTop:4 }}
                 onClick={() => setShowUpgradeModal(false)}
               >
                 Maybe later

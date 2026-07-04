@@ -1,51 +1,152 @@
-@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,300;1,400&family=Instrument+Serif:ital@0;1&family=JetBrains+Mono:wght@300;400;500&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Instrument+Serif:ital@0;1&family=JetBrains+Mono:wght@400;500&display=swap');
 
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
+/* ============================================================
+   DESIGN TOKENS — single source of truth (see DESIGN-SYSTEM.md)
+   No hex/rgba color may live outside this file.
+   ============================================================ */
+
 :root {
-  --bg:        #060C18;
-  --bg2:       #0D1426;
-  --surface:   #111D35;
-  --surface2:  #162040;
-  --lift:      #1E2D4D;
-  --nav-bg:    rgba(6,12,24,0.88);
-  --nav-text:  rgba(248,250,252,0.55);
-  --border:    rgba(255,255,255,0.07);
-  --border2:   rgba(255,255,255,0.13);
-  --border3:   rgba(255,255,255,0.2);
-  --blue:      #2563EB;
-  --blue2:     #3B82F6;
-  --blue3:     #60A5FA;
-  --blue-glow: rgba(37,99,235,0.2);
-  --green:     #22C55E;
-  --amber:     #F59E0B;
-  --red:       #EF4444;
-  --text:      #F8FAFC;
-  --muted:     #94A3B8;
-  --faint:     #475569;
+  /* Fonds — encre propriétaire (plus de slate Tailwind) */
+  --bg:        #0A101F;
+  --bg2:       #0E1628;
+  --surface:   #131C31;
+  --surface2:  #18233C;
+  --lift:      #1F2C4A;
+  --nav-bg:    rgba(10,16,31,0.88);
+  --nav-text:  rgba(237,241,249,0.55);
+
+  /* Bordures */
+  --border:    rgba(230,237,250,0.08);
+  --border2:   rgba(230,237,250,0.14);
+  --border3:   rgba(230,237,250,0.22);
+
+  /* Texte */
+  --text:      #EDF1F9;
+  --muted:     #98A4BC;
+  --faint:     #5C6A85; /* réservé aux tailles >= 18px */
+
+  /* Signature — "Flash Blue" */
+  --accent:        #2E62FF;
+  --accent-hover:  #234FDB;
+  --accent-text:   #7C9BFF;
+  --accent-soft:   rgba(46,98,255,0.14);
+  --accent-border: rgba(46,98,255,0.35);
+
+  /* Le "flash" — une dose par page maximum */
+  --spark:     #FFC53D;
+
+  /* États sémantiques */
+  --success:        #2FBF71;
+  --success-text:   #7FE0AC;
+  --success-soft:   rgba(47,191,113,0.12);
+  --success-border: rgba(47,191,113,0.3);
+  --warning:        #E8A13C;
+  --warning-text:   #F3C879;
+  --warning-soft:   rgba(232,161,60,0.12);
+  --warning-border: rgba(232,161,60,0.3);
+  --danger:         #E5484D;
+  --danger-text:    #F09A9D;
+  --danger-soft:    rgba(229,72,77,0.12);
+  --danger-border:  rgba(229,72,77,0.3);
+
+  /* Alias hérités — mappés sur la nouvelle palette, à retirer
+     une fois la migration des modules terminée */
+  --blue:      var(--accent);
+  --blue2:     #4A78FF;
+  --blue3:     var(--accent-text);
+  --blue-glow: rgba(46,98,255,0.2);
+  --green:     var(--success);
+  --amber:     var(--warning);
+  --red:       var(--danger);
+
+  /* Typographie */
   --font:      'Plus Jakarta Sans', sans-serif;
   --serif:     'Instrument Serif', serif;
   --mono:      'JetBrains Mono', monospace;
+
+  /* Échelle typo — seules tailles autorisées */
+  --text-xs:    12px;
+  --text-sm:    14px;
+  --text-base:  16px;
+  --text-lg:    18px;
+  --text-xl:    22px;
+  --text-2xl:   28px;
+  --display-sm: clamp(30px, 4vw, 40px);
+  --display-md: clamp(38px, 5vw, 52px);
+  --display-lg: clamp(42px, 5.5vw, 64px);
+
+  /* Espacement — base 4 */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 24px;
+  --space-6: 32px;
+  --space-7: 48px;
+  --space-8: 64px;
+  --space-9: 96px;
+  --space-10: 128px;
+
+  /* Rayons — trois valeurs */
+  --radius-sm:   8px;
+  --radius-md:   14px;
+  --radius-full: 999px;
+
+  /* Ombres — deux niveaux */
+  --shadow-card:  0 1px 2px rgba(4,8,18,0.4), 0 8px 24px rgba(4,8,18,0.35);
+  --shadow-float: 0 2px 6px rgba(4,8,18,0.45), 0 24px 64px rgba(4,8,18,0.5);
 }
 
 [data-theme="light"] {
-  --bg:        #F8FAFC;
-  --bg2:       #F1F5F9;
+  --bg:        #FAFBFD;
+  --bg2:       #F2F5FA;
   --surface:   #FFFFFF;
-  --surface2:  #F8FAFC;
-  --lift:      #EFF4FF;
-  --nav-bg:    rgba(255,255,255,0.85);
-  --nav-text:  rgba(15,23,42,0.65);
-  --border:    rgba(0,0,0,0.08);
-  --border2:   rgba(0,0,0,0.12);
-  --border3:   rgba(0,0,0,0.20);
-  --blue:      #1D4ED8;
-  --blue2:     #2563EB;
-  --blue3:     #1E40AF;
-  --blue-glow: rgba(37,99,235,0.12);
-  --text:      #0F172A;
-  --muted:     #475569;
-  --faint:     #94A3B8;
+  --surface2:  #F6F8FC;
+  --lift:      #EDF2FF;
+  --nav-bg:    rgba(255,255,255,0.88);
+  --nav-text:  rgba(16,24,39,0.65);
+
+  --border:    rgba(16,24,39,0.08);
+  --border2:   rgba(16,24,39,0.13);
+  --border3:   rgba(16,24,39,0.2);
+
+  --text:      #101827;
+  --muted:     #4C5A73;
+  --faint:     #8B96AC;
+
+  --accent:        #1E4FD6;
+  --accent-hover:  #16409F;
+  --accent-text:   #1E4FD6;
+  --accent-soft:   rgba(30,79,214,0.10);
+  --accent-border: rgba(30,79,214,0.3);
+
+  --spark:     #B7791F;
+
+  --success:        #1E9E5A;
+  --success-text:   #157347;
+  --success-soft:   rgba(30,158,90,0.10);
+  --success-border: rgba(30,158,90,0.3);
+  --warning:        #B45309;
+  --warning-text:   #92400E;
+  --warning-soft:   rgba(180,83,9,0.08);
+  --warning-border: rgba(180,83,9,0.3);
+  --danger:         #D3363C;
+  --danger-text:    #B91C1C;
+  --danger-soft:    rgba(211,54,60,0.07);
+  --danger-border:  rgba(211,54,60,0.3);
+
+  --blue:      var(--accent);
+  --blue2:     #2E62FF;
+  --blue3:     var(--accent-hover);
+  --blue-glow: rgba(30,79,214,0.12);
+  --green:     var(--success);
+  --amber:     var(--warning);
+  --red:       var(--danger);
+
+  --shadow-card:  0 1px 2px rgba(16,24,39,0.06), 0 8px 24px rgba(16,24,39,0.07);
+  --shadow-float: 0 2px 6px rgba(16,24,39,0.08), 0 24px 64px rgba(16,24,39,0.12);
 }
 
 html { scroll-behavior: smooth; }
@@ -54,13 +155,13 @@ body {
   background: var(--bg);
   color: var(--text);
   font-family: var(--font);
-  font-size: 15px;
+  font-size: var(--text-base);
   line-height: 1.6;
   -webkit-font-smoothing: antialiased;
   overflow-x: hidden;
 }
 
-::selection { background: rgba(37,99,235,0.4); color: var(--text); }
+::selection { background: rgba(46,98,255,0.35); color: var(--text); }
 a { color: inherit; text-decoration: none; }
 button { font-family: var(--font); cursor: pointer; }
 input, textarea, select { font-family: var(--font); }

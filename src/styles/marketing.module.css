@@ -59,19 +59,18 @@
 }
 
 .h1 {
-  font-size: 56px;
-  font-weight: 800;
-  letter-spacing: -2px;
-  line-height: 1.05;
+  font-family: var(--serif);
+  font-size: var(--display-md);
+  font-weight: 400;
+  letter-spacing: -0.01em;
+  line-height: 1.08;
   margin: 0 auto 24px;
   max-width: 880px;
   color: var(--text);
 }
 .h1Accent {
-  background: linear-gradient(135deg, var(--blue3) 0%, var(--blue2) 100%);
-  -webkit-background-clip: text;
-  background-clip: text;
-  -webkit-text-fill-color: transparent;
+  font-style: italic;
+  color: var(--accent-text);
 }
 
 .heroSub {
@@ -119,10 +118,11 @@
 }
 
 .h1Left {
-  font-size: clamp(36px, 4.6vw, 58px);
-  font-weight: 800;
-  line-height: 1.07;
-  letter-spacing: -2px;
+  font-family: var(--serif);
+  font-size: var(--display-md);
+  font-weight: 400;
+  line-height: 1.08;
+  letter-spacing: -0.01em;
   color: var(--text);
   margin: 0 0 22px;
 }
@@ -151,8 +151,8 @@
 .heroStat { display: flex; flex-direction: column; gap: 4px; }
 .heroStatN {
   font-size: 26px;
-  font-weight: 800;
-  letter-spacing: -1px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
   background: linear-gradient(135deg, var(--blue2), var(--blue3));
   -webkit-background-clip: text;
   background-clip: text;
@@ -179,7 +179,6 @@
   .heroActionsLeft { justify-content: center; }
   .heroStats { justify-content: center; }
   .heroBadgeSerif { font-size: 15px; }
-  .h1Left { font-size: clamp(32px, 8vw, 44px); }
   .heroCard { animation: none; }
 }
 
@@ -196,7 +195,7 @@
   font-size: 15px;
   font-weight: 700;
   text-decoration: none;
-  letter-spacing: -0.2px;
+  letter-spacing: -0.01em;
   transition: transform 0.2s, box-shadow 0.2s, background 0.2s;
 }
 .btnPrimary:hover {
@@ -247,10 +246,11 @@
 }
 
 .sectionTitle {
-  font-size: 40px;
-  font-weight: 800;
-  letter-spacing: -1.5px;
-  line-height: 1.1;
+  font-family: var(--serif);
+  font-size: var(--display-sm);
+  font-weight: 400;
+  letter-spacing: -0.01em;
+  line-height: 1.15;
   color: var(--text);
   margin-bottom: 16px;
   text-align: center;
@@ -307,7 +307,7 @@
   font-weight: 700;
   color: var(--text);
   margin-bottom: 10px;
-  letter-spacing: -0.3px;
+  letter-spacing: -0.01em;
 }
 
 .cardDesc {
@@ -349,7 +349,7 @@
   font-weight: 700;
   color: var(--text);
   margin-bottom: 6px;
-  letter-spacing: -0.2px;
+  letter-spacing: -0.01em;
 }
 
 .painDesc {
@@ -486,10 +486,11 @@
   z-index: 1;
 }
 .ctaBannerTitle {
-  font-size: 44px;
-  font-weight: 800;
-  letter-spacing: -1.8px;
-  line-height: 1.1;
+  font-family: var(--serif);
+  font-size: var(--display-sm);
+  font-weight: 400;
+  letter-spacing: -0.01em;
+  line-height: 1.15;
   margin-bottom: 16px;
   color: var(--text);
 }
@@ -540,13 +541,10 @@
 
 @media (max-width: 880px) {
   .hero { padding: 72px 0 48px; }
-  .h1 { font-size: 38px; letter-spacing: -1px; }
   .heroSub { font-size: 16px; }
   .section { padding: 64px 0; }
-  .sectionTitle { font-size: 30px; letter-spacing: -1px; }
   .cardGrid { grid-template-columns: 1fr; }
   .split { grid-template-columns: 1fr; gap: 40px; }
   .ctaBanner { padding: 72px 20px; }
-  .ctaBannerTitle { font-size: 32px; letter-spacing: -1px; }
   .container { padding: 0 20px; }
 }

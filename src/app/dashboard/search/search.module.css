@@ -128,7 +128,7 @@
 }
 
 .resultTitle mark {
-  background: rgba(37,99,235,0.18);
+  background: rgba(46,98,255,0.18);
   color: var(--blue3);
   border-radius: 2px;
   padding: 0 2px;
@@ -154,8 +154,8 @@
   text-transform: uppercase;
   font-weight: 600;
   color: var(--blue3);
-  background: rgba(37,99,235,0.1);
-  border: 1px solid rgba(37,99,235,0.22);
+  background: rgba(46,98,255,0.1);
+  border: 1px solid rgba(46,98,255,0.22);
   padding: 2px 8px;
   border-radius: 10px;
 }
@@ -167,7 +167,7 @@
 }
 
 .resultSnippet mark {
-  background: rgba(37,99,235,0.18);
+  background: rgba(46,98,255,0.18);
   color: var(--blue3);
   border-radius: 2px;
   padding: 0 2px;

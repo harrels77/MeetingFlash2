@@ -31,7 +31,7 @@
   display: inline-flex;
   align-items: center;
   font-size: 10px;
-  font-weight: 800;
+  font-weight: 700;
   letter-spacing: 0.08em;
   text-transform: uppercase;
   padding: 3px 8px;
@@ -67,37 +67,37 @@
 }
 .badge_critical {
   background: rgba(220,38,38,0.18);
-  color: #FCA5A5;
+  color: var(--danger-text);
 }
 :global([data-theme="light"]) .badge_critical {
   background: rgba(220,38,38,0.14);
-  color: #B91C1C;
+  color: var(--danger-text);
 }
 
 .sev_medium {
-  background: linear-gradient(135deg, rgba(245,158,11,0.10) 0%, rgba(245,158,11,0.02) 100%);
-  border-left-color: rgba(245,158,11,0.65);
+  background: linear-gradient(135deg, rgba(232,161,60,0.10) 0%, rgba(232,161,60,0.02) 100%);
+  border-left-color: rgba(232,161,60,0.65);
 }
 .badge_medium {
-  background: rgba(245,158,11,0.18);
-  color: #FCD34D;
+  background: rgba(232,161,60,0.18);
+  color: var(--warning-text);
 }
 :global([data-theme="light"]) .badge_medium {
-  background: rgba(245,158,11,0.16);
-  color: #B45309;
+  background: rgba(232,161,60,0.16);
+  color: var(--warning-text);
 }
 
 .sev_low {
-  background: linear-gradient(135deg, rgba(34,197,94,0.10) 0%, rgba(34,197,94,0.02) 100%);
-  border-left-color: rgba(34,197,94,0.55);
+  background: linear-gradient(135deg, rgba(47,191,113,0.10) 0%, rgba(47,191,113,0.02) 100%);
+  border-left-color: rgba(47,191,113,0.55);
 }
 .badge_low {
-  background: rgba(34,197,94,0.18);
-  color: #86EFAC;
+  background: rgba(47,191,113,0.18);
+  color: var(--success-text);
 }
 :global([data-theme="light"]) .badge_low {
-  background: rgba(34,197,94,0.14);
-  color: #15803D;
+  background: rgba(47,191,113,0.14);
+  color: var(--success-text);
 }
 
 .sev_unknown {

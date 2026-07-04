@@ -54,7 +54,7 @@
 
 .title {
   font-size: 40px;
-  font-weight: 800;
+  font-weight: 700;
   letter-spacing: -2px;
   color: var(--text);
   margin-bottom: 8px;
@@ -84,8 +84,8 @@
 }
 
 .dangerCard {
-  border-color: rgba(239,68,68,0.2);
-  background: rgba(239,68,68,0.04);
+  border-color: rgba(229,72,77,0.2);
+  background: rgba(229,72,77,0.04);
 }
 
 .cardRow {
@@ -97,8 +97,8 @@
 .avatar {
   width: 48px; height: 48px;
   border-radius: 50%;
-  background: rgba(37,99,235,0.15);
-  border: 1px solid rgba(37,99,235,0.3);
+  background: rgba(46,98,255,0.15);
+  border: 1px solid rgba(46,98,255,0.3);
   display: flex; align-items: center; justify-content: center;
   font-size: 20px;
   font-weight: 700;
@@ -206,7 +206,7 @@
   border-radius: 8px;
   transition: border-color 0.2s;
 }
-.input:focus { border-color: rgba(37,99,235,0.5); }
+.input:focus { border-color: rgba(46,98,255,0.5); }
 
 .saveBtn {
   background: var(--blue);
@@ -270,24 +270,24 @@
 .dangerTitle {
   font-size: 15px;
   font-weight: 600;
-  color: #FCA5A5;
+  color: var(--danger-text);
   margin-bottom: 4px;
 }
 
 .dangerBtn {
   background: transparent;
-  border: 1px solid rgba(239,68,68,0.3);
+  border: 1px solid rgba(229,72,77,0.3);
   font-family: var(--font);
   font-size: 13px;
   font-weight: 500;
-  color: #FCA5A5;
+  color: var(--danger-text);
   padding: 8px 16px;
   cursor: pointer;
   border-radius: 8px;
   transition: all 0.15s;
   white-space: nowrap;
 }
-.dangerBtn:hover { background: rgba(239,68,68,0.1); }
+.dangerBtn:hover { background: rgba(229,72,77,0.1); }
 
 .confirmRow {
   display: flex;
@@ -298,11 +298,11 @@
 
 .confirmText {
   font-size: 12px;
-  color: #FCA5A5;
+  color: var(--danger-text);
 }
 
 .dangerBtnConfirm {
-  background: #EF4444;
+  background: var(--danger);
   color: #fff;
   border: none;
   font-family: var(--font);

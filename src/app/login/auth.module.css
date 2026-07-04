@@ -17,7 +17,7 @@
   transform: translateX(-50%);
   width: 800px;
   height: 500px;
-  background: radial-gradient(ellipse, rgba(37,99,235,0.1) 0%, transparent 65%);
+  background: radial-gradient(ellipse, rgba(46,98,255,0.1) 0%, transparent 65%);
   pointer-events: none;
   z-index: 0;
 }
@@ -40,7 +40,7 @@
   border: 1px solid var(--border2);
   border-radius: 20px;
   overflow: hidden;
-  box-shadow: 0 32px 80px rgba(0,0,0,0.4), 0 0 0 1px rgba(37,99,235,0.1);
+  box-shadow: 0 32px 80px rgba(0,0,0,0.4), 0 0 0 1px rgba(46,98,255,0.1);
 }
 
 .cardHeader {
@@ -49,7 +49,7 @@
   display: flex;
   flex-direction: column;
   gap: 12px;
-  background: linear-gradient(135deg, rgba(37,99,235,0.08), transparent);
+  background: linear-gradient(135deg, rgba(46,98,255,0.08), transparent);
 }
 
 .glyph {
@@ -60,7 +60,7 @@
 
 .title {
   font-size: 26px;
-  font-weight: 800;
+  font-weight: 700;
   letter-spacing: -1px;
   color: var(--text);
 }
@@ -139,7 +139,7 @@
   border-radius: 8px;
 }
 .input::placeholder { color: var(--faint); }
-.input:focus { border-color: rgba(37,99,235,0.5); background: rgba(37,99,235,0.05); }
+.input:focus { border-color: rgba(46,98,255,0.5); background: rgba(46,98,255,0.05); }
 
 .passwordWrap {
   position: relative;
@@ -164,12 +164,12 @@
 .eyeBtn:hover { color: var(--muted); }
 
 .error {
-  background: rgba(239,68,68,0.08);
-  border: 1px solid rgba(239,68,68,0.2);
+  background: rgba(229,72,77,0.08);
+  border: 1px solid rgba(229,72,77,0.2);
   border-radius: 8px;
   padding: 10px 14px;
   font-size: 13px;
-  color: #FCA5A5;
+  color: var(--danger-text);
 }
 
 .submitBtn {
@@ -190,7 +190,7 @@
 .submitBtn:hover:not(:disabled) {
   background: var(--blue2);
   transform: translateY(-1px);
-  box-shadow: 0 8px 24px rgba(37,99,235,0.4);
+  box-shadow: 0 8px 24px rgba(46,98,255,0.4);
 }
 .submitBtn:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
 

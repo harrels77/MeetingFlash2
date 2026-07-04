@@ -522,7 +522,7 @@ export default function Dashboard() {
               }}>
                 <div style={{ fontSize: 28 }}>⏱️</div>
                 <div style={{ flex: 1 }}>
-                  <div style={{ fontSize: 22, fontWeight: 800, color: 'var(--text)', lineHeight: 1.1 }}>
+                  <div style={{ fontSize: 22, fontWeight: 700, color: 'var(--text)', lineHeight: 1.1 }}>
                     {hoursSavedThisMonth > 0
                       ? <>~{hoursSavedThisMonth}h{minutesSavedRemainder > 0 ? ` ${minutesSavedRemainder}m` : ''}</>
                       : <>~{minutesSavedThisMonth} min</>

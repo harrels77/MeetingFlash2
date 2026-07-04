@@ -8,8 +8,8 @@ const SITE_URL = 'https://www.meetingflash.work'
 
 export const viewport: Viewport = {
   themeColor: [
-    { media: '(prefers-color-scheme: dark)',  color: '#060C18' },
-    { media: '(prefers-color-scheme: light)', color: '#F8FAFC' },
+    { media: '(prefers-color-scheme: dark)',  color: '#0A101F' },
+    { media: '(prefers-color-scheme: light)', color: '#FAFBFD' },
   ],
   width: 'device-width',
   initialScale: 1,

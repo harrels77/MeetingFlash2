@@ -84,7 +84,7 @@
   border-radius: 8px;
 }
 .navItem:hover { color: var(--text); background: var(--border); }
-.navActive { color: var(--text); background: rgba(37,99,235,0.12); }
+.navActive { color: var(--text); background: rgba(46,98,255,0.12); }
 
 .navDot {
   width: 6px; height: 6px;
@@ -139,11 +139,11 @@
   font-weight: 600;
   letter-spacing: 0.06em;
   text-transform: uppercase;
-  background: rgba(37,99,235,0.15);
+  background: rgba(46,98,255,0.15);
   color: var(--blue3);
   padding: 3px 9px;
   border-radius: 20px;
-  border: 1px solid rgba(37,99,235,0.25);
+  border: 1px solid rgba(46,98,255,0.25);
 }
 
 .planUses {
@@ -155,8 +155,8 @@
   display: block;
   padding: 8px;
   text-align: center;
-  background: rgba(37,99,235,0.1);
-  border: 1px solid rgba(37,99,235,0.25);
+  background: rgba(46,98,255,0.1);
+  border: 1px solid rgba(46,98,255,0.25);
   font-family: var(--font);
   font-size: 12px;
   font-weight: 600;
@@ -165,7 +165,7 @@
   border-radius: 8px;
   transition: all 0.15s;
 }
-.upgradeBtn:hover { background: rgba(37,99,235,0.18); }
+.upgradeBtn:hover { background: rgba(46,98,255,0.18); }
 
 .userRow {
   display: flex;
@@ -277,18 +277,18 @@
 .selectModeBtnActive { color: var(--text); border-color: var(--border3); }
 
 .deleteSelectedBtn {
-  background: rgba(239,68,68,0.1);
-  border: 1px solid rgba(239,68,68,0.25);
+  background: rgba(229,72,77,0.1);
+  border: 1px solid rgba(229,72,77,0.25);
   font-family: var(--font);
   font-size: 12px;
   font-weight: 600;
-  color: #FCA5A5;
+  color: var(--danger-text);
   padding: 7px 14px;
   cursor: pointer;
   transition: all 0.15s;
   border-radius: 8px;
 }
-.deleteSelectedBtn:hover { background: rgba(239,68,68,0.18); }
+.deleteSelectedBtn:hover { background: rgba(229,72,77,0.18); }
 
 /* NEW PROJECT FORM */
 .newProjectForm {
@@ -355,7 +355,7 @@
   gap: 12px;
 }
 .meetingRow:hover { background: var(--border); }
-.meetingRowSelected { background: rgba(37,99,235,0.06) !important; }
+.meetingRowSelected { background: rgba(46,98,255,0.06) !important; }
 
 .meetingLeft {
   flex: 1;
@@ -382,8 +382,8 @@
   font-size: 11px;
   font-weight: 600;
   color: var(--blue3);
-  background: rgba(37,99,235,0.1);
-  border: 1px solid rgba(37,99,235,0.2);
+  background: rgba(46,98,255,0.1);
+  border: 1px solid rgba(46,98,255,0.2);
   padding: 2px 8px;
   border-radius: 20px;
 }
@@ -450,8 +450,8 @@
 }
 .contextMenuItem:last-child { border-bottom: none; }
 .contextMenuItem:hover { background: var(--border); color: var(--text); }
-.contextMenuItemDanger { color: #FCA5A5 !important; }
-.contextMenuItemDanger:hover { background: rgba(239,68,68,0.08) !important; }
+.contextMenuItemDanger { color: var(--danger-text) !important; }
+.contextMenuItemDanger:hover { background: rgba(229,72,77,0.08) !important; }
 
 /* CHECKBOX */
 .checkbox {
@@ -484,7 +484,7 @@
   transition: all 0.2s;
 }
 .projectCard:hover { border-color: var(--border2); transform: translateY(-2px); box-shadow: 0 8px 32px rgba(0,0,0,0.2); }
-.projectCardSelected { border-color: rgba(37,99,235,0.4) !important; background: rgba(37,99,235,0.06) !important; }
+.projectCardSelected { border-color: rgba(46,98,255,0.4) !important; background: rgba(46,98,255,0.06) !important; }
 
 .projectCardTop {
   display: flex;
@@ -603,7 +603,7 @@
   border-radius: 8px;
   transition: border-color 0.2s;
 }
-.modalInput:focus { border-color: rgba(37,99,235,0.5); }
+.modalInput:focus { border-color: rgba(46,98,255,0.5); }
 
 .modalActions { display: flex; gap: 8px; }
 

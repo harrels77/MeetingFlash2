@@ -102,19 +102,19 @@
 }
 
 .cardFeatured {
-  border-color: rgba(37,99,235,0.4);
-  background: linear-gradient(180deg, var(--surface) 0%, rgba(37,99,235,0.06) 100%);
+  border-color: rgba(46,98,255,0.4);
+  background: linear-gradient(180deg, var(--surface) 0%, rgba(46,98,255,0.06) 100%);
   transform: translateY(-4px);
   box-shadow:
-    0 0 0 1px rgba(37,99,235,0.3),
-    0 12px 32px rgba(37,99,235,0.18),
+    0 0 0 1px rgba(46,98,255,0.3),
+    0 12px 32px rgba(46,98,255,0.18),
     0 30px 60px rgba(0,0,0,0.32);
 }
 .cardFeatured:hover {
   transform: translateY(-6px);
   box-shadow:
-    0 0 0 1px rgba(37,99,235,0.5),
-    0 16px 40px rgba(37,99,235,0.24),
+    0 0 0 1px rgba(46,98,255,0.5),
+    0 16px 40px rgba(46,98,255,0.24),
     0 40px 80px rgba(0,0,0,0.36);
 }
 
@@ -142,14 +142,14 @@
   font-size: 16px;
   font-weight: 700;
   color: var(--text);
-  letter-spacing: -0.2px;
+  letter-spacing: -0.01em;
 }
 
 .cardPrice {
   font-size: 48px;
-  font-weight: 800;
+  font-weight: 700;
   color: var(--text);
-  letter-spacing: -2px;
+  letter-spacing: -0.02em;
   line-height: 1;
   display: flex;
   align-items: flex-end;
@@ -175,7 +175,7 @@
   font-size: 24px;
   font-weight: 700;
   color: var(--muted);
-  letter-spacing: -0.5px;
+  letter-spacing: -0.01em;
 }
 
 .cardSub {
@@ -200,12 +200,12 @@
   text-decoration: none;
   cursor: pointer;
   transition: background 0.2s, transform 0.2s, box-shadow 0.2s;
-  letter-spacing: -0.2px;
+  letter-spacing: -0.01em;
 }
 .cardBtnPrimary:hover:not(:disabled) {
   background: var(--blue2);
   transform: translateY(-1px);
-  box-shadow: 0 8px 24px rgba(37,99,235,0.4);
+  box-shadow: 0 8px 24px rgba(46,98,255,0.4);
 }
 .cardBtnPrimary:disabled { opacity: 0.5; cursor: not-allowed; }
 

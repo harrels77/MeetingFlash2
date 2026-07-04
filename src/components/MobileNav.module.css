@@ -61,7 +61,7 @@
   transition: all 0.2s;
   text-decoration: none;
 }
-.navCta:hover { background: var(--blue2); transform: translateY(-1px); box-shadow: 0 6px 20px rgba(37,99,235,0.35); }
+.navCta:hover { background: var(--blue2); transform: translateY(-1px); box-shadow: 0 6px 20px rgba(46,98,255,0.35); }
 
 /* ACCOUNT DROPDOWN */
 .forWrap {
@@ -119,8 +119,8 @@
 .accountAvatar {
   width: 26px; height: 26px;
   border-radius: 50%;
-  background: rgba(37,99,235,0.2);
-  border: 1px solid rgba(37,99,235,0.4);
+  background: rgba(46,98,255,0.2);
+  border: 1px solid rgba(46,98,255,0.4);
   display: flex; align-items: center; justify-content: center;
   font-size: 12px;
   font-weight: 700;
@@ -188,8 +188,8 @@
   letter-spacing: 0.06em;
   text-transform: uppercase;
   color: var(--blue3);
-  background: rgba(37,99,235,0.15);
-  border: 1px solid rgba(37,99,235,0.3);
+  background: rgba(46,98,255,0.15);
+  border: 1px solid rgba(46,98,255,0.3);
   padding: 2px 9px;
   border-radius: 20px;
 }
@@ -213,7 +213,7 @@
 .accountMenuItem:hover { background: var(--lift); color: var(--text); }
 
 .accountMenuSignOut { color: rgba(220,38,38,0.85) !important; }
-.accountMenuSignOut:hover { color: #DC2626 !important; background: rgba(239,68,68,0.08) !important; }
+.accountMenuSignOut:hover { color: var(--danger) !important; background: rgba(229,72,77,0.08) !important; }
 
 /* THEME TOGGLE */
 .themeToggle {
@@ -296,7 +296,7 @@
 .mobileLink:hover { color: var(--text); background: var(--lift); }
 
 .mobileSignOut { color: rgba(220,38,38,0.85) !important; }
-.mobileSignOut:hover { background: rgba(239,68,68,0.06) !important; }
+.mobileSignOut:hover { background: rgba(229,72,77,0.06) !important; }
 
 .mobileDivider {
   height: 1px;
@@ -315,8 +315,8 @@
 .mobileAvatar {
   width: 40px; height: 40px;
   border-radius: 50%;
-  background: rgba(37,99,235,0.15);
-  border: 1px solid rgba(37,99,235,0.3);
+  background: rgba(46,98,255,0.15);
+  border: 1px solid rgba(46,98,255,0.3);
   display: flex; align-items: center; justify-content: center;
   font-size: 18px;
   font-weight: 700;

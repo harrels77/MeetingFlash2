@@ -19,8 +19,8 @@
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  background: rgba(37,99,235,0.12);
-  border: 1px solid rgba(37,99,235,0.25);
+  background: rgba(46,98,255,0.12);
+  border: 1px solid rgba(46,98,255,0.25);
   color: var(--blue3);
   font-size: 11px;
   font-weight: 600;
@@ -33,7 +33,7 @@
 
 .title {
   font-size: clamp(28px, 4vw, 44px);
-  font-weight: 800;
+  font-weight: 700;
   letter-spacing: -1.5px;
   line-height: 1.15;
   color: var(--text);
@@ -159,8 +159,8 @@
 
 .btnShare {
   color: var(--blue3);
-  background: rgba(37,99,235,0.1);
-  border-color: rgba(37,99,235,0.25);
+  background: rgba(46,98,255,0.1);
+  border-color: rgba(46,98,255,0.25);
 }
 
 .flashIcon {
@@ -294,7 +294,7 @@
   align-items: center;
   gap: 7px;
 }
-.outputTitle span { color: #F59E0B; }
+.outputTitle span { color: var(--warning); }
 
 /* ── BLOCKS (used in app + pack detail) ── */
 .block {
@@ -398,7 +398,7 @@
   color: var(--muted);
   border-radius: 7px;
 }
-.navItemActive { background: rgba(37,99,235,0.12); color: var(--text); }
+.navItemActive { background: rgba(46,98,255,0.12); color: var(--text); }
 
 .navDot {
   width: 5px; height: 5px;
@@ -438,8 +438,8 @@
   font-weight: 700;
   letter-spacing: 0.06em;
   color: var(--blue3);
-  background: rgba(37,99,235,0.15);
-  border: 1px solid rgba(37,99,235,0.25);
+  background: rgba(46,98,255,0.15);
+  border: 1px solid rgba(46,98,255,0.25);
   padding: 2px 9px;
   border-radius: 20px;
 }
@@ -504,7 +504,7 @@
 
 .packTitleBig {
   font-size: 28px;
-  font-weight: 800;
+  font-weight: 700;
   letter-spacing: -1px;
   line-height: 1.1;
   color: var(--text);
@@ -553,8 +553,8 @@
 .owner {
   font-size: 10px; font-weight: 600;
   color: var(--blue3);
-  background: rgba(37,99,235,0.1);
-  border: 1px solid rgba(37,99,235,0.2);
+  background: rgba(46,98,255,0.1);
+  border: 1px solid rgba(46,98,255,0.2);
   padding: 1px 7px;
   border-radius: 20px;
 }
@@ -563,17 +563,17 @@
 
 .priorityHigh {
   font-size: 10px; font-weight: 700;
-  color: #F87171;
-  background: rgba(239,68,68,0.1);
-  border: 1px solid rgba(239,68,68,0.2);
+  color: var(--danger-text);
+  background: rgba(229,72,77,0.1);
+  border: 1px solid rgba(229,72,77,0.2);
   padding: 1px 7px;
   border-radius: 20px;
 }
 .priorityMed {
   font-size: 10px; font-weight: 700;
   color: var(--amber);
-  background: rgba(245,158,11,0.1);
-  border: 1px solid rgba(245,158,11,0.2);
+  background: rgba(232,161,60,0.1);
+  border: 1px solid rgba(232,161,60,0.2);
   padding: 1px 7px;
   border-radius: 20px;
 }
@@ -590,8 +590,8 @@
   white-space: nowrap;
 }
 .statusTodo { color: var(--text); border-color: var(--border3); background: var(--lift); }
-.statusProg { color: var(--amber); border-color: rgba(245,158,11,0.4); background: rgba(245,158,11,0.08); }
-.statusDone { color: var(--green); border-color: rgba(34,197,94,0.4); background: rgba(34,197,94,0.08); }
+.statusProg { color: var(--amber); border-color: rgba(232,161,60,0.4); background: rgba(232,161,60,0.08); }
+.statusDone { color: var(--green); border-color: rgba(47,191,113,0.4); background: rgba(47,191,113,0.08); }
 
 .lineThrough { text-decoration: line-through; opacity: 0.5; }
 

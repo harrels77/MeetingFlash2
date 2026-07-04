@@ -15,13 +15,13 @@
 }
 
 .tier.tierP0 {
-  background: linear-gradient(135deg, rgba(239,68,68,0.08) 0%, rgba(239,68,68,0.02) 100%);
-  border-color: rgba(239,68,68,0.30);
-  box-shadow: 0 0 0 1px rgba(239,68,68,0.06) inset, 0 4px 16px rgba(239,68,68,0.08);
+  background: linear-gradient(135deg, rgba(229,72,77,0.08) 0%, rgba(229,72,77,0.02) 100%);
+  border-color: rgba(229,72,77,0.30);
+  box-shadow: 0 0 0 1px rgba(229,72,77,0.06) inset, 0 4px 16px rgba(229,72,77,0.08);
 }
 .tier.tierP1 {
-  background: linear-gradient(135deg, rgba(251,191,36,0.08) 0%, rgba(251,191,36,0.02) 100%);
-  border-color: rgba(251,191,36,0.30);
+  background: linear-gradient(135deg, rgba(232,161,60,0.08) 0%, rgba(232,161,60,0.02) 100%);
+  border-color: rgba(232,161,60,0.30);
 }
 .tier.tierP2 {
   opacity: 0.85;
@@ -44,8 +44,8 @@
   text-transform: uppercase;
   color: var(--text);
 }
-.tierP0 .tierLabel { color: #FCA5A5; }
-.tierP1 .tierLabel { color: #FCD34D; }
+.tierP0 .tierLabel { color: var(--danger-text); }
+.tierP1 .tierLabel { color: var(--warning-text); }
 .tierP2 .tierLabel { color: var(--muted); }
 
 .tierCount {
@@ -57,8 +57,8 @@
   background: var(--lift);
   color: var(--muted);
 }
-.tierP0 .tierCount { background: rgba(239,68,68,0.18); color: #FCA5A5; }
-.tierP1 .tierCount { background: rgba(251,191,36,0.18); color: #FCD34D; }
+.tierP0 .tierCount { background: rgba(229,72,77,0.18); color: var(--danger-text); }
+.tierP1 .tierCount { background: rgba(232,161,60,0.18); color: var(--warning-text); }
 
 .tierList {
   list-style: none;
@@ -85,7 +85,7 @@
 .tierP2 .tierList li { font-size: 13.5px; color: var(--muted); }
 
 /* Light-mode contrast adjustments */
-:global([data-theme="light"]) .tierP0 .tierLabel { color: #B91C1C; }
-:global([data-theme="light"]) .tierP1 .tierLabel { color: #B45309; }
-:global([data-theme="light"]) .tierP0 .tierCount { color: #B91C1C; background: rgba(239,68,68,0.12); }
-:global([data-theme="light"]) .tierP1 .tierCount { color: #B45309; background: rgba(251,191,36,0.18); }
+:global([data-theme="light"]) .tierP0 .tierLabel { color: var(--danger-text); }
+:global([data-theme="light"]) .tierP1 .tierLabel { color: var(--warning-text); }
+:global([data-theme="light"]) .tierP0 .tierCount { color: var(--danger-text); background: rgba(229,72,77,0.12); }
+:global([data-theme="light"]) .tierP1 .tierCount { color: var(--warning-text); background: rgba(232,161,60,0.18); }
