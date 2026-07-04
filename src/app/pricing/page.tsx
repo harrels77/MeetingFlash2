@@ -8,7 +8,7 @@ import PricingCards from '@/components/PricingCards'
 
 export const metadata: Metadata = {
   title: 'Pricing — MeetingFlash',
-  description: 'Simple, honest pricing. Free plan with 5 packs / month, Pro at $12/month or $96/year for unlimited packs, project memory, smart search, multi-language output, and PDF export.',
+  description: 'Free plan with 5 packs / month, Pro at $12/month or $96/year for unlimited packs, project memory, smart search, multi-language output, and PDF export.',
   alternates: { canonical: '/pricing' },
   openGraph: {
     title: 'Pricing — MeetingFlash',
@@ -116,7 +116,7 @@ export default function PricingPage() {
             Pricing
           </div>
           <h1 className={s.h1}>
-            Simple. Honest. <span className={s.h1Accent}>No surprises.</span>
+            One price, and the free plan <span className={s.h1Accent}>actually stays free.</span>
           </h1>
           <p className={s.heroSub}>
             Start free with 5 Execution Packs per month. Upgrade to Pro when you need more — every Pro feature is backed by code, not marketing.
