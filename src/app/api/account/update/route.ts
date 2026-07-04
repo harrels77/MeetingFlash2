@@ -7,7 +7,7 @@ import { createClient } from '@supabase/supabase-js'
 // uses_this_month, etc. The plan/usage fields are only written by the Stripe
 // webhook (server-side, service role) and the increment_uses RPC.
 
-const ALLOWED_FIELDS = ['full_name', 'default_lang', 'default_style'] as const
+const ALLOWED_FIELDS = ['full_name', 'default_lang', 'default_style', 'weekly_digest'] as const
 type AllowedField = typeof ALLOWED_FIELDS[number]
 
 export async function POST(req: NextRequest) {

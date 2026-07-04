@@ -18,6 +18,7 @@ interface Profile {
   created_at?: string
   default_lang?: string | null
   default_style?: string | null
+  weekly_digest?: boolean | null
 }
 
 export default function Settings() {
@@ -37,6 +38,7 @@ export default function Settings() {
   const [defaultLang, setDefaultLang]     = useState<'EN' | 'FR' | 'ES' | 'DE'>('EN')
   const [defaultStyle, setDefaultStyle]   = useState<'Concise' | 'Detailed' | 'Email'>('Concise')
   const [savingPrefs, setSavingPrefs]     = useState(false)
+  const [weeklyDigest, setWeeklyDigest]   = useState(true)
   const [prefsSaved, setPrefsSaved]       = useState(false)
   const [openingPortal, setOpeningPortal] = useState(false)
 
@@ -78,6 +80,7 @@ export default function Settings() {
         setName(data.full_name || '')
         if (data.default_lang) setDefaultLang(data.default_lang as 'EN' | 'FR' | 'ES' | 'DE')
         if (data.default_style) setDefaultStyle(data.default_style as 'Concise' | 'Detailed' | 'Email')
+        if (typeof data.weekly_digest === 'boolean') setWeeklyDigest(data.weekly_digest)
       }
       clearTimeout(timeout)
       setLoading(false)
@@ -123,7 +126,7 @@ export default function Settings() {
   async function savePreferences() {
     if (!profile) return
     setSavingPrefs(true)
-    const updated = await postUpdate({ default_lang: defaultLang, default_style: defaultStyle })
+    const updated = await postUpdate({ default_lang: defaultLang, default_style: defaultStyle, weekly_digest: weeklyDigest })
     setSavingPrefs(false)
     if (updated) {
       await refetchProfile().catch(() => {})
@@ -350,6 +353,20 @@ export default function Settings() {
                   <option value="Detailed">Detailed — thorough, all relevant context</option>
                   <option value="Email">Email — formatted for professional follow-up</option>
                 </select>
+              </div>
+            </div>
+            <div className={styles.fieldGroup} style={{ marginTop: 20 }}>
+              <label className={styles.label}>Weekly open-actions email</label>
+              <div className={styles.fieldRow}>
+                <label style={{ display: 'flex', alignItems: 'center', gap: 10, fontSize: 14, color: 'var(--muted)', cursor: 'pointer' }}>
+                  <input
+                    type="checkbox"
+                    checked={weeklyDigest}
+                    onChange={e => setWeeklyDigest(e.target.checked)}
+                    style={{ width: 16, height: 16, accentColor: 'var(--accent)' }}
+                  />
+                  Send me a Monday recap of my open action items
+                </label>
                 <button
                   className={styles.saveBtn}
                   onClick={savePreferences}
