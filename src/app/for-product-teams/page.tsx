@@ -3,6 +3,7 @@ import Link from 'next/link'
 import MobileNav from '@/components/MobileNav'
 import { buildBreadcrumb } from '@/lib/breadcrumb'
 import { Check, RefreshCw, Calendar, Users, Target, Brain, CheckCircle2, ClipboardList, Send, ArrowRight, ArrowDown } from 'lucide-react'
+import SiteFooter from '@/components/SiteFooter'
 import s from '@/styles/marketing.module.css'
 
 export const metadata: Metadata = {
@@ -239,17 +240,10 @@ export default function ForProductTeamsPage() {
         <p className={s.ctaBannerSub}>
           Try it on your last sprint — no signup required for the first one.
         </p>
-        <Link href="/app?template=retro" className={s.btnPrimary}>Run your first Flash free <ArrowRight size={18} strokeWidth={1.75} aria-hidden="true" /></Link>
+        <Link href="/app?template=retro" className={s.btnPrimary}>Try it free <ArrowRight size={18} strokeWidth={1.75} aria-hidden="true" /></Link>
       </section>
 
-      <footer className={s.miniFooter}>
-        <Link href="/">Home</Link>
-        <Link href="/blog">Blog</Link>
-        <Link href="/for-agencies">For agencies</Link>
-        <Link href="/for-freelancers">For freelancers</Link>
-        <Link href="/pricing">Pricing</Link>
-        <div style={{ marginTop: 16 }}>© 2026 MeetingFlash · hello@meetingflash.work</div>
-      </footer>
+      <SiteFooter />
     </div>
   )
 }

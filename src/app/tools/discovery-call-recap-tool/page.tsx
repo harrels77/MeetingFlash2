@@ -3,6 +3,7 @@ import Link from 'next/link'
 import MobileNav from '@/components/MobileNav'
 import { buildBreadcrumb } from '@/lib/breadcrumb'
 import { Pin, Banknote, CheckCircle2, HelpCircle, Send, MessageSquare, ArrowRight, ArrowDown } from 'lucide-react'
+import SiteFooter from '@/components/SiteFooter'
 import s from '@/styles/marketing.module.css'
 
 export const metadata: Metadata = {
@@ -255,16 +256,7 @@ export default function DiscoveryCallRecapToolPage() {
         <Link href="/app" className={s.btnPrimary}>Try it free <ArrowRight size={18} strokeWidth={1.75} aria-hidden="true" /></Link>
       </section>
 
-      <footer className={s.miniFooter}>
-        <Link href="/">Home</Link>
-        <Link href="/blog">Blog</Link>
-        <Link href="/blog/discovery-call-recap-template">Discovery recap template</Link>
-        <Link href="/for-agencies">For agencies</Link>
-        <Link href="/tools/follow-up-email-generator">Follow-up email generator</Link>
-        <Link href="/tools/meeting-action-items-extractor">Action items extractor</Link>
-        <Link href="/pricing">Pricing</Link>
-        <div style={{ marginTop: 16 }}>© 2026 MeetingFlash · hello@meetingflash.work</div>
-      </footer>
+      <SiteFooter />
     </div>
   )
 }

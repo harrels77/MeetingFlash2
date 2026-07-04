@@ -52,9 +52,19 @@ export default function MobileNav() {
         setForOpen(false)
       }
     }
+    function handleEscape(e: KeyboardEvent) {
+      if (e.key === 'Escape') {
+        setAccountOpen(false)
+        setForOpen(false)
+      }
+    }
     if (accountOpen || forOpen) {
       document.addEventListener('click', handleClickOutside)
-      return () => document.removeEventListener('click', handleClickOutside)
+      document.addEventListener('keydown', handleEscape)
+      return () => {
+        document.removeEventListener('click', handleClickOutside)
+        document.removeEventListener('keydown', handleEscape)
+      }
     }
   }, [accountOpen, forOpen])
 
@@ -82,7 +92,6 @@ export default function MobileNav() {
 
         {/* DESKTOP LINKS — cachés sur mobile via CSS */}
         <div className={styles.desktopLinks}>
-          <Link href="/" className={styles.navLink}>Home</Link>
           <div className={styles.forWrap}>
             <button
               type="button"
@@ -148,7 +157,7 @@ export default function MobileNav() {
             <>
               <Link href="/login" className={styles.navLink}>Sign in</Link>
 
-              <Link href="/app"   className={styles.navCta}>Try with sample notes <ArrowRight size={16} strokeWidth={1.75} aria-hidden="true" /></Link>
+              <Link href="/app"   className={styles.navCta}>Try it free <ArrowRight size={16} strokeWidth={1.75} aria-hidden="true" /></Link>
             </>
           )}
         </div>
@@ -254,7 +263,7 @@ export default function MobileNav() {
                 Create account
               </Link>
               <Link href="/app" className={styles.mobileCta} onClick={() => setOpen(false)}>
-                Try with sample notes <ArrowRight size={16} strokeWidth={1.75} aria-hidden="true" />
+                Try it free <ArrowRight size={16} strokeWidth={1.75} aria-hidden="true" />
               </Link>
             </>
           )}

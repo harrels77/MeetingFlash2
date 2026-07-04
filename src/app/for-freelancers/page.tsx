@@ -3,6 +3,7 @@ import Link from 'next/link'
 import MobileNav from '@/components/MobileNav'
 import { buildBreadcrumb } from '@/lib/breadcrumb'
 import { Check, Banknote, Calendar, Target, Send, ClipboardList, Brain, Globe, ArrowRight, ArrowDown } from 'lucide-react'
+import SiteFooter from '@/components/SiteFooter'
 import s from '@/styles/marketing.module.css'
 
 export const metadata: Metadata = {
@@ -239,17 +240,10 @@ export default function ForFreelancersPage() {
         <p className={s.ctaBannerSub}>
           Try MeetingFlash on your last client call. No signup needed for the first one.
         </p>
-        <Link href="/app?template=status" className={s.btnPrimary}>Run your first Flash free <ArrowRight size={18} strokeWidth={1.75} aria-hidden="true" /></Link>
+        <Link href="/app?template=status" className={s.btnPrimary}>Try it free <ArrowRight size={18} strokeWidth={1.75} aria-hidden="true" /></Link>
       </section>
 
-      <footer className={s.miniFooter}>
-        <Link href="/">Home</Link>
-        <Link href="/blog">Blog</Link>
-        <Link href="/for-agencies">For agencies</Link>
-        <Link href="/for-product-teams">For product teams</Link>
-        <Link href="/pricing">Pricing</Link>
-        <div style={{ marginTop: 16 }}>© 2026 MeetingFlash · hello@meetingflash.work</div>
-      </footer>
+      <SiteFooter />
     </div>
   )
 }

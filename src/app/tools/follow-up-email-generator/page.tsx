@@ -3,6 +3,7 @@ import Link from 'next/link'
 import MobileNav from '@/components/MobileNav'
 import { buildBreadcrumb } from '@/lib/breadcrumb'
 import { PenLine, Zap, Send, ArrowRight, ArrowDown } from 'lucide-react'
+import SiteFooter from '@/components/SiteFooter'
 import s from '@/styles/marketing.module.css'
 
 export const metadata: Metadata = {
@@ -238,15 +239,7 @@ export default function FollowUpEmailGeneratorPage() {
         <Link href="/app" className={s.btnPrimary}>Try the generator free <ArrowRight size={18} strokeWidth={1.75} aria-hidden="true" /></Link>
       </section>
 
-      <footer className={s.miniFooter}>
-        <Link href="/">Home</Link>
-        <Link href="/blog">Blog</Link>
-        <Link href="/blog/how-to-write-follow-up-email-after-meeting">Follow-up email guide</Link>
-        <Link href="/tools/meeting-action-items-extractor">Action items extractor</Link>
-        <Link href="/tools/discovery-call-recap-tool">Discovery call recap</Link>
-        <Link href="/pricing">Pricing</Link>
-        <div style={{ marginTop: 16 }}>© 2026 MeetingFlash · hello@meetingflash.work</div>
-      </footer>
+      <SiteFooter />
     </div>
   )
 }

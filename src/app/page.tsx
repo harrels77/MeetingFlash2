@@ -3,10 +3,10 @@ import { useEffect, useRef } from 'react'
 import Link from 'next/link'
 import MobileNav from '@/components/MobileNav'
 import HeroCta from '@/components/HeroCta'
-import FooterAccount from '@/components/FooterAccount'
 import ProductShowcase from '@/components/ProductShowcase'
 import PricingCards from '@/components/PricingCards'
 import DiscoveryMockup from '@/components/DiscoveryMockup'
+import SiteFooter from '@/components/SiteFooter'
 import { Layers, Brain, Lock, Globe, ClipboardList, Search, Target, RefreshCw, Timer, Send, Zap, Check, Pin, AlertTriangle, ArrowRight, ArrowDown, Plus } from 'lucide-react'
 import s from './page.module.css'
 
@@ -436,51 +436,7 @@ export default function Home() {
         <HeroCta className={`${s.btnPrimary} ${s.reveal}`} />
       </section>
 
-      {/* ── FOOTER ── */}
-      <footer className={s.footer}>
-        <div className={s.footerInner}>
-          <div className={s.footerBrand}>
-            <Link href="/" className={s.footerLogo}>
-              <div className={s.footerLogoMark} />
-              MeetingFlash
-            </Link>
-            <p className={s.footerTagline}>
-              Raw meeting notes in, client-ready recap out —<br />in about 20 seconds.
-            </p>
-          </div>
-          <div className={s.footerCols}>
-            <div className={s.footerCol}>
-              <div className={s.footerColTitle}>Product</div>
-              <Link href="#features">Features</Link>
-              <Link href="/pricing">Pricing</Link>
-              <Link href="/app">Try free</Link>
-              <Link href="/blog">Blog</Link>
-            </div>
-            <div className={s.footerCol}>
-              <div className={s.footerColTitle}>Use cases</div>
-              <Link href="/for-agencies">For agencies</Link>
-              <Link href="/for-product-teams">For product teams</Link>
-              <Link href="/for-freelancers">For freelancers</Link>
-            </div>
-            <div className={s.footerCol}>
-              <div className={s.footerColTitle}>Free tools</div>
-              <Link href="/tools/follow-up-email-generator">Follow-up email generator</Link>
-              <Link href="/tools/meeting-action-items-extractor">Action items extractor</Link>
-              <Link href="/tools/discovery-call-recap-tool">Discovery call recap</Link>
-            </div>
-            <FooterAccount className={s.footerCol} colTitleClass={s.footerColTitle} />
-            <div className={s.footerCol}>
-              <div className={s.footerColTitle}>Legal</div>
-              <a href="/privacy" target="_blank" rel="noopener">Privacy</a>
-              <a href="/terms" target="_blank" rel="noopener">Terms</a>
-            </div>
-          </div>
-        </div>
-        <div className={s.footerBottom}>
-          <span>© 2026 MeetingFlash</span>
-          <span className={s.footerAccent}>Made by one person who answers his own email.</span>
-        </div>
-      </footer>
+      <SiteFooter />
     </div>
   )
 }

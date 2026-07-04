@@ -158,7 +158,7 @@
   background-clip: text;
   -webkit-text-fill-color: transparent;
 }
-.heroStatL { font-size: 12px; color: var(--faint); }
+.heroStatL { font-size: 12px; color: var(--muted); }
 .heroStatDiv { width: 1px; height: 30px; background: var(--border2); }
 
 .heroCard { animation: floatCard 6s ease-in-out infinite; }
@@ -502,21 +502,6 @@
 }
 
 /* Mini-footer */
-.miniFooter {
-  border-top: 1px solid var(--border);
-  padding: 32px 24px;
-  text-align: center;
-  color: var(--muted);
-  font-size: 13px;
-  position: relative;
-  z-index: 1;
-}
-.miniFooter a {
-  color: var(--muted);
-  margin: 0 12px;
-  transition: color 0.2s;
-}
-.miniFooter a:hover { color: var(--text); }
 
 /* Two-col split (text + mockup) */
 .split {

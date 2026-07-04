@@ -23,7 +23,7 @@ export default function HeroCta({ className }: { className?: string }) {
   // Two-state CTA — explicit and predictable.
   // Signed-out OR still loading → guest-friendly invitation.
   // Signed-in → "Continue" because the user already has an account / context.
-  const label = !loading && user ? 'Continue' : 'Try with sample notes'
+  const label = !loading && user ? 'Continue' : 'Try it free'
 
   return (
     <Link ref={ref} href="/app" className={className}>

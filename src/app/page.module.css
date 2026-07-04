@@ -180,7 +180,7 @@
 
 .heroStatL {
   font-size: 12px;
-  color: var(--faint);
+  color: var(--muted);
   font-weight: 400;
 }
 
@@ -218,7 +218,7 @@
   font-weight: 700;
   letter-spacing: 0.1em;
   text-transform: uppercase;
-  color: var(--faint);
+  color: var(--muted);
   margin-bottom: 4px;
 }
 
@@ -231,7 +231,7 @@
 .miniLine {
   font-family: var(--mono);
   font-size: 12px;
-  color: var(--faint);
+  color: var(--muted);
   background: var(--surface2);
   border: 1px solid var(--border);
   border-radius: 6px;
@@ -353,7 +353,7 @@
   font-weight: 600;
   letter-spacing: 0.1em;
   text-transform: uppercase;
-  color: var(--faint);
+  color: var(--muted);
   margin-bottom: 20px;
 }
 
@@ -386,11 +386,11 @@
 }
 
 .demoNoteProcessed {
-  color: var(--faint);
+  color: var(--muted);
   background: rgba(46,98,255,0.05);
   border-color: rgba(46,98,255,0.2);
   text-decoration: line-through;
-  text-decoration-color: var(--faint);
+  text-decoration-color: var(--muted);
 }
 
 .demoNoteCheck {
@@ -500,7 +500,7 @@
 .logoBarLabel {
   text-align: center;
   font-size: 12px;
-  color: var(--faint);
+  color: var(--muted);
   font-weight: 500;
   letter-spacing: 0.06em;
   text-transform: uppercase;
@@ -525,7 +525,7 @@
   padding: 0 32px;
   font-size: 14px;
   font-weight: 600;
-  color: var(--faint);
+  color: var(--muted);
   letter-spacing: 0.04em;
   text-transform: uppercase;
   flex-shrink: 0;
@@ -676,7 +676,7 @@
   font-weight: 600;
   letter-spacing: 0.06em;
   text-transform: uppercase;
-  color: var(--faint);
+  color: var(--muted);
   margin-bottom: 24px;
   padding-bottom: 16px;
   border-bottom: 1px solid var(--border);
@@ -709,7 +709,7 @@
   flex-shrink: 0;
   font-family: var(--mono);
   font-size: var(--text-xs);
-  color: var(--faint);
+  color: var(--muted);
   white-space: nowrap;
 }
 .compareCardFeatured .compareTime { color: var(--accent-text); }
@@ -897,91 +897,6 @@
   line-height: 1.6;
 }
 
-/* ── FOOTER ── */
-.footer {
-  position: relative;
-  z-index: 1;
-  border-top: 1px solid var(--border);
-  padding: 60px 24px 0;
-  background: var(--bg2);
-}
-
-.footerInner {
-  max-width: 1100px;
-  margin: 0 auto;
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 80px;
-  padding-bottom: 48px;
-}
-
-.footerBrand { display: flex; flex-direction: column; gap: 16px; }
-
-.footerLogo {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  font-size: 16px;
-  font-weight: 700;
-  color: var(--text);
-  text-decoration: none;
-}
-
-.footerLogoMark {
-  width: 20px; height: 20px;
-  background: var(--blue);
-  border-radius: 6px;
-  flex-shrink: 0;
-}
-
-.footerTagline {
-  font-size: 14px;
-  color: var(--faint);
-  line-height: 1.7;
-}
-
-.footerCols {
-  display: flex;
-  gap: 48px;
-}
-
-.footerCol {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-}
-
-.footerColTitle {
-  font-size: 11px;
-  font-weight: 700;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  color: var(--faint);
-  margin-bottom: 4px;
-}
-
-.footerCol a {
-  font-size: 14px;
-  color: var(--muted);
-  text-decoration: none;
-  transition: color 0.15s;
-}
-.footerCol a:hover { color: var(--text); }
-
-.footerBottom {
-  max-width: 1100px;
-  margin: 0 auto;
-  padding: 20px 0;
-  border-top: 1px solid var(--border);
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  font-size: 13px;
-  color: var(--faint);
-}
-
-.footerAccent { color: var(--blue3); }
-
 /* ── SCROLL REVEAL ── */
 .reveal {
   opacity: 0;
@@ -1024,10 +939,6 @@
 
   .ctaBanner { padding: 80px 20px; }
 
-  .footer { padding: 48px 20px 0; }
-  .footerInner { grid-template-columns: 1fr; gap: 40px; }
-  .footerCols { flex-wrap: wrap; gap: 28px; }
-  .footerBottom { flex-direction: column; gap: 8px; text-align: center; }
 }
 
 /* ── FOR AGENCIES SECTION ── */

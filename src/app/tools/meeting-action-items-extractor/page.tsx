@@ -3,6 +3,7 @@ import Link from 'next/link'
 import MobileNav from '@/components/MobileNav'
 import { buildBreadcrumb } from '@/lib/breadcrumb'
 import { User, Calendar, Target, ClipboardList, ArrowRight, ArrowDown } from 'lucide-react'
+import SiteFooter from '@/components/SiteFooter'
 import s from '@/styles/marketing.module.css'
 
 export const metadata: Metadata = {
@@ -253,15 +254,7 @@ export default function ActionItemsExtractorPage() {
         <Link href="/app" className={s.btnPrimary}>Try the extractor free <ArrowRight size={18} strokeWidth={1.75} aria-hidden="true" /></Link>
       </section>
 
-      <footer className={s.miniFooter}>
-        <Link href="/">Home</Link>
-        <Link href="/blog">Blog</Link>
-        <Link href="/blog/meeting-action-items-best-practices">Action items guide</Link>
-        <Link href="/tools/follow-up-email-generator">Follow-up email generator</Link>
-        <Link href="/tools/discovery-call-recap-tool">Discovery call recap</Link>
-        <Link href="/pricing">Pricing</Link>
-        <div style={{ marginTop: 16 }}>© 2026 MeetingFlash · hello@meetingflash.work</div>
-      </footer>
+      <SiteFooter />
     </div>
   )
 }
