@@ -29,6 +29,7 @@
 }
 
 .author {
+  font-family: var(--font);
   font-size: 13px;
   font-weight: 700;
   color: var(--text);
@@ -40,6 +41,7 @@
 }
 
 .bubble {
+  font-family: var(--font);
   background: var(--surface2);
   border: 1px solid var(--border);
   border-radius: 4px 12px 12px 12px;

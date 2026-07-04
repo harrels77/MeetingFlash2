@@ -240,6 +240,14 @@ The landing was rewritten in two pre-launch passes after external reviewer round
 ` — mixed currencies confused users since Pro is `$12`). All prices on the landing are USD.
 - **Brand mark = `/logo.png` everywhere.** Login, signup, share page, dashboard sidebar, ProductShowcase mockups all use `<Image src="/logo.png" />`. The old "blue square" placeholder is gone — don't re-introduce it on new pages.
 
+### Growth & retention pass (2026-07-04, après la refonte D.A.)
+- **Digest hebdo d'actions ouvertes** : `/api/cron/weekly-digest` (cron Vercel lundi 07:00 UTC, `CRON_SECRET`). Regroupe les tasks `status != 'done'` par user (service role), envoie via Resend le top 8 (P0 d'abord) + CTA dashboard. Opt-out : `profiles.weekly_digest` (migration `2026_07_04_weekly_digest.sql`, **à appliquer manuellement**) ; la route ne skippe que sur `false` explicite donc fonctionne avant migration. Toggle dans Settings → Flash preferences ; champ whitelisté dans `/api/account/update`.
+- **Upload de transcript** sur /app : bouton "Upload transcript" (.txt/.vtt/.srt, 1 MB max) — parsing VTT/SRT client-side dans `parseTranscriptFile` (page.tsx) : strip timestamps/numéros de cue/balises `<v>`.
+- **"Open in Gmail"** sur le bloc email (/app + pack page) : helpers `emailParts`/`gmailComposeUrl` dans `src/lib/packMeta.ts` (extraction de la ligne `Subject:`).
+- **Rendu format destination** : `<EmailPreview />` (carte mail To/Subject/corps) et `<SlackPreview />` (bulle "You · now") sur /app, /share/[token], pack page — même pattern que ActionTiers.
+- **Démo animée du hero** : `src/components/HeroDemo.tsx` (boucle notes → éclair → pack ; statique sous prefers-reduced-motion). Remplace l'ancien MiniBeforeAfter statique.
+- **Print/PDF** : bloc `@media print` dans `pack.module.css` — page blanche, chrome masqué, task tracker masqué, pied "Generated with MeetingFlash".
+
 ### Refonte D.A. 2026-07-04 (AUDIT.md → FIXES.md, 15 items livrés)
 - **Section Compare** : le tableau "✕ ChatGPT / ✓ MeetingFlash" est REMPLACÉ par un avant/après factuel (deux timelines chiffrées, H2 "Why not just paste it into ChatGPT?"). Ne pas réintroduire de croix rouges sur les concurrents.
 - **Pricing = un seul composant** : `src/components/PricingCards.tsx` (ex-PricingClient), rendu par `/` ET `/pricing`. La section pricing dupliquée de la landing (qui affichait un "Save 20%" faux — le vrai chiffre est 33%) n'existe plus.
