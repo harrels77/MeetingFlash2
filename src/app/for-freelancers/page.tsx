@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import Link from 'next/link'
 import MobileNav from '@/components/MobileNav'
 import { buildBreadcrumb } from '@/lib/breadcrumb'
+import { Check, Banknote, Calendar, Target, Send, ClipboardList, Brain, Globe, ArrowRight, ArrowDown } from 'lucide-react'
 import s from '@/styles/marketing.module.css'
 
 export const metadata: Metadata = {
@@ -87,13 +88,13 @@ export default function ForFreelancersPage() {
             Recap emails, action lists, follow-ups — in 20 seconds. So you can charge for delivery, not for the paperwork that comes after every client call.
           </p>
           <div className={s.heroActions}>
-            <Link href="/app?template=status" className={s.btnPrimary}>Try it free →</Link>
-            <Link href="#math" className={s.btnGhost}>See the math ↓</Link>
+            <Link href="/app?template=status" className={s.btnPrimary}>Try it free <ArrowRight size={18} strokeWidth={1.75} aria-hidden="true" /></Link>
+            <Link href="#math" className={s.btnGhost}>See the math <ArrowDown size={16} strokeWidth={1.75} aria-hidden="true" /></Link>
           </div>
           <div className={s.trustStrip}>
-            <span>✓ 5 packs free / month</span>
-            <span>✓ No credit card</span>
-            <span>✓ Pro at $12 / month</span>
+            <span><Check size={15} strokeWidth={1.75} aria-hidden="true" /> 5 packs free / month</span>
+            <span><Check size={15} strokeWidth={1.75} aria-hidden="true" /> No credit card</span>
+            <span><Check size={15} strokeWidth={1.75} aria-hidden="true" /> Pro at $12 / month</span>
           </div>
         </div>
       </section>
@@ -116,21 +117,21 @@ export default function ForFreelancersPage() {
               </p>
             </div>
             <div className={s.card}>
-              <div className={s.cardIcon}>💸</div>
+              <div className={s.cardIcon}><Banknote size={22} strokeWidth={1.75} aria-hidden="true" /></div>
               <div className={s.cardTitle}>$144 / month at 30 calls</div>
               <p className={s.cardDesc}>
                 30 calls × 20 minutes saved × $100/hr × 24% (proportional time-back) = ~$144 / month of unbilled admin reclaimed. Pro costs $12.
               </p>
             </div>
             <div className={s.card}>
-              <div className={s.cardIcon}>📅</div>
+              <div className={s.cardIcon}><Calendar size={22} strokeWidth={1.75} aria-hidden="true" /></div>
               <div className={s.cardTitle}>Recap before the next call</div>
               <p className={s.cardDesc}>
                 Send the follow-up email the same minute the call ends. Clients perceive freelancers who respond at machine speed differently — they refer them.
               </p>
             </div>
             <div className={s.card}>
-              <div className={s.cardIcon}>🎯</div>
+              <div className={s.cardIcon}><Target size={22} strokeWidth={1.75} aria-hidden="true" /></div>
               <div className={s.cardTitle}>Action lists you actually use</div>
               <p className={s.cardDesc}>
                 Every Pack&apos;s action items are saved to a tasks list. Open the dashboard, see your 8 outstanding actions across clients, knock them out.
@@ -150,28 +151,28 @@ export default function ForFreelancersPage() {
           <div className={s.split}>
             <div className={s.painList}>
               <div className={s.pain}>
-                <div className={s.painIcon}>📤</div>
+                <div className={s.painIcon}><Send size={22} strokeWidth={1.75} aria-hidden="true" /></div>
                 <div>
                   <div className={s.painTitle}>Recap email already drafted.</div>
                   <p className={s.painDesc}>Not a template — a real email using the actual decisions and actions from your call. Edit one sentence, send it.</p>
                 </div>
               </div>
               <div className={s.pain}>
-                <div className={s.painIcon}>📋</div>
+                <div className={s.painIcon}><ClipboardList size={22} strokeWidth={1.75} aria-hidden="true" /></div>
                 <div>
                   <div className={s.painTitle}>Todo list builds itself.</div>
                   <p className={s.painDesc}>Every action item from every Pack lands in your task list. No more &quot;wait, what did I commit to last Tuesday?&quot; — it&apos;s right there.</p>
                 </div>
               </div>
               <div className={s.pain}>
-                <div className={s.painIcon}>🧠</div>
+                <div className={s.painIcon}><Brain size={22} strokeWidth={1.75} aria-hidden="true" /></div>
                 <div>
                   <div className={s.painTitle}>Project memory across calls.</div>
                   <p className={s.painDesc}>Tag each Pack to a project (one client = one project). By call #4, the tool knows what was decided in calls 1-3.</p>
                 </div>
               </div>
               <div className={s.pain}>
-                <div className={s.painIcon}>🌍</div>
+                <div className={s.painIcon}><Globe size={22} strokeWidth={1.75} aria-hidden="true" /></div>
                 <div>
                   <div className={s.painTitle}>Output in the client&apos;s language.</div>
                   <p className={s.painDesc}>Take notes in your language, deliver the recap in your client&apos;s. EN / FR / ES / DE on Pro.</p>
@@ -238,7 +239,7 @@ export default function ForFreelancersPage() {
         <p className={s.ctaBannerSub}>
           Try MeetingFlash on your last client call. No signup needed for the first one.
         </p>
-        <Link href="/app?template=status" className={s.btnPrimary}>Run your first Flash free →</Link>
+        <Link href="/app?template=status" className={s.btnPrimary}>Run your first Flash free <ArrowRight size={18} strokeWidth={1.75} aria-hidden="true" /></Link>
       </section>
 
       <footer className={s.miniFooter}>

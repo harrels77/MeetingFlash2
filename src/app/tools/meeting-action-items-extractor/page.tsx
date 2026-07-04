@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import Link from 'next/link'
 import MobileNav from '@/components/MobileNav'
 import { buildBreadcrumb } from '@/lib/breadcrumb'
+import { User, Calendar, Target, ClipboardList, ArrowRight, ArrowDown } from 'lucide-react'
 import s from '@/styles/marketing.module.css'
 
 export const metadata: Metadata = {
@@ -90,8 +91,8 @@ export default function ActionItemsExtractorPage() {
                 Paste your meeting notes — get a clean list of action items, each with the right person attributed and the deadline mentioned. Free for your first one.
               </p>
               <div className={s.heroActionsLeft}>
-                <Link href="/app" className={s.btnPrimary}>Extract my action items →</Link>
-                <Link href="#example" className={s.btnGhost}>See an example ↓</Link>
+                <Link href="/app" className={s.btnPrimary}>Extract my action items <ArrowRight size={18} strokeWidth={1.75} aria-hidden="true" /></Link>
+                <Link href="#example" className={s.btnGhost}>See an example <ArrowDown size={16} strokeWidth={1.75} aria-hidden="true" /></Link>
               </div>
               <div className={s.heroStats}>
                 <div className={s.heroStat}>
@@ -195,28 +196,28 @@ export default function ActionItemsExtractorPage() {
           </div>
           <div className={s.painList}>
             <div className={s.pain}>
-              <div className={s.painIcon}>👤</div>
+              <div className={s.painIcon}><User size={22} strokeWidth={1.75} aria-hidden="true" /></div>
               <div>
                 <div className={s.painTitle}>Names are pulled from your notes — not assumed.</div>
                 <p className={s.painDesc}>If your notes say &quot;Tom&quot;, the action goes to Tom. If they don&apos;t name anyone, the owner is left blank rather than guessed.</p>
               </div>
             </div>
             <div className={s.pain}>
-              <div className={s.painIcon}>📅</div>
+              <div className={s.painIcon}><Calendar size={22} strokeWidth={1.75} aria-hidden="true" /></div>
               <div>
                 <div className={s.painTitle}>Deadlines stay literal.</div>
                 <p className={s.painDesc}>&quot;by Friday&quot; becomes &quot;Due: Friday&quot;. &quot;EOD&quot; stays &quot;Due: today&quot;. The tool doesn&apos;t invent a deadline if your notes didn&apos;t mention one.</p>
               </div>
             </div>
             <div className={s.pain}>
-              <div className={s.painIcon}>🎯</div>
+              <div className={s.painIcon}><Target size={22} strokeWidth={1.75} aria-hidden="true" /></div>
               <div>
                 <div className={s.painTitle}>Priorities inferred from urgency cues.</div>
                 <p className={s.painDesc}>If a task has tight time pressure (&quot;ASAP&quot;, &quot;today&quot;) it&apos;s flagged high priority. Otherwise medium or low. You can override.</p>
               </div>
             </div>
             <div className={s.pain}>
-              <div className={s.painIcon}>📋</div>
+              <div className={s.painIcon}><ClipboardList size={22} strokeWidth={1.75} aria-hidden="true" /></div>
               <div>
                 <div className={s.painTitle}>Output is paste-ready.</div>
                 <p className={s.painDesc}>Drop the action items into Linear, Jira, Notion, or your todo list. No formatting cleanup — they come out clean.</p>
@@ -249,7 +250,7 @@ export default function ActionItemsExtractorPage() {
       <section className={s.ctaBanner}>
         <h2 className={s.ctaBannerTitle}>Extract your action items now.</h2>
         <p className={s.ctaBannerSub}>Free for your first meeting. No signup required.</p>
-        <Link href="/app" className={s.btnPrimary}>Try the extractor free →</Link>
+        <Link href="/app" className={s.btnPrimary}>Try the extractor free <ArrowRight size={18} strokeWidth={1.75} aria-hidden="true" /></Link>
       </section>
 
       <footer className={s.miniFooter}>

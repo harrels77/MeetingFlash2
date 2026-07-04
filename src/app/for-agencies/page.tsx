@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import Link from 'next/link'
 import MobileNav from '@/components/MobileNav'
 import { buildBreadcrumb } from '@/lib/breadcrumb'
+import { Check, Target, ClipboardList, RefreshCw, BarChart3, Send, Brain, Globe, Paperclip, ArrowRight, ArrowDown } from 'lucide-react'
 import s from '@/styles/marketing.module.css'
 
 export const metadata: Metadata = {
@@ -92,13 +93,13 @@ export default function ForAgenciesPage() {
             Discovery calls, weekly status updates, sprint retros, quarterly reviews — turned into a polished recap email and Slack message in 20 seconds. Built for agencies who run too many client meetings to write recaps by hand.
           </p>
           <div className={s.heroActions}>
-            <Link href="/app?template=discovery" className={s.btnPrimary}>Try it free →</Link>
-            <Link href="#how" className={s.btnGhost}>See how it works ↓</Link>
+            <Link href="/app?template=discovery" className={s.btnPrimary}>Try it free <ArrowRight size={18} strokeWidth={1.75} aria-hidden="true" /></Link>
+            <Link href="#how" className={s.btnGhost}>See how it works <ArrowDown size={16} strokeWidth={1.75} aria-hidden="true" /></Link>
           </div>
           <div className={s.trustStrip}>
-            <span>✓ 20 seconds per recap</span>
-            <span>✓ Project memory across calls</span>
-            <span>✓ EN / FR / ES / DE output</span>
+            <span><Check size={15} strokeWidth={1.75} aria-hidden="true" /> 20 seconds per recap</span>
+            <span><Check size={15} strokeWidth={1.75} aria-hidden="true" /> Project memory across calls</span>
+            <span><Check size={15} strokeWidth={1.75} aria-hidden="true" /> EN / FR / ES / DE output</span>
           </div>
         </div>
       </section>
@@ -115,28 +116,28 @@ export default function ForAgenciesPage() {
           </div>
           <div className={s.cardGrid}>
             <div className={s.card}>
-              <div className={s.cardIcon}>🎯</div>
+              <div className={s.cardIcon}><Target size={22} strokeWidth={1.75} aria-hidden="true" /></div>
               <div className={s.cardTitle}>Discovery calls</div>
               <p className={s.cardDesc}>
                 Capture the prospect&apos;s goals, scope, budget, and timeline. Get a recap email in their inbox before they leave the meeting room — the recap email is part of the sale.
               </p>
             </div>
             <div className={s.card}>
-              <div className={s.cardIcon}>📋</div>
+              <div className={s.cardIcon}><ClipboardList size={22} strokeWidth={1.75} aria-hidden="true" /></div>
               <div className={s.cardTitle}>Weekly client status</div>
               <p className={s.cardDesc}>
                 Paste your weekly notes — get a polished status email with what shipped, what&apos;s next, decisions needed, and risks. Calm clients renew.
               </p>
             </div>
             <div className={s.card}>
-              <div className={s.cardIcon}>🔁</div>
+              <div className={s.cardIcon}><RefreshCw size={22} strokeWidth={1.75} aria-hidden="true" /></div>
               <div className={s.cardTitle}>Sprint check-ins</div>
               <p className={s.cardDesc}>
                 Internal team retros and standups become structured improvement commitments — with owners and deadlines, not just venting.
               </p>
             </div>
             <div className={s.card}>
-              <div className={s.cardIcon}>📊</div>
+              <div className={s.cardIcon}><BarChart3 size={22} strokeWidth={1.75} aria-hidden="true" /></div>
               <div className={s.cardTitle}>Quarterly reviews</div>
               <p className={s.cardDesc}>
                 Strategic sessions become a clear list of decisions, action items, and a starting agenda for the next quarter — written, not lost in a Notion doc.
@@ -157,28 +158,28 @@ export default function ForAgenciesPage() {
           <div className={s.split}>
             <div className={s.painList}>
               <div className={s.pain}>
-                <div className={s.painIcon}>📤</div>
+                <div className={s.painIcon}><Send size={22} strokeWidth={1.75} aria-hidden="true" /></div>
                 <div>
                   <div className={s.painTitle}>Client-ready output, not internal note dumps.</div>
                   <p className={s.painDesc}>The follow-up email is drafted using the actual decisions and owners from the call. Edit one line, send it — no template rewriting.</p>
                 </div>
               </div>
               <div className={s.pain}>
-                <div className={s.painIcon}>🧠</div>
+                <div className={s.painIcon}><Brain size={22} strokeWidth={1.75} aria-hidden="true" /></div>
                 <div>
                   <div className={s.painTitle}>Project memory across calls.</div>
                   <p className={s.painDesc}>By call #4 with a client, your tool should remember calls 1-3. MeetingFlash projects keep decisions and tasks across every meeting on the same engagement.</p>
                 </div>
               </div>
               <div className={s.pain}>
-                <div className={s.painIcon}>🌍</div>
+                <div className={s.painIcon}><Globe size={22} strokeWidth={1.75} aria-hidden="true" /></div>
                 <div>
                   <div className={s.painTitle}>Multi-language for international clients.</div>
                   <p className={s.painDesc}>Take notes in your language, deliver the recap in your client&apos;s language. EN / FR / ES / DE on Pro, more on request.</p>
                 </div>
               </div>
               <div className={s.pain}>
-                <div className={s.painIcon}>📎</div>
+                <div className={s.painIcon}><Paperclip size={22} strokeWidth={1.75} aria-hidden="true" /></div>
                 <div>
                   <div className={s.painTitle}>Shareable links + PDF export.</div>
                   <p className={s.painDesc}>One-click share link or a clean PDF for formal deliverables. Clients see the recap exactly as you do — no login, no friction.</p>
@@ -247,7 +248,7 @@ export default function ForAgenciesPage() {
         <p className={s.ctaBannerSub}>
           Try it on your last meeting — no signup required for the first one.
         </p>
-        <Link href="/app?template=discovery" className={s.btnPrimary}>Run your first Flash free →</Link>
+        <Link href="/app?template=discovery" className={s.btnPrimary}>Run your first Flash free <ArrowRight size={18} strokeWidth={1.75} aria-hidden="true" /></Link>
       </section>
 
       <footer className={s.miniFooter}>

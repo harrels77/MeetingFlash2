@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import Link from 'next/link'
 import MobileNav from '@/components/MobileNav'
 import { buildBreadcrumb } from '@/lib/breadcrumb'
+import { Pin, Banknote, CheckCircle2, HelpCircle, Send, MessageSquare, ArrowRight, ArrowDown } from 'lucide-react'
 import s from '@/styles/marketing.module.css'
 
 export const metadata: Metadata = {
@@ -90,8 +91,8 @@ export default function DiscoveryCallRecapToolPage() {
                 Paste your raw discovery call notes — get a polished recap email, scope confirmation, action items with owners and deadlines, and open questions. The recap email is part of the sale. Send it fast.
               </p>
               <div className={s.heroActionsLeft}>
-                <Link href="/app" className={s.btnPrimary}>Generate my recap →</Link>
-                <Link href="/blog/discovery-call-recap-template" className={s.btnGhost}>Read the template guide ↓</Link>
+                <Link href="/app" className={s.btnPrimary}>Generate my recap <ArrowRight size={18} strokeWidth={1.75} aria-hidden="true" /></Link>
+                <Link href="/blog/discovery-call-recap-template" className={s.btnGhost}>Read the template guide <ArrowDown size={16} strokeWidth={1.75} aria-hidden="true" /></Link>
               </div>
               <div className={s.heroStats}>
                 <div className={s.heroStat}>
@@ -151,32 +152,32 @@ export default function DiscoveryCallRecapToolPage() {
           </div>
           <div className={s.cardGrid}>
             <div className={s.card}>
-              <div className={s.cardIcon}>📌</div>
+              <div className={s.cardIcon}><Pin size={22} strokeWidth={1.75} aria-hidden="true" /></div>
               <div className={s.cardTitle}>Confirmed scope</div>
               <p className={s.cardDesc}>What they&apos;re hiring you for, in their language. Restated so there&apos;s no misalignment by week 2.</p>
             </div>
             <div className={s.card}>
-              <div className={s.cardIcon}>💸</div>
+              <div className={s.cardIcon}><Banknote size={22} strokeWidth={1.75} aria-hidden="true" /></div>
               <div className={s.cardTitle}>Budget &amp; timeline</div>
               <p className={s.cardDesc}>The dollar figure, payment milestones, and project timeline pulled directly from what was discussed.</p>
             </div>
             <div className={s.card}>
-              <div className={s.cardIcon}>✓</div>
+              <div className={s.cardIcon}><CheckCircle2 size={22} strokeWidth={1.75} aria-hidden="true" /></div>
               <div className={s.cardTitle}>Action items with owners</div>
               <p className={s.cardDesc}>Who is doing what by when — yours and theirs. No floating commitments without an owner.</p>
             </div>
             <div className={s.card}>
-              <div className={s.cardIcon}>❓</div>
+              <div className={s.cardIcon}><HelpCircle size={22} strokeWidth={1.75} aria-hidden="true" /></div>
               <div className={s.cardTitle}>Open questions</div>
               <p className={s.cardDesc}>Things that came up but weren&apos;t resolved. Becomes the agenda for the next call.</p>
             </div>
             <div className={s.card}>
-              <div className={s.cardIcon}>📤</div>
+              <div className={s.cardIcon}><Send size={22} strokeWidth={1.75} aria-hidden="true" /></div>
               <div className={s.cardTitle}>Follow-up email</div>
               <p className={s.cardDesc}>Drafted using all of the above — ready to copy, edit one line, and send to the prospect.</p>
             </div>
             <div className={s.card}>
-              <div className={s.cardIcon}>💬</div>
+              <div className={s.cardIcon}><MessageSquare size={22} strokeWidth={1.75} aria-hidden="true" /></div>
               <div className={s.cardTitle}>Internal Slack message</div>
               <p className={s.cardDesc}>A separate update for your team channel — what we just won, what&apos;s next, who&apos;s on it.</p>
             </div>
@@ -251,7 +252,7 @@ export default function DiscoveryCallRecapToolPage() {
       <section className={s.ctaBanner}>
         <h2 className={s.ctaBannerTitle}>Send the recap<br />before they finish their coffee.</h2>
         <p className={s.ctaBannerSub}>Free for your first one. No signup required.</p>
-        <Link href="/app" className={s.btnPrimary}>Try it free →</Link>
+        <Link href="/app" className={s.btnPrimary}>Try it free <ArrowRight size={18} strokeWidth={1.75} aria-hidden="true" /></Link>
       </section>
 
       <footer className={s.miniFooter}>

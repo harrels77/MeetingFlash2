@@ -52,6 +52,9 @@
 
 .navCta {
   margin-left: 8px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
   padding: 8px 18px;
   background: var(--blue);
   color: #fff;
@@ -195,7 +198,9 @@
 }
 
 .accountMenuItem {
-  display: block;
+  display: flex;
+  align-items: center;
+  gap: 8px;
   width: 100%;
   padding: 11px 16px;
   font-size: 13px;
@@ -220,7 +225,9 @@
   background: none;
   border: 1px solid var(--border2);
   color: var(--muted);
-  font-size: 15px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   width: 34px;
   height: 34px;
   border-radius: 8px;
@@ -277,6 +284,9 @@
 }
 
 .mobileLink {
+  display: flex;
+  align-items: center;
+  gap: 8px;
   padding: 18px 24px;
   font-size: 16px;
   font-weight: 500;
@@ -338,6 +348,10 @@
 
 .mobileCta {
   margin: 20px 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
   padding: 16px;
   background: var(--blue);
   color: #fff;

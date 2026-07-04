@@ -60,6 +60,9 @@
 }
 
 .tab {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
   padding: 8px 18px;
   font-size: 13px;
   font-weight: 500;
@@ -140,6 +143,9 @@
 .topbarRight { display: flex; gap: 8px; }
 
 .btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
   padding: 5px 12px;
   font-size: 12px;
   border: 1px solid var(--border2);

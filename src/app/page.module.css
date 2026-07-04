@@ -246,9 +246,12 @@
   border: 1px solid var(--border);
   border-radius: 6px;
   padding: 6px 10px;
-  display: block;
+  display: flex;
+  align-items: center;
+  gap: 6px;
   font-weight: 500;
 }
+.miniOutput svg { flex-shrink: 0; }
 
 .miniDemoArrow {
   display: flex;
@@ -273,7 +276,8 @@
 }
 
 .miniDemoArrowIcon {
-  font-size: 16px;
+  display: flex;
+  color: var(--spark);
 }
 
 @media (max-width: 680px) {
@@ -603,7 +607,7 @@
   border-color: rgba(232,161,60,0.2);
 }
 
-.bentoIcon { font-size: 28px; margin-bottom: 16px; display: block; }
+.bentoIcon { color: var(--accent-text); margin-bottom: 16px; display: block; }
 
 .bentoTitle {
   font-size: 17px;
@@ -1067,7 +1071,7 @@
 }
 
 .agencyPainIcon {
-  font-size: 22px;
+  color: var(--accent-text);
   flex-shrink: 0;
   width: 44px;
   height: 44px;

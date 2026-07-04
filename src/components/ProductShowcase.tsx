@@ -1,6 +1,7 @@
 'use client'
 import { useState } from 'react'
 import Image from 'next/image'
+import { Zap, ArrowLeft, ArrowUpRight } from 'lucide-react'
 import s from './ProductShowcase.module.css'
 
 type Tab = 'app' | 'dashboard' | 'pack'
@@ -20,7 +21,7 @@ export default function ProductShowcase() {
         <div className={s.tabsWrap}>
           <div className={s.tabs} role="tablist">
             <button className={`${s.tab} ${tab === 'app' ? s.tabActive : ''}`} onClick={() => setTab('app')} role="tab" aria-selected={tab === 'app'}>
-              ⚡ Flash tool
+              <Zap size={15} strokeWidth={1.75} aria-hidden="true" /> Flash tool
             </button>
             <button className={`${s.tab} ${tab === 'dashboard' ? s.tabActive : ''}`} onClick={() => setTab('dashboard')} role="tab" aria-selected={tab === 'dashboard'}>
               Dashboard
@@ -57,7 +58,7 @@ function AppMockup() {
       <TopBar right={
         <>
           <div className={s.btn}>Dashboard</div>
-          <div className={s.btn}>← Back</div>
+          <div className={s.btn}><ArrowLeft size={13} strokeWidth={1.75} aria-hidden="true" /> Back</div>
         </>
       } />
       <div className={s.appBody}>
@@ -67,7 +68,7 @@ function AppMockup() {
             <div className={s.appHeadTitle}>Execution Pack Generator</div>
             <div className={s.appHeadActions}>
               <div className={s.btn} style={{ fontSize: 11 }}>Templates ▾</div>
-              <div className={s.btn} style={{ fontSize: 11 }}>Load sample ↗</div>
+              <div className={s.btn} style={{ fontSize: 11 }}>Load sample <ArrowUpRight size={12} strokeWidth={1.75} aria-hidden="true" /></div>
             </div>
           </div>
 
@@ -117,7 +118,7 @@ function AppMockup() {
         <div className={s.appRight}>
           <div className={s.outputHeader}>
             <div className={s.outputTitle}>
-              <span>⚡</span> Your Execution Pack
+              <Zap size={15} strokeWidth={1.75} aria-hidden="true" /> Your Execution Pack
             </div>
             <div className={s.btn}>Copy all</div>
           </div>

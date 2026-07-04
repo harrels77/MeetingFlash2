@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
 import { useAuth } from '@/lib/AuthProvider'
+import { Zap, Sun, Moon, ChevronDown, ArrowRight } from 'lucide-react'
 import styles from './MobileNav.module.css'
 
 export default function MobileNav() {
@@ -90,7 +91,7 @@ export default function MobileNav() {
               style={{ display: 'inline-flex', alignItems: 'center', gap: 4, background: 'none', border: 'none', font: 'inherit', cursor: 'pointer' }}
               aria-expanded={forOpen}
             >
-              For <span style={{ fontSize: 10, transition: 'transform 0.15s', transform: forOpen ? 'rotate(180deg)' : 'none' }}>▾</span>
+              For <ChevronDown size={14} strokeWidth={1.75} aria-hidden="true" style={{ transition: 'transform 0.15s', transform: forOpen ? 'rotate(180deg)' : 'none' }} />
             </button>
             {forOpen && (
               <div className={styles.forMenu}>
@@ -115,7 +116,7 @@ export default function MobileNav() {
               >
                 <div className={styles.accountAvatar}>{initial}</div>
                 <span className={styles.accountName}>{displayName}</span>
-                <span className={styles.accountChevron}>▾</span>
+                <ChevronDown size={14} strokeWidth={1.75} aria-hidden="true" className={styles.accountChevron} />
               </button>
 
                 {accountOpen && (
@@ -126,7 +127,7 @@ export default function MobileNav() {
                       <div className={styles.accountMenuPlan}>{profile?.plan || (profilePending ? '—' : 'free')}</div>
                     </div>
                     <Link href="/app" className={styles.accountMenuItem} onClick={() => setAccountOpen(false)}>
-                      ⚡ New Flash
+                      <Zap size={16} strokeWidth={1.75} aria-hidden="true" /> New Flash
                     </Link>
                     <Link href="/dashboard" className={styles.accountMenuItem} onClick={() => setAccountOpen(false)}>
                       Dashboard
@@ -147,7 +148,7 @@ export default function MobileNav() {
             <>
               <Link href="/login" className={styles.navLink}>Sign in</Link>
 
-              <Link href="/app"   className={styles.navCta}>Try with sample notes →</Link>
+              <Link href="/app"   className={styles.navCta}>Try with sample notes <ArrowRight size={16} strokeWidth={1.75} aria-hidden="true" /></Link>
             </>
           )}
         </div>
@@ -158,7 +159,7 @@ export default function MobileNav() {
           onClick={toggleTheme}
           aria-label="Toggle theme"
         >
-          {theme === 'dark' ? '☀' : '☾'}
+          {theme === 'dark' ? <Sun size={18} strokeWidth={1.75} aria-hidden="true" /> : <Moon size={18} strokeWidth={1.75} aria-hidden="true" />}
         </button>
 
         {/* BURGER — visible uniquement sur mobile via CSS */}
@@ -207,7 +208,7 @@ export default function MobileNav() {
               className={styles.mobileLink}
               onClick={() => setAccountOpen(!accountOpen)}
             >
-              {displayName} ▾
+              {displayName} <ChevronDown size={14} strokeWidth={1.75} aria-hidden="true" />
             </button>
 
             {/* SUB MENU */}
@@ -226,7 +227,7 @@ export default function MobileNav() {
                 <div className={styles.mobileDivider} />
 
                 <Link href="/app" className={styles.mobileLink} onClick={() => setOpen(false)}>
-                  ⚡ New Flash
+                  <Zap size={16} strokeWidth={1.75} aria-hidden="true" /> New Flash
                 </Link>
                 <Link href="/dashboard" className={styles.mobileLink} onClick={() => setOpen(false)}>
                   Dashboard
@@ -253,7 +254,7 @@ export default function MobileNav() {
                 Create account
               </Link>
               <Link href="/app" className={styles.mobileCta} onClick={() => setOpen(false)}>
-                Try with sample notes →
+                Try with sample notes <ArrowRight size={16} strokeWidth={1.75} aria-hidden="true" />
               </Link>
             </>
           )}

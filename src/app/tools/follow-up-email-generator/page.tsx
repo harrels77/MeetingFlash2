@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import Link from 'next/link'
 import MobileNav from '@/components/MobileNav'
 import { buildBreadcrumb } from '@/lib/breadcrumb'
+import { PenLine, Zap, Send, ArrowRight, ArrowDown } from 'lucide-react'
 import s from '@/styles/marketing.module.css'
 
 export const metadata: Metadata = {
@@ -90,8 +91,8 @@ export default function FollowUpEmailGeneratorPage() {
                 Paste your raw meeting notes — get a polished follow-up email in 20 seconds. No prompt to write, no signup for the first one.
               </p>
               <div className={s.heroActionsLeft}>
-                <Link href="/app" className={s.btnPrimary}>Generate my email →</Link>
-                <Link href="#how" className={s.btnGhost}>See an example ↓</Link>
+                <Link href="/app" className={s.btnPrimary}>Generate my email <ArrowRight size={18} strokeWidth={1.75} aria-hidden="true" /></Link>
+                <Link href="#how" className={s.btnGhost}>See an example <ArrowDown size={16} strokeWidth={1.75} aria-hidden="true" /></Link>
               </div>
               <div className={s.heroStats}>
                 <div className={s.heroStat}>
@@ -149,21 +150,21 @@ export default function FollowUpEmailGeneratorPage() {
           </div>
           <div className={s.cardGrid}>
             <div className={s.card}>
-              <div className={s.cardIcon}>📝</div>
+              <div className={s.cardIcon}><PenLine size={22} strokeWidth={1.75} aria-hidden="true" /></div>
               <div className={s.cardTitle}>1 · Paste your notes</div>
               <p className={s.cardDesc}>
                 Bullet points, fragments, half-sentences from the meeting. No formatting required — &quot;Sarah → launch April 28&quot; works.
               </p>
             </div>
             <div className={s.card}>
-              <div className={s.cardIcon}>⚡</div>
+              <div className={s.cardIcon}><Zap size={22} strokeWidth={1.75} aria-hidden="true" /></div>
               <div className={s.cardTitle}>2 · Hit Flash</div>
               <p className={s.cardDesc}>
                 The tool extracts decisions, action items with owners and deadlines, and drafts the follow-up email using your meeting&apos;s actual content.
               </p>
             </div>
             <div className={s.card}>
-              <div className={s.cardIcon}>📤</div>
+              <div className={s.cardIcon}><Send size={22} strokeWidth={1.75} aria-hidden="true" /></div>
               <div className={s.cardTitle}>3 · Send</div>
               <p className={s.cardDesc}>
                 Copy the email, edit one sentence if you want, send it. Most people send it as-is.
@@ -234,7 +235,7 @@ export default function FollowUpEmailGeneratorPage() {
       <section className={s.ctaBanner}>
         <h2 className={s.ctaBannerTitle}>Generate your follow-up email now.</h2>
         <p className={s.ctaBannerSub}>Free for the first one. No signup needed.</p>
-        <Link href="/app" className={s.btnPrimary}>Try the generator free →</Link>
+        <Link href="/app" className={s.btnPrimary}>Try the generator free <ArrowRight size={18} strokeWidth={1.75} aria-hidden="true" /></Link>
       </section>
 
       <footer className={s.miniFooter}>

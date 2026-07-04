@@ -1,6 +1,7 @@
 'use client'
 import { useState } from 'react'
 import Link from 'next/link'
+import { ArrowRight } from 'lucide-react'
 import s from './pricing.module.css'
 
 export default function PricingClient() {
@@ -55,7 +56,7 @@ export default function PricingClient() {
               <span className={s.pricePer}>/ month</span>
             </div>
             <p className={s.cardSub}>Try the full workflow without a credit card.</p>
-            <Link href="/signup" className={s.cardBtnGhost}>Start free →</Link>
+            <Link href="/signup" className={s.cardBtnGhost}>Start free <ArrowRight size={16} strokeWidth={1.75} aria-hidden="true" /></Link>
             <ul className={s.featList}>
               <li>5 Execution Packs / month</li>
               <li>English output only</li>
@@ -82,7 +83,7 @@ export default function PricingClient() {
               disabled={loading}
               className={s.cardBtnPrimary}
             >
-              {loading ? 'Loading…' : 'Go Pro →'}
+              {loading ? 'Loading…' : 'Go Pro'}
             </button>
             <ul className={s.featList}>
               <li><strong>Unlimited</strong> Execution Packs</li>
@@ -105,7 +106,7 @@ export default function PricingClient() {
               href="mailto:hello@meetingflash.work?subject=Notify me about Team"
               className={s.cardBtnGhost}
             >
-              Notify me →
+              Notify me
             </a>
             <ul className={s.featList}>
               <li>Everything in Pro</li>

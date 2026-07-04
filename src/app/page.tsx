@@ -5,6 +5,7 @@ import MobileNav from '@/components/MobileNav'
 import HeroCta from '@/components/HeroCta'
 import FooterAccount from '@/components/FooterAccount'
 import ProductShowcase from '@/components/ProductShowcase'
+import { Layers, Brain, Lock, Globe, ClipboardList, Search, Target, RefreshCw, Timer, Send, Zap, Check, Pin, AlertTriangle, ArrowRight, ArrowDown } from 'lucide-react'
 import s from './page.module.css'
 
 const LOGOS = ['Notion', 'Slack', 'Linear', 'Figma', 'Loom', 'Asana', 'Jira', 'Zoom', 'Google Meet', 'Teams']
@@ -116,16 +117,16 @@ export default function Home() {
         <div className={s.miniDemoArrow}>
           <div className={s.miniDemoArrowLine} />
           <div className={s.miniDemoArrowLabel}>20 seconds</div>
-          <div className={s.miniDemoArrowIcon}>⚡</div>
+          <div className={s.miniDemoArrowIcon}><Zap size={16} strokeWidth={1.75} aria-hidden="true" /></div>
         </div>
 
         <div className={s.miniDemoRight}>
           <div className={s.miniDemoTag} style={{color:'var(--blue3)'}}>Execution Pack</div>
           <div className={s.miniDemoContent}>
-            <span className={s.miniOutput} style={{color:'var(--blue3)'}}>📌 Launch set for April 28th</span>
-            <span className={s.miniOutput} style={{color:'var(--green)'}}>✓ Tom → Feature list (Fri)</span>
-            <span className={s.miniOutput} style={{color:'var(--green)'}}>✓ Freeze subscriptions Q2</span>
-            <span className={s.miniOutput} style={{color:'var(--amber)'}}>⚠ Interview timeline tight</span>
+            <span className={s.miniOutput} style={{color:'var(--blue3)'}}><Pin size={12} strokeWidth={1.75} aria-hidden="true" /> Launch set for April 28th</span>
+            <span className={s.miniOutput} style={{color:'var(--green)'}}><Check size={12} strokeWidth={1.75} aria-hidden="true" /> Tom → Feature list (Fri)</span>
+            <span className={s.miniOutput} style={{color:'var(--green)'}}><Check size={12} strokeWidth={1.75} aria-hidden="true" /> Freeze subscriptions Q2</span>
+            <span className={s.miniOutput} style={{color:'var(--amber)'}}><AlertTriangle size={12} strokeWidth={1.75} aria-hidden="true" /> Interview timeline tight</span>
           </div>
         </div>
       </div>
@@ -166,7 +167,7 @@ export default function Home() {
 
         <div className={s.heroActions}>
           <HeroCta className={s.btnPrimary} />
-          <Link href="#features" className={s.btnGhost}>See how it works ↓</Link>
+          <Link href="#features" className={s.btnGhost}>See how it works <ArrowDown size={16} strokeWidth={1.75} aria-hidden="true" /></Link>
         </div>
 
         <div className={s.heroStats}>
@@ -213,7 +214,7 @@ export default function Home() {
 
         <div className={`${s.bento} ${s.reveal}`}>
           <div className={`${s.bentoCard} ${s.bentoCardLarge} ${s.bentoCardBlue}`}>
-            <div className={s.bentoIcon}>⚡</div>
+            <div className={s.bentoIcon}><Layers size={24} strokeWidth={1.75} aria-hidden="true" /></div>
             <h3 className={s.bentoTitle}>Execution Pack</h3>
             <p className={s.bentoDesc}>7 ready-to-use outputs from one paste. Decisions, tasks with owners, open questions, risks, follow-up email, Slack message, and next agenda.</p>
             <div className={s.bentoBadges}>
@@ -225,31 +226,31 @@ export default function Home() {
           </div>
 
           <div className={`${s.bentoCard} ${s.bentoCardGreen}`}>
-            <div className={s.bentoIcon}>🧠</div>
+            <div className={s.bentoIcon}><Brain size={24} strokeWidth={1.75} aria-hidden="true" /></div>
             <h3 className={s.bentoTitle}>Project Memory</h3>
             <p className={s.bentoDesc}>Every decision tracked across meetings. Never wonder what was agreed 3 weeks ago.</p>
           </div>
 
           <div className={`${s.bentoCard}`}>
-            <div className={s.bentoIcon}>🔒</div>
+            <div className={s.bentoIcon}><Lock size={24} strokeWidth={1.75} aria-hidden="true" /></div>
             <h3 className={s.bentoTitle}>Private by design</h3>
             <p className={s.bentoDesc}>Transcripts processed and discarded. Never stored. Never used for training.</p>
           </div>
 
           <div className={`${s.bentoCard}`}>
-            <div className={s.bentoIcon}>🌍</div>
+            <div className={s.bentoIcon}><Globe size={24} strokeWidth={1.75} aria-hidden="true" /></div>
             <h3 className={s.bentoTitle}>Any language</h3>
             <p className={s.bentoDesc}>Input in any language. Output in English, French, Spanish, German, or any other.</p>
           </div>
 
           <div className={`${s.bentoCard} ${s.bentoCardAmber}`}>
-            <div className={s.bentoIcon}>📋</div>
+            <div className={s.bentoIcon}><ClipboardList size={24} strokeWidth={1.75} aria-hidden="true" /></div>
             <h3 className={s.bentoTitle}>Task Tracker</h3>
             <p className={s.bentoDesc}>Action items automatically extracted with owners, deadlines, and priority. Track status across meetings.</p>
           </div>
 
           <div className={`${s.bentoCard}`}>
-            <div className={s.bentoIcon}>🔍</div>
+            <div className={s.bentoIcon}><Search size={24} strokeWidth={1.75} aria-hidden="true" /></div>
             <h3 className={s.bentoTitle}>Smart Search</h3>
             <p className={s.bentoDesc}>Search across all your meetings instantly. Find any decision or commitment in seconds.</p>
           </div>
@@ -308,7 +309,7 @@ export default function Home() {
   <div className={`${s.agencyGrid} ${s.reveal}`}>
     <div className={s.agencyPainList}>
       <div className={s.agencyPain}>
-        <div className={s.agencyPainIcon}>🎯</div>
+        <div className={s.agencyPainIcon}><Target size={22} strokeWidth={1.75} aria-hidden="true" /></div>
         <div>
           <div className={s.agencyPainTitle}>Discovery → recap, instantly.</div>
           <div className={s.agencyPainDesc}>
@@ -317,7 +318,7 @@ export default function Home() {
         </div>
       </div>
       <div className={s.agencyPain}>
-        <div className={s.agencyPainIcon}>📋</div>
+        <div className={s.agencyPainIcon}><ClipboardList size={22} strokeWidth={1.75} aria-hidden="true" /></div>
         <div>
           <div className={s.agencyPainTitle}>Status updates without the admin.</div>
           <div className={s.agencyPainDesc}>
@@ -326,7 +327,7 @@ export default function Home() {
         </div>
       </div>
       <div className={s.agencyPain}>
-        <div className={s.agencyPainIcon}>🔁</div>
+        <div className={s.agencyPainIcon}><RefreshCw size={22} strokeWidth={1.75} aria-hidden="true" /></div>
         <div>
           <div className={s.agencyPainTitle}>Project memory across calls.</div>
           <div className={s.agencyPainDesc}>
@@ -371,7 +372,7 @@ export default function Home() {
   </div>
 
   <div className={`${s.agencyCta} ${s.reveal}`}>
-    <Link href="/app" className={s.btnPrimary}>Try it on a discovery call →</Link>
+    <Link href="/app" className={s.btnPrimary}>Try it on a discovery call <ArrowRight size={18} strokeWidth={1.75} aria-hidden="true" /></Link>
     <span className={s.agencyCtaNote}>No signup needed for the first one.</span>
   </div>
 </section>
@@ -384,21 +385,21 @@ export default function Home() {
   </h2>
   <div className={`${s.bento} ${s.reveal}`} style={{ maxWidth: 1100, margin: '40px auto 0' }}>
     <div className={`${s.bentoCard} ${s.bentoCardBlue}`}>
-      <div className={s.bentoIcon}>⏱</div>
+      <div className={s.bentoIcon}><Timer size={24} strokeWidth={1.75} aria-hidden="true" /></div>
       <h3 className={s.bentoTitle}>20 minutes back per meeting</h3>
       <p className={s.bentoDesc}>
         That's the time it takes most people to type a recap, format an email, and copy actions into Slack. You stop doing it.
       </p>
     </div>
     <div className={`${s.bentoCard} ${s.bentoCardGreen}`}>
-      <div className={s.bentoIcon}>🎯</div>
+      <div className={s.bentoIcon}><Target size={24} strokeWidth={1.75} aria-hidden="true" /></div>
       <h3 className={s.bentoTitle}>Every action has an owner</h3>
       <p className={s.bentoDesc}>
         No more "who was supposed to do this?" three weeks later. Tasks come out with name, deadline, priority — by default.
       </p>
     </div>
     <div className={`${s.bentoCard} ${s.bentoCardAmber}`}>
-      <div className={s.bentoIcon}>📤</div>
+      <div className={s.bentoIcon}><Send size={24} strokeWidth={1.75} aria-hidden="true" /></div>
       <h3 className={s.bentoTitle}>Recap sent before the next meeting</h3>
       <p className={s.bentoDesc}>
         The follow-up email goes out the same minute the call ends. Your client reads it while the meeting is still fresh in their mind.
@@ -448,7 +449,7 @@ export default function Home() {
                 <li key={f}><span className={s.featCheck}>✓</span>{f}</li>
               ))}
             </ul>
-            <Link href="/app" className={s.planBtnFree}>Start free →</Link>
+            <Link href="/app" className={s.planBtnFree}>Start free <ArrowRight size={16} strokeWidth={1.75} aria-hidden="true" /></Link>
           </div>
 
           <div className={`${s.priceCard} ${s.priceCardFeatured}`}>
@@ -476,7 +477,7 @@ export default function Home() {
                   if (url) window.location.href = url
                 }}
               >
-                Go Pro →
+                Go Pro
               </button>
           </div>
 
@@ -494,7 +495,7 @@ export default function Home() {
               className={s.planBtnFree}
               style={{ textAlign: 'center' }}
             >
-              Notify me →
+              Notify me
             </a>
           </div>
         </div>

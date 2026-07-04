@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import Link from 'next/link'
 import MobileNav from '@/components/MobileNav'
 import { buildBreadcrumb } from '@/lib/breadcrumb'
+import { Check, RefreshCw, Calendar, Users, Target, Brain, CheckCircle2, ClipboardList, Send, ArrowRight, ArrowDown } from 'lucide-react'
 import s from '@/styles/marketing.module.css'
 
 export const metadata: Metadata = {
@@ -87,13 +88,13 @@ export default function ForProductTeamsPage() {
             Sprint retros, planning, 1-on-1s, stakeholder reviews — turned into structured commitments with named owners and deadlines, in 20 seconds. So next sprint actually starts where the last one ended.
           </p>
           <div className={s.heroActions}>
-            <Link href="/app?template=retro" className={s.btnPrimary}>Try it free →</Link>
-            <Link href="#meetings" className={s.btnGhost}>See meeting types ↓</Link>
+            <Link href="/app?template=retro" className={s.btnPrimary}>Try it free <ArrowRight size={18} strokeWidth={1.75} aria-hidden="true" /></Link>
+            <Link href="#meetings" className={s.btnGhost}>See meeting types <ArrowDown size={16} strokeWidth={1.75} aria-hidden="true" /></Link>
           </div>
           <div className={s.trustStrip}>
-            <span>✓ 20 seconds per recap</span>
-            <span>✓ Tasks tracked across sprints</span>
-            <span>✓ Decisions persist as project memory</span>
+            <span><Check size={15} strokeWidth={1.75} aria-hidden="true" /> 20 seconds per recap</span>
+            <span><Check size={15} strokeWidth={1.75} aria-hidden="true" /> Tasks tracked across sprints</span>
+            <span><Check size={15} strokeWidth={1.75} aria-hidden="true" /> Decisions persist as project memory</span>
           </div>
         </div>
       </section>
@@ -109,28 +110,28 @@ export default function ForProductTeamsPage() {
           </div>
           <div className={s.cardGrid}>
             <div className={s.card}>
-              <div className={s.cardIcon}>🔁</div>
+              <div className={s.cardIcon}><RefreshCw size={22} strokeWidth={1.75} aria-hidden="true" /></div>
               <div className={s.cardTitle}>Sprint retrospectives</div>
               <p className={s.cardDesc}>
                 What worked, what didn&apos;t, and the top 3 changes — with owners and deadlines, not just venting. Use the <Link href="/blog/sprint-retrospective-template" style={{ color: 'var(--blue3)' }}>retro template</Link> we built for this.
               </p>
             </div>
             <div className={s.card}>
-              <div className={s.cardIcon}>📅</div>
+              <div className={s.cardIcon}><Calendar size={22} strokeWidth={1.75} aria-hidden="true" /></div>
               <div className={s.cardTitle}>Sprint planning</div>
               <p className={s.cardDesc}>
                 Story breakdown decisions, capacity reasoning, deferred items — captured in one structured pack you can paste into Linear or Jira.
               </p>
             </div>
             <div className={s.card}>
-              <div className={s.cardIcon}>👥</div>
+              <div className={s.cardIcon}><Users size={22} strokeWidth={1.75} aria-hidden="true" /></div>
               <div className={s.cardTitle}>1-on-1s</div>
               <p className={s.cardDesc}>
                 Action items, growth commitments, blockers raised. The pack stays in your project memory so the next 1-on-1 picks up where the last one ended.
               </p>
             </div>
             <div className={s.card}>
-              <div className={s.cardIcon}>🎯</div>
+              <div className={s.cardIcon}><Target size={22} strokeWidth={1.75} aria-hidden="true" /></div>
               <div className={s.cardTitle}>Stakeholder reviews</div>
               <p className={s.cardDesc}>
                 Demos and roadmap reviews become a clear list of decisions, follow-up questions, and a draft summary email for absent stakeholders.
@@ -150,28 +151,28 @@ export default function ForProductTeamsPage() {
           <div className={s.split}>
             <div className={s.painList}>
               <div className={s.pain}>
-                <div className={s.painIcon}>🧠</div>
+                <div className={s.painIcon}><Brain size={22} strokeWidth={1.75} aria-hidden="true" /></div>
                 <div>
                   <div className={s.painTitle}>Project memory across sprints.</div>
                   <p className={s.painDesc}>Retros, planning, and reviews on the same project share decisions and tasks. Last sprint&apos;s commitments surface at the top of the next sprint.</p>
                 </div>
               </div>
               <div className={s.pain}>
-                <div className={s.painIcon}>✓</div>
+                <div className={s.painIcon}><CheckCircle2 size={22} strokeWidth={1.75} aria-hidden="true" /></div>
                 <div>
                   <div className={s.painTitle}>Owners + deadlines, every action.</div>
                   <p className={s.painDesc}>The model defaults to attributing every action item to a name and a date. No more &quot;we should improve X&quot; floating without an owner.</p>
                 </div>
               </div>
               <div className={s.pain}>
-                <div className={s.painIcon}>📋</div>
+                <div className={s.painIcon}><ClipboardList size={22} strokeWidth={1.75} aria-hidden="true" /></div>
                 <div>
                   <div className={s.painTitle}>Paste-ready output for Linear / Jira / Notion.</div>
                   <p className={s.painDesc}>Tasks come out clean and structured — copy-paste into your issue tracker or project doc, no formatting cleanup.</p>
                 </div>
               </div>
               <div className={s.pain}>
-                <div className={s.painIcon}>📤</div>
+                <div className={s.painIcon}><Send size={22} strokeWidth={1.75} aria-hidden="true" /></div>
                 <div>
                   <div className={s.painTitle}>Auto-drafted Slack updates for the team.</div>
                   <p className={s.painDesc}>Every Pack includes a draft Slack message — the kind a scrum master normally writes after the meeting. Skip the writing.</p>
@@ -238,7 +239,7 @@ export default function ForProductTeamsPage() {
         <p className={s.ctaBannerSub}>
           Try it on your last sprint — no signup required for the first one.
         </p>
-        <Link href="/app?template=retro" className={s.btnPrimary}>Run your first Flash free →</Link>
+        <Link href="/app?template=retro" className={s.btnPrimary}>Run your first Flash free <ArrowRight size={18} strokeWidth={1.75} aria-hidden="true" /></Link>
       </section>
 
       <footer className={s.miniFooter}>
