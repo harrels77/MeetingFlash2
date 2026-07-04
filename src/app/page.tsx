@@ -1,10 +1,12 @@
 'use client'
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useRef } from 'react'
 import Link from 'next/link'
 import MobileNav from '@/components/MobileNav'
 import HeroCta from '@/components/HeroCta'
 import FooterAccount from '@/components/FooterAccount'
 import ProductShowcase from '@/components/ProductShowcase'
+import PricingCards from '@/components/PricingCards'
+import DiscoveryMockup from '@/components/DiscoveryMockup'
 import { Layers, Brain, Lock, Globe, ClipboardList, Search, Target, RefreshCw, Timer, Send, Zap, Check, Pin, AlertTriangle, ArrowRight, ArrowDown } from 'lucide-react'
 import s from './page.module.css'
 
@@ -90,7 +92,6 @@ const HOME_JSON_LD = [
 
 export default function Home() {
   const revealRef = useRef<IntersectionObserver | null>(null)
-  const [annual, setAnnual] = useState(false)
 
   useEffect(() => {
     revealRef.current = new IntersectionObserver(
@@ -344,38 +345,7 @@ export default function Home() {
       </div>
     </div>
 
-    <div className={s.agencyMockup}>
-      <div className={s.agencyMockupHead}>
-        <div className={s.agencyMockupDots}>
-          <span /><span /><span />
-        </div>
-        <div className={s.agencyMockupTitle}>Discovery call · Acme Corp</div>
-      </div>
-      <div className={s.agencyMockupBody}>
-        <div className={`${s.agencyBlock} ${s.agencyBlockBlue}`}>
-          <div className={s.agencyBlockLabel}>Decisions</div>
-          <div className={s.agencyBlockContent}>
-            • Scope locked: e-commerce rebuild, 12-week timeline<br />
-            • Budget approved at $48k, paid in 3 milestones<br />
-            • Kickoff scheduled for May 6th
-          </div>
-        </div>
-        <div className={`${s.agencyBlock} ${s.agencyBlockGreen}`}>
-          <div className={s.agencyBlockLabel}>Action items</div>
-          <div className={s.agencyBlockContent}>
-            ✓ <strong>You</strong> → Send SOW + first invoice (Mon)<br />
-            ✓ <strong>Sarah (Acme)</strong> → Share brand assets &amp; access (Tue)<br />
-            ✓ <strong>You</strong> → Set up Slack channel + project doc (Wed)
-          </div>
-        </div>
-        <div className={`${s.agencyBlock} ${s.agencyBlockPaper}`}>
-          <div className={s.agencyBlockLabel}>Follow-up email</div>
-          <div className={s.agencyBlockContent}>
-            Hi Sarah, great speaking today. Confirming we&apos;re aligned on the 12-week scope and $48k budget across 3 milestones. Kickoff May 6th. I&apos;ll send the SOW &amp; first invoice Monday — you&apos;ll share brand assets Tuesday…
-          </div>
-        </div>
-      </div>
-    </div>
+    <DiscoveryMockup />
   </div>
 
   <div className={`${s.agencyCta} ${s.reveal}`}>
@@ -433,78 +403,8 @@ export default function Home() {
         <h2 className={`${s.sectionTitle} ${s.reveal}`}>One price, and the free plan actually stays free.</h2>
         <p className={`${s.pricingSub} ${s.reveal}`}>Start free. Upgrade when you're ready.</p>
 
-        <div className={`${s.reveal}`} style={{ display:'flex', alignItems:'center', justifyContent:'center', gap:12, marginBottom:32 }}>
-          <span style={{ color: !annual ? 'var(--text)' : 'var(--muted)', fontSize:14, fontWeight:500 }}>Monthly</span>
-          <button
-            onClick={() => setAnnual(a => !a)}
-            style={{ position:'relative', width:44, height:24, borderRadius:12, background: annual ? 'var(--blue)' : 'var(--surface2)', border:'1px solid var(--border)', cursor:'pointer', transition:'background 0.2s' }}
-          >
-            <span style={{ position:'absolute', top:3, left: annual ? 22 : 3, width:18, height:18, borderRadius:'50%', background:'#fff', transition:'left 0.2s' }} />
-          </button>
-          <span style={{ color: annual ? 'var(--text)' : 'var(--muted)', fontSize:14, fontWeight:500 }}>
-            Annual <span style={{ color:'var(--green)', fontSize:12, fontWeight:600 }}>Save 33%</span>
-          </span>
-        </div>
-
-        <div className={`${s.pricingGrid} ${s.reveal}`}>
-          <div className={s.priceCard}>
-            <div className={s.planName}>Free</div>
-            <div className={s.planPrice}>$0</div>
-            <div className={s.planPeriod}>Forever</div>
-            <ul className={s.planFeats}>
-              {['5 Execution Packs / month', 'All 7 outputs', 'English output', '1 project', 'Copy to clipboard'].map(f => (
-                <li key={f}><span className={s.featCheck}>✓</span>{f}</li>
-              ))}
-            </ul>
-            <Link href="/app" className={s.planBtnFree}>Start free <ArrowRight size={16} strokeWidth={1.75} aria-hidden="true" /></Link>
-          </div>
-
-          <div className={`${s.priceCard} ${s.priceCardFeatured}`}>
-            <div className={s.planBadge}>Most popular</div>
-            <div className={s.planName}>Pro</div>
-            <div className={s.planPrice}>{annual ? '$8' : '$12'}</div>
-            <div className={s.planPeriod}>{annual ? 'per month · billed $96/yr' : 'per month · cancel anytime'}</div>
-            <ul className={s.planFeats}>
-              {['Unlimited Execution Packs', 'Unlimited projects + project memory', 'Smart search across meetings', 'Output in EN, FR, ES, DE', 'PDF export', 'Priority email support'].map(f => (
-                <li key={f}><span className={s.featCheck}>✓</span>{f}</li>
-              ))}
-            </ul>
-              <button
-                className={s.planBtnPro}
-                onClick={async () => {
-                  const priceId = annual
-                    ? process.env.NEXT_PUBLIC_STRIPE_PRO_ANNUAL_PRICE_ID
-                    : process.env.NEXT_PUBLIC_STRIPE_PRO_PRICE_ID
-                  const res = await fetch('/api/checkout', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ priceId, email: '' })
-                  })
-                  const { url } = await res.json()
-                  if (url) window.location.href = url
-                }}
-              >
-                Go Pro
-              </button>
-          </div>
-
-          <div className={s.priceCard}>
-            <div className={s.planName}>Team</div>
-            <div className={s.planPrice} style={{ fontSize: 28, color: 'var(--muted)', fontWeight: 600 }}>Coming soon</div>
-            <div className={s.planPeriod}>Shared workspaces & seats</div>
-            <ul className={s.planFeats}>
-              {['Shared project memory', 'Team workspace', 'Per-seat billing', 'Get notified on launch'].map(f => (
-                <li key={f}><span className={s.featCheck}>·</span>{f}</li>
-              ))}
-            </ul>
-            <a
-              href="mailto:hello@meetingflash.work?subject=Team%20plan%20interest"
-              className={s.planBtnFree}
-              style={{ textAlign: 'center' }}
-            >
-              Notify me
-            </a>
-          </div>
+        <div className={s.reveal}>
+          <PricingCards />
         </div>
       </section>
 

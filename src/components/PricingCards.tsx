@@ -2,9 +2,9 @@
 import { useState } from 'react'
 import Link from 'next/link'
 import { ArrowRight } from 'lucide-react'
-import s from './pricing.module.css'
+import s from '@/app/pricing/pricing.module.css'
 
-export default function PricingClient() {
+export default function PricingCards() {
   const [annual, setAnnual] = useState(false)
   const [loading, setLoading] = useState(false)
 

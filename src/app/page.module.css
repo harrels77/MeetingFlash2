@@ -757,131 +757,17 @@
   margin-bottom: 56px;
 }
 
-.pricingGrid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 12px;
-  text-align: left;
-}
 
-.priceCard {
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: 16px;
-  padding: 36px;
-  position: relative;
-  transition: all 0.25s;
-}
-.priceCard:hover { transform: translateY(-3px); box-shadow: 0 20px 60px rgba(0,0,0,0.2); }
 
-.priceCardFeatured {
-  background: linear-gradient(160deg, rgba(46,98,255,0.22) 0%, rgba(46,98,255,0.08) 50%, rgba(46,98,255,0.03) 100%);
-  border-color: rgba(74,120,255,0.5);
-  box-shadow: 0 0 0 1px rgba(74,120,255,0.2), 0 0 80px rgba(46,98,255,0.18), 0 24px 48px rgba(0,0,0,0.3);
-  transform: translateY(-4px);
-}
 
-.planBadge {
-  position: absolute;
-  top: -14px;
-  left: 50%;
-  transform: translateX(-50%);
-  background: linear-gradient(90deg, var(--blue), var(--blue2));
-  color: #fff;
-  font-size: 11px;
-  font-weight: 700;
-  padding: 5px 16px;
-  border-radius: 10px;
-  white-space: nowrap;
-  letter-spacing: 0.06em;
-  box-shadow: 0 4px 16px rgba(46,98,255,0.5);
-  text-transform: uppercase;
-}
 
-.planName {
-  font-size: 13px;
-  font-weight: 600;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: var(--faint);
-  margin-bottom: 16px;
-}
-.priceCardFeatured .planName { color: var(--blue3); }
 
-.planPrice {
-  font-family: var(--serif);
-  font-size: 52px;
-  font-weight: 400;
-  letter-spacing: 0;
-  line-height: 1;
-  color: var(--text);
-  margin-bottom: 4px;
-}
 
-.planPeriod {
-  font-size: 13px;
-  color: var(--faint);
-  margin-bottom: 28px;
-}
 
-.planFeats {
-  list-style: none;
-  margin-bottom: 28px;
-  display: flex;
-  flex-direction: column;
-  gap: 0;
-}
 
-.planFeats li {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 10px 0;
-  border-bottom: 1px solid var(--border);
-  font-size: 14px;
-  color: var(--muted);
-}
-.planFeats li:last-child { border-bottom: none; }
-.priceCardFeatured .planFeats li { color: var(--muted); }
 
-.featCheck {
-  color: var(--green);
-  font-weight: 700;
-  font-size: 12px;
-  flex-shrink: 0;
-}
 
-.planBtnFree {
-  display: block;
-  width: 100%;
-  padding: 12px;
-  border: 1px solid var(--border2);
-  background: transparent;
-  color: var(--muted);
-  font-size: 14px;
-  font-weight: 600;
-  border-radius: 8px;
-  text-align: center;
-  text-decoration: none;
-  transition: all 0.15s;
-}
-.planBtnFree:hover { color: var(--text); border-color: var(--border3); }
 
-.planBtnPro {
-  display: block;
-  width: 100%;
-  padding: 13px;
-  background: var(--blue);
-  color: #fff;
-  font-size: 14px;
-  font-weight: 700;
-  border-radius: 8px;
-  text-align: center;
-  text-decoration: none;
-  transition: all 0.2s;
-  border: none;
-}
-.planBtnPro:hover { background: var(--blue2); box-shadow: 0 8px 24px rgba(46,98,255,0.4); }
 
 /* ── CTA BANNER ── */
 .ctaBanner {
@@ -1046,7 +932,6 @@
   .compareGrid { grid-template-columns: 1fr; }
 
   .pricing { padding: 72px 20px; }
-  .pricingGrid { grid-template-columns: 1fr; max-width: 420px; margin-left: auto; margin-right: auto; }
 
   .ctaBanner { padding: 80px 20px; }
 
@@ -1123,100 +1008,18 @@
 }
 
 /* Mockup card on the right */
-.agencyMockup {
-  background: var(--bg);
-  border: 1px solid var(--border2);
-  border-radius: 16px;
-  overflow: hidden;
-  box-shadow:
-    0 1px 0 rgba(255,255,255,0.04) inset,
-    0 0 0 1px var(--border),
-    0 8px 24px rgba(0,0,0,0.18),
-    0 30px 60px rgba(0,0,0,0.32),
-    0 60px 120px rgba(37, 99, 235, 0.12);
-  transition: transform 0.4s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.4s ease;
-}
 
-.agencyMockup:hover {
-  transform: translateY(-3px);
-  box-shadow:
-    0 1px 0 rgba(255,255,255,0.05) inset,
-    0 0 0 1px var(--border2),
-    0 12px 32px rgba(0,0,0,0.22),
-    0 40px 80px rgba(0,0,0,0.36),
-    0 80px 140px rgba(37, 99, 235, 0.18);
-}
 
-.agencyMockupHead {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-  padding: 14px 18px;
-  border-bottom: 1px solid var(--border);
-  background: var(--nav-bg);
-}
 
-.agencyMockupDots {
-  display: flex;
-  gap: 6px;
-}
 
-.agencyMockupDots span {
-  width: 10px;
-  height: 10px;
-  border-radius: 50%;
-  background: var(--border2);
-}
 
-.agencyMockupTitle {
-  font-size: 13px;
-  color: var(--muted);
-  font-weight: 500;
-  font-family: var(--mono);
-}
 
-.agencyMockupBody {
-  padding: 18px;
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  background: var(--bg);
-}
 
-.agencyBlock {
-  border: 1px solid var(--border);
-  border-radius: 10px;
-  background: var(--surface);
-  padding: 14px 16px;
-  position: relative;
-}
 
-.agencyBlockBlue   { border-left: 3px solid var(--blue2); }
-.agencyBlockGreen  { border-left: 3px solid var(--green); }
-.agencyBlockPaper  { border-left: 3px solid rgba(148,163,184,0.4); }
 
-.agencyBlockLabel {
-  font-size: 10.5px;
-  font-weight: 700;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  color: var(--muted);
-  margin-bottom: 8px;
-}
 
-.agencyBlockBlue  .agencyBlockLabel { color: var(--blue3); }
-.agencyBlockGreen .agencyBlockLabel { color: var(--green); }
 
-.agencyBlockContent {
-  font-size: 13.5px;
-  line-height: 1.65;
-  color: var(--text);
-}
 
-.agencyBlockContent strong {
-  color: var(--blue3);
-  font-weight: 600;
-}
 
 .agencyCta {
   margin-top: 56px;
@@ -1235,7 +1038,5 @@
 @media (max-width: 880px) {
   .agencySection { padding: 72px 20px; }
   .agencyGrid { grid-template-columns: 1fr; gap: 40px; margin-top: 48px; }
-  .agencyMockupBody { padding: 14px; }
-  .agencyBlockContent { font-size: 13px; }
   .agencyCta { margin-top: 40px; flex-direction: column; gap: 12px; }
 }

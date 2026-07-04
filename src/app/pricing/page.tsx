@@ -3,7 +3,7 @@ import Link from 'next/link'
 import MobileNav from '@/components/MobileNav'
 import { buildBreadcrumb } from '@/lib/breadcrumb'
 import s from '@/styles/marketing.module.css'
-import PricingClient from './PricingClient'
+import PricingCards from '@/components/PricingCards'
 
 export const metadata: Metadata = {
   title: 'Pricing — MeetingFlash',
@@ -123,7 +123,7 @@ export default function PricingPage() {
         </div>
       </section>
 
-      <PricingClient />
+      <PricingCards />
 
       <section className={s.section}>
         <div className={s.container}>

@@ -3,6 +3,7 @@ import Link from 'next/link'
 import MobileNav from '@/components/MobileNav'
 import { buildBreadcrumb } from '@/lib/breadcrumb'
 import { Check, Target, ClipboardList, RefreshCw, BarChart3, Send, Brain, Globe, Paperclip, ArrowRight, ArrowDown } from 'lucide-react'
+import DiscoveryMockup from '@/components/DiscoveryMockup'
 import s from '@/styles/marketing.module.css'
 
 export const metadata: Metadata = {
@@ -87,7 +88,7 @@ export default function ForAgenciesPage() {
             For agencies
           </div>
           <h1 className={s.h1}>
-            Send client-ready meeting recaps <span className={s.h1Accent}>before they finish their coffee.</span>
+            The meeting recap tool built for <span className={s.h1Accent}>agency client work.</span>
           </h1>
           <p className={s.heroSub}>
             Discovery calls, weekly status updates, sprint retros, quarterly reviews — turned into a polished recap email and Slack message in 20 seconds. Built for agencies who run too many client meetings to write recaps by hand.
@@ -187,36 +188,7 @@ export default function ForAgenciesPage() {
               </div>
             </div>
 
-            <div className={s.mockup}>
-              <div className={s.mockupHead}>
-                <div className={s.mockupDots}><span /><span /><span /></div>
-                <div className={s.mockupTitle}>Discovery call · Acme Corp</div>
-              </div>
-              <div className={s.mockupBody}>
-                <div className={`${s.mockBlock} ${s.mockBlockBlue}`}>
-                  <div className={s.mockBlockLabel}>Decisions</div>
-                  <div className={s.mockBlockContent}>
-                    • Scope locked: e-commerce rebuild, 12-week timeline<br />
-                    • Budget approved at $48k, paid in 3 milestones<br />
-                    • Kickoff scheduled for May 6th
-                  </div>
-                </div>
-                <div className={`${s.mockBlock} ${s.mockBlockGreen}`}>
-                  <div className={s.mockBlockLabel}>Action items</div>
-                  <div className={s.mockBlockContent}>
-                    ✓ <strong>You</strong> → Send SOW + first invoice (Mon)<br />
-                    ✓ <strong>Sarah (Acme)</strong> → Share brand assets &amp; access (Tue)<br />
-                    ✓ <strong>You</strong> → Set up Slack channel + project doc (Wed)
-                  </div>
-                </div>
-                <div className={`${s.mockBlock} ${s.mockBlockPaper}`}>
-                  <div className={s.mockBlockLabel}>Follow-up email</div>
-                  <div className={s.mockBlockContent}>
-                    Hi Sarah, great speaking today. Confirming we&apos;re aligned on the 12-week scope and $48k budget across 3 milestones. Kickoff May 6th. I&apos;ll send the SOW &amp; first invoice Monday — you&apos;ll share brand assets Tuesday…
-                  </div>
-                </div>
-              </div>
-            </div>
+            <DiscoveryMockup />
           </div>
         </div>
       </section>
