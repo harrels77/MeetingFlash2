@@ -250,7 +250,7 @@ export default function DiscoveryCallRecapToolPage() {
       </section>
 
       <section className={s.ctaBanner}>
-        <h2 className={s.ctaBannerTitle}>Send the recap<br />before they finish their coffee.</h2>
+        <h2 className={s.ctaBannerTitle}>Send the recap before they finish their coffee.</h2>
         <p className={s.ctaBannerSub}>Free for your first one. No signup required.</p>
         <Link href="/app" className={s.btnPrimary}>Try it free <ArrowRight size={18} strokeWidth={1.75} aria-hidden="true" /></Link>
       </section>

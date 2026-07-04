@@ -7,7 +7,7 @@ import FooterAccount from '@/components/FooterAccount'
 import ProductShowcase from '@/components/ProductShowcase'
 import PricingCards from '@/components/PricingCards'
 import DiscoveryMockup from '@/components/DiscoveryMockup'
-import { Layers, Brain, Lock, Globe, ClipboardList, Search, Target, RefreshCw, Timer, Send, Zap, Check, Pin, AlertTriangle, ArrowRight, ArrowDown } from 'lucide-react'
+import { Layers, Brain, Lock, Globe, ClipboardList, Search, Target, RefreshCw, Timer, Send, Zap, Check, Pin, AlertTriangle, ArrowRight, ArrowDown, Plus } from 'lucide-react'
 import s from './page.module.css'
 
 const LOGOS = ['Notion', 'Slack', 'Linear', 'Figma', 'Loom', 'Asana', 'Jira', 'Zoom', 'Google Meet', 'Teams']
@@ -156,8 +156,7 @@ export default function Home() {
         </div>
 
         <h1 className={s.h1}>
-          Send a client-ready meeting recap<br />
-          <span className={s.h1Accent}>before they finish their coffee.</span>
+          Send a client-ready meeting recap <span className={s.h1Accent}>before they finish their coffee.</span>
         </h1>
 
         <p className={s.heroSub}>
@@ -210,7 +209,7 @@ export default function Home() {
       <section className={s.features} id="features">
         <div className={`${s.sectionPill} ${s.reveal}`}>Features</div>
         <h2 className={`${s.sectionTitle} ${s.reveal}`}>
-          Everything after the meeting,<br />handled automatically.
+          Everything after the meeting, handled automatically.
         </h2>
 
         <div className={`${s.bento} ${s.reveal}`}>
@@ -308,7 +307,7 @@ export default function Home() {
 <section className={s.agencySection} id="agencies">
   <div className={`${s.sectionPill} ${s.reveal}`}>For agencies</div>
   <h2 className={`${s.sectionTitle} ${s.reveal}`}>
-    Built for the way<br />agencies actually work.
+    Built for the way agencies actually work.
   </h2>
   <p className={`${s.agencyLede} ${s.reveal}`}>
     Discovery calls, client status updates, sprint retros — turned into a client-ready recap before you leave the meeting room.
@@ -358,9 +357,9 @@ export default function Home() {
 <section className={s.sectionBlock}>
   <div className={`${s.sectionPill} ${s.reveal}`}>What changes</div>
   <h2 className={`${s.sectionTitle} ${s.reveal}`}>
-    What changes when you stop<br />writing recaps yourself.
+    What changes when you stop writing recaps yourself.
   </h2>
-  <div className={`${s.bento} ${s.reveal}`} style={{ maxWidth: 1100, margin: '40px auto 0' }}>
+  <div className={`${s.bento} ${s.bentoNarrow} ${s.reveal}`}>
     <div className={`${s.bentoCard} ${s.bentoCardBlue}`}>
       <div className={s.bentoIcon}><Timer size={24} strokeWidth={1.75} aria-hidden="true" /></div>
       <h3 className={s.bentoTitle}>20 minutes back per meeting</h3>
@@ -383,15 +382,15 @@ export default function Home() {
       </p>
     </div>
   </div>
-  <div className={`${s.reveal}`} style={{ textAlign: 'center', maxWidth: 620, margin: '40px auto 0', padding: '24px 28px', background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 14 }}>
-    <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.12em', color: 'var(--muted)', textTransform: 'uppercase', marginBottom: 10 }}>From the maker</div>
-    <p style={{ color: 'var(--text)', fontSize: 15, lineHeight: 1.65, marginBottom: 12 }}>
+  <div className={`${s.makerNote} ${s.reveal}`}>
+    <div className={s.makerLabel}>From the maker</div>
+    <p className={s.makerText}>
       I built MeetingFlash because I was tired of writing the same recap email three times a week.
       I&apos;m Simon — solo founder, no VC, no growth-hacking nonsense. If something breaks or you have an idea,
-      reply to <a href="mailto:hello@meetingflash.work" style={{ color: 'var(--blue3)', textDecoration: 'none', fontWeight: 600 }}>hello@meetingflash.work</a>{' '}
+      reply to <a href="mailto:hello@meetingflash.work">hello@meetingflash.work</a>{' '}
       and you&apos;ll get me directly.
     </p>
-    <div style={{ fontSize: 13, color: 'var(--muted)' }}>
+    <div className={s.makerFoot}>
       No fake quotes here — try it on your next meeting and tell me what you think.
     </div>
   </div>
@@ -412,39 +411,14 @@ export default function Home() {
       <section className={s.sectionBlock} id="faq" style={{ paddingBottom: 40 }}>
         <div className={`${s.sectionPill} ${s.reveal}`}>FAQ</div>
         <h2 className={`${s.sectionTitle} ${s.reveal}`}>Questions people ask before trying it.</h2>
-        <div className={`${s.reveal}`} style={{ maxWidth: 760, margin: '40px auto 0', display: 'flex', flexDirection: 'column', gap: 12 }}>
+        <div className={`${s.faqList} ${s.reveal}`}>
           {FAQ_ITEMS.map((item, i) => (
-            <details
-              key={i}
-              style={{
-                background: 'var(--surface)',
-                border: '1px solid var(--border)',
-                borderRadius: 12,
-                padding: '18px 22px',
-                cursor: 'pointer',
-              }}
-            >
-              <summary style={{
-                listStyle: 'none',
-                fontSize: 15,
-                fontWeight: 600,
-                color: 'var(--text)',
-                display: 'flex',
-                justifyContent: 'space-between',
-                alignItems: 'center',
-                gap: 16,
-              }}>
+            <details key={i} className={s.faqItem}>
+              <summary className={s.faqQ}>
                 <span>{item.q}</span>
-                <span style={{ color: 'var(--muted)', fontSize: 18, flexShrink: 0 }}>+</span>
+                <span className={s.faqIcon}><Plus size={18} strokeWidth={1.75} aria-hidden="true" /></span>
               </summary>
-              <p style={{
-                color: 'var(--muted)',
-                fontSize: 14,
-                lineHeight: 1.7,
-                marginTop: 14,
-                paddingTop: 14,
-                borderTop: '1px solid var(--border)',
-              }}>{item.a}</p>
+              <p className={s.faqA}>{item.a}</p>
             </details>
           ))}
         </div>

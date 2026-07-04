@@ -153,7 +153,7 @@ export default function ForAgenciesPage() {
         <div className={s.container}>
           <div className={s.sectionHead}>
             <div className={s.sectionPill}>Why agencies switch</div>
-            <h2 className={s.sectionTitle}>Most AI meeting tools were built for sales teams.<br />MeetingFlash was built for agencies.</h2>
+            <h2 className={s.sectionTitle}>Most AI meeting tools were built for sales teams, not agencies.</h2>
           </div>
 
           <div className={s.split}>

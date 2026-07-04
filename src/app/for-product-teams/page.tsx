@@ -235,7 +235,7 @@ export default function ForProductTeamsPage() {
       </section>
 
       <section className={s.ctaBanner}>
-        <h2 className={s.ctaBannerTitle}>Your next retro ends<br />with three commitments shipped.</h2>
+        <h2 className={s.ctaBannerTitle}>Your next retro can end with three real commitments.</h2>
         <p className={s.ctaBannerSub}>
           Try it on your last sprint — no signup required for the first one.
         </p>

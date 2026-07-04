@@ -103,7 +103,7 @@ export default function ForFreelancersPage() {
         <div className={s.container}>
           <div className={s.sectionHead}>
             <div className={s.sectionPill}>The math</div>
-            <h2 className={s.sectionTitle}>If you bill $100+/hour,<br />MeetingFlash pays for itself in one call.</h2>
+            <h2 className={s.sectionTitle}>If you bill $100+/hour, MeetingFlash pays for itself in one call.</h2>
             <p className={s.sectionLede}>
               Most freelancers spend 15-20 minutes after every client call writing the recap email and updating their todo list. At a $100/hr rate, that&apos;s $25-33 of unbilled admin per call.
             </p>
