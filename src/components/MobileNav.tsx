@@ -69,18 +69,21 @@ export default function MobileNav() {
   }, [accountOpen, forOpen])
 
   // While auth is loading OR the profile hasn't arrived yet for a logged-in
-  // user, show a neutral placeholder. Falling back to user.email.split('@')[0]
-  // here would briefly render the email-prefix (e.g. "adrienharrel") before
-  // the real Google/profile name ("Harrel") loads in — a confusing flash on
-  // every cold-start refresh.
+  // user, prefer the name already present in the session metadata (Google
+  // provides it instantly, and email signups store it at registration) —
+  // no DB round-trip needed. Only fall back to the neutral "Account" when
+  // even the metadata has no name. NEVER fall back to the email prefix
+  // while pending: that was the "adrienharrel" flash bug (Phase 10).
   const profilePending = loading || (!!user && !profile)
+  const metaName = (user?.user_metadata as { full_name?: string } | undefined)?.full_name
   const displayName = profilePending
-    ? 'Account'
+    ? (metaName || 'Account')
     : (profile?.full_name
+        || metaName
         || profile?.email?.split('@')[0]
         || user?.email?.split('@')[0]
         || 'Account')
-  const initial = profilePending ? '·' : (displayName[0] || 'A').toUpperCase()
+  const initial = (profilePending && !metaName) ? '·' : (displayName[0] || 'A').toUpperCase()
 
   return (
     <>

@@ -507,7 +507,7 @@ The "Free plan flicker" symptom that triggered Phase 9 turned out to be the surf
 
 **Auth — MobileNav placeholder while profile pending**
 - Symptom: even when the profile load was healthy, the nav briefly rendered "adrienharrel" (the email prefix) before swapping to "Harrel" (the Google name). The displayName fallback chain was `profile?.full_name → profile?.email?.split('@')[0] → user?.email?.split('@')[0]` — that second-to-last step would fire while profile was still in flight.
-- Fix in `MobileNav.tsx:60`: define `profilePending = loading || (!!user && !profile)`; while pending, render "Account" + "·" initial instead of the email-prefix fallback. Plan badge similarly shows "—" instead of the false "free" fallback during pending.
+- Fix in `MobileNav.tsx:60`: define `profilePending = loading || (!!user && !profile)`; while pending, render "Account" + "·" initial instead of the email-prefix fallback. **Amélioré 2026-07-10** : pendant le pending, la nav affiche désormais `user.user_metadata.full_name` (dispo instantanément dans la session, sans requête DB — nom Google ou nom saisi au signup) et ne retombe sur "Account" que si le metadata n'a pas de nom. Toujours JAMAIS le préfixe email pendant le pending. Plan badge similarly shows "—" instead of the false "free" fallback during pending.
 - The 4s `loading` safety timeout in AuthProvider was also bug-fixed (`useEffect` body, ~line 105): it used to fire `setLoading(false)` unconditionally even mid-`loadProfile`. Now only fires if `getSession()` itself hasn't resolved, letting `loadProfile` finish on its own retry budget.
 
 **Auth — single-method enforcement (anti-doublon)**
