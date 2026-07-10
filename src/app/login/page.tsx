@@ -5,6 +5,7 @@ import Link from 'next/link'
 import Image from 'next/image'
 import { supabase } from '@/lib/supabase'
 import ThemeToggle from '@/components/ThemeToggle'
+import { Eye, EyeOff } from 'lucide-react'
 import styles from './auth.module.css'
 
 export default function LoginPage() {
@@ -49,7 +50,7 @@ export default function LoginPage() {
       setError(error.message)
       setLoading(false)
     } else {
-      router.push('/')
+      router.push('/?welcome=1')
     }
   }
 
@@ -95,14 +96,18 @@ export default function LoginPage() {
               value={email}
               onChange={e => setEmail(e.target.value)}
               placeholder="you@agency.com"
+              autoFocus
               required
             />
           </div>
           <div className={styles.field}>
-            <label className={styles.label}>Password</label>
+            <div className={styles.labelRow}>
+              <label className={styles.label}>Password</label>
+              <Link href="/forgot-password" className={styles.forgotLink}>Forgot password?</Link>
+            </div>
             <div className={styles.passwordWrap}>
             <input
-                type="password"
+                type={showPassword ? 'text' : 'password'}
                 className={styles.input}
                 value={password}
                 onChange={e => setPassword(e.target.value)}
@@ -113,8 +118,9 @@ export default function LoginPage() {
                 type="button"
                 className={styles.eyeBtn}
                 onClick={() => setShowPassword(!showPassword)}
+                aria-label={showPassword ? 'Hide password' : 'Show password'}
               >
-                {showPassword ? '🙈' : '👁'}
+                {showPassword ? <EyeOff size={16} strokeWidth={1.75} aria-hidden="true" /> : <Eye size={16} strokeWidth={1.75} aria-hidden="true" />}
               </button>
             </div>
           </div>

@@ -3,6 +3,7 @@ import '../styles/globals.css'
 import { AuthProvider } from '@/lib/AuthProvider'
 import { Analytics } from '@vercel/analytics/next'
 import SwRegister from '@/components/SwRegister'
+import WelcomeToast from '@/components/WelcomeToast'
 
 const SITE_URL = 'https://www.meetingflash.work'
 
@@ -108,6 +109,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <body>
         <AuthProvider>
           {children}
+          <WelcomeToast />
         </AuthProvider>
         <SwRegister />
         <Analytics />

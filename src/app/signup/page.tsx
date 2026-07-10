@@ -4,6 +4,7 @@ import Link from 'next/link'
 import Image from 'next/image'
 import { supabase } from '@/lib/supabase'
 import ThemeToggle from '@/components/ThemeToggle'
+import { Eye, EyeOff } from 'lucide-react'
 import styles from '../login/auth.module.css'
 
 export default function SignupPage() {
@@ -53,7 +54,7 @@ export default function SignupPage() {
   async function handleGoogle() {
     await supabase.auth.signInWithOAuth({
       provider: 'google',
-      options: { redirectTo: `${window.location.origin}/dashboard` }
+      options: { redirectTo: `${window.location.origin}/auth/callback` }
     })
   }
 
@@ -127,7 +128,7 @@ export default function SignupPage() {
                 className={styles.eyeBtn}
                 onClick={() => setShowPassword(!showPassword)}
               >
-                {showPassword ? '🙈' : '👁'}
+                {showPassword ? <EyeOff size={16} strokeWidth={1.75} aria-hidden="true" /> : <Eye size={16} strokeWidth={1.75} aria-hidden="true" />}
               </button>
             </div>
           </div>

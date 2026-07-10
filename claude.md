@@ -157,12 +157,21 @@ src/
 - Handled via Supabase Auth (Google OAuth + email/password)
 - Google OAuth consent screen branded as "MeetingFlash" (verified, in production) — authorized domains include `meetingflash.work`, `supabase.co`, and Vercel preview domains
 - Global session managed by `AuthProvider.tsx` — every page uses `useAuth()`. The earlier exception for `/app` was removed in Phase 9; do not reintroduce a self-managed `getSession()` in any page.
-- After login/signup: redirect to `/` (not `/dashboard`)
+- After login/signup: redirect to `/?welcome=1` (pas `/dashboard`) — le param déclenche le WelcomeToast puis est strippé de l'URL
 - OAuth callback route: `src/app/auth/callback/route.ts` — also enforces single-method auth post-OAuth (see "Single-method auth enforcement" below).
 - `AuthProvider` calls both `getSession()` AND `onAuthStateChange` — both can call `loadProfile` simultaneously (known race condition in prod, do not change without testing). `loadProfile` is idempotent on the result (only `setProfile` when data exists), so two concurrent calls don't fight.
 - `signOut` in AuthProvider: fire-and-forget `supabase.auth.signOut()`, then synchronous wipe of every `sb-*` / `supabase.auth*` key from localStorage, then `window.location.replace('/')`. The synchronous localStorage wipe is **load-bearing** for the transient-SIGNED_OUT distinction (see Mistakes section above). Don't await the Supabase call; don't reorder the wipe.
 - **Always use the canonical `useAuth().signOut`.** `dashboard/page.tsx` and `settings/page.tsx` previously had their own local sign-out that awaited `supabase.auth.signOut()` and could hang when Supabase slept. Both now call `useAuth().signOut` directly. `settings/page.tsx`'s `deleteAccount` also finishes by calling the canonical signOut. Don't reintroduce local awaiting sign-out paths.
 - **Welcome email trigger:** when `loadProfile` creates a new profile (first time, no existing row CONFIRMED via PGRST116 with the JWT attached), it calls `fetch('/api/email/welcome', ...)` fire-and-forget. Currently fails silently (Resend account flagged).
+
+### Password reset + login personnalisation (2026-07-10)
+- **`/forgot-password`** : formulaire email → pré-flight RPC `get_auth_providers_for_email` (compte Google-only → message "use Google", pas d'email envoyé) → `supabase.auth.resetPasswordForEmail(email, { redirectTo: origin + '/reset-password' })` → écran "Check your inbox" (ne révèle pas si le compte existe).
+- **`/reset-password`** : page d'atterrissage du lien email. Attend la session recovery (detectSessionInUrl du client singleton) jusqu'à 5s ; sans session → état "link expired" + lien vers /forgot-password. Soumission : `auth.updateUser({ password })` (min 8 chars + confirmation) → redirect `/?welcome=1`.
+- ⚠️ **Config Supabase requise** : `https://www.meetingflash.work/reset-password` doit être dans Auth → URL Configuration → Redirect URLs (sinon le lien de l'email retombe sur la Site URL). Non gérable via MCP — action manuelle dashboard Supabase.
+- **Salutation post-login** : convention `/?welcome=1`. Le login password (`router.push('/?welcome=1')`) et le callback OAuth (redirect final) la posent ; `<WelcomeToast />` (monté dans le root layout, dans AuthProvider) strippe le param via replaceState, attend le prénom du profil (max 4s puis "Welcome back."), affiche "Good morning, Simon." (serif italique, pilule top-center, auto-dismiss ~5s). Helpers `timeGreeting`/`firstNameOf` dans `src/lib/greeting.ts`.
+- **Salutation dashboard** : bloc `.greetingBlock` en haut de l'onglet Recent — "{timeGreeting()}, {prénom}." + sous-ligne avec le compte d'actions ouvertes.
+- **Fix** : le bouton œil du login ne changeait jamais le `type` de l'input (state présent mais non câblé) — réparé, et les emojis 🙈/👁 des deux pages auth remplacés par Eye/EyeOff Lucide.
+- **Fix sécurité** : le bouton Google du **signup** redirigeait vers `/dashboard` en court-circuitant `/auth/callback` — l'enforcement anti-double-identité ne s'exécutait pas sur ce chemin. Corrigé vers `/auth/callback` (même flux que le login).
 
 ### Single-method auth enforcement (Phase 10)
 Prevents a single email from ending up with both a Google identity and an email/password identity, which produced the "name flicker" bug (see Phase 10 in this file).

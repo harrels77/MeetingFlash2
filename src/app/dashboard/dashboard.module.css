@@ -647,3 +647,22 @@
   .projectGrid { padding: 16px 20px; grid-template-columns: 1fr; }
   .modal { margin: 20px; }
 }
+/* ── GREETING (haut de l'onglet Recent) ── */
+.greetingBlock {
+  margin-bottom: 28px;
+}
+
+.greetingTitle {
+  font-family: var(--serif);
+  font-size: var(--text-2xl);
+  font-weight: 400;
+  color: var(--text);
+  letter-spacing: -0.01em;
+  line-height: 1.2;
+}
+
+.greetingSub {
+  margin-top: 4px;
+  font-size: var(--text-sm);
+  color: var(--muted);
+}

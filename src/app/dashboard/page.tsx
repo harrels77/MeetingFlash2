@@ -7,6 +7,7 @@ import { supabase } from '@/lib/supabase'
 import { useAuth } from '@/lib/AuthProvider'
 import ThemeToggle from '@/components/ThemeToggle'
 import { Settings, AlertTriangle, ClipboardList } from 'lucide-react'
+import { timeGreeting, firstNameOf } from '@/lib/greeting'
 import styles from './dashboard.module.css'
 
 
@@ -427,6 +428,19 @@ export default function Dashboard() {
         )}
 
         {/* OPEN ACTIONS WIDGET — sticky reason to come back */}
+        {tab === 'recent' && (
+          <div className={styles.greetingBlock}>
+            <div className={styles.greetingTitle}>
+              {timeGreeting()}{firstNameOf(profile?.full_name) ? `, ${firstNameOf(profile?.full_name)}` : ''}.
+            </div>
+            <div className={styles.greetingSub}>
+              {openTasks.length > 0
+                ? `You have ${openTasks.length} open action${openTasks.length > 1 ? 's' : ''} from your meetings.`
+                : 'No open actions — everything from your meetings is handled.'}
+            </div>
+          </div>
+        )}
+
         {tab === 'recent' && openTasks.length > 0 && (
           <div style={{
             background: 'linear-gradient(135deg, rgba(245,158,11,0.10), rgba(245,158,11,0.03))',
