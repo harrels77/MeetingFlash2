@@ -20,7 +20,7 @@ const FAQ_ITEMS = [
   },
   {
     q: 'Where do my notes go?',
-    a: 'Transcripts are sent to Anthropic\'s Claude API, processed in-memory, and discarded — never stored on Anthropic\'s side or used for training. The generated Pack (decisions, actions, etc.) is stored in your account on Supabase (EU region) so you can come back to it. You can delete any pack in one click, and your full account from Settings.',
+    a: 'Your notes are sent to Anthropic\'s Claude API to generate the pack — Anthropic processes them in-memory and never stores them or uses them for training. If you\'re signed in, the generated Pack and your original notes are saved in your account (Supabase, EU region) so you can come back to them; guest flashes aren\'t saved at all. You can delete any pack in one click, and your full account from Settings.',
   },
   {
     q: 'Which languages work?',

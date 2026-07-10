@@ -103,7 +103,7 @@ export default function PackDetail() {
       if (!meeting) return
       setSharing(true)
 
-      const token = Math.random().toString(36).slice(2) + Date.now().toString(36)
+      const token = crypto.randomUUID()
 
       await supabase
         .from('meetings')

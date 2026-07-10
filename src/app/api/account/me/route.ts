@@ -76,7 +76,7 @@ export async function GET(req: NextRequest) {
   if (newProf) {
     fetch(`${process.env.NEXT_PUBLIC_APP_URL || ''}/api/email/welcome`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 'Content-Type': 'application/json', 'x-internal-key': process.env.CRON_SECRET || '' },
       body: JSON.stringify({ email: user.email, name: '' }),
     }).catch(() => {})
   }

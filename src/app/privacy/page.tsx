@@ -12,7 +12,7 @@ export default function Privacy() {
 
       <div className={styles.content}>
         <div className={styles.header}>
-          <p className={styles.date}>Last updated: April 2026</p>
+          <p className={styles.date}>Last updated: July 2026</p>
           <h1 className={styles.title}>Privacy Policy</h1>
           <p className={styles.intro}>
             This Privacy Policy explains how MeetingFlash ("we", "our", or "us")
@@ -91,8 +91,17 @@ export default function Privacy() {
 
           <ul>
             <li>We do not use your meeting data to train AI models.</li>
-            <li>Transcripts are processed only to generate results.</li>
-            <li>MeetingFlash does not permanently store raw transcripts.</li>
+            <li>
+              The AI provider (Anthropic) processes your transcript in memory
+              to generate the pack and does not store it or use it for
+              training.
+            </li>
+            <li>
+              If you are signed in, your original notes are saved alongside
+              the generated pack in your account, so you can refer back to
+              them. They are deleted when you delete the pack or your
+              account. Guest flashes are not saved at all.
+            </li>
           </ul>
         </section>
 
@@ -111,6 +120,14 @@ export default function Privacy() {
             <li>
               <strong>Stripe</strong> — payment processing
             </li>
+            <li>
+              <strong>Resend</strong> — transactional emails (welcome, usage
+              notifications, weekly action digest)
+            </li>
+            <li>
+              <strong>Vercel</strong> — hosting and privacy-friendly,
+              cookie-less analytics
+            </li>
           </ul>
 
           <p>
@@ -124,13 +141,15 @@ export default function Privacy() {
 
           <ul>
             <li>
-              Meeting transcripts submitted to generate Execution Packs are not
-              permanently stored.
+              Generated Execution Packs — and the original notes they were
+              generated from — are stored in your account until you delete
+              the pack or your account.
             </li>
 
             <li>
-              Generated Execution Packs may be stored in your account until you
-              delete them.
+              Deleting your account removes your packs, notes, tasks,
+              projects, profile and sign-in identity, and cancels any active
+              subscription.
             </li>
 
             <li>

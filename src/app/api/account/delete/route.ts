@@ -43,6 +43,26 @@ export async function POST(req: NextRequest) {
     process.env.SUPABASE_SERVICE_ROLE_KEY!
   )
 
+  // Step 2a — cancel any active Stripe subscriptions FIRST: a deleted
+  // account must stop being billed (was a documented TODO — legal issue).
+  // Failures are logged but don't block the deletion; the user asked to
+  // leave, honoring that takes priority.
+  try {
+    if (user.email && process.env.STRIPE_SECRET_KEY) {
+      const Stripe = (await import('stripe')).default
+      const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, { apiVersion: '2026-03-25.dahlia' })
+      const customers = await stripe.customers.list({ email: user.email, limit: 3 })
+      for (const customer of customers.data) {
+        const subs = await stripe.subscriptions.list({ customer: customer.id, status: 'active', limit: 10 })
+        for (const sub of subs.data) {
+          await stripe.subscriptions.cancel(sub.id)
+        }
+      }
+    }
+  } catch (stripeErr) {
+    console.error('Stripe cancellation during account delete failed:', stripeErr)
+  }
+
   // Order matters when there are FK constraints: child rows first.
   const tasksDel = await adminClient.from('tasks').delete().eq('user_id', user.id)
   const meetingsDel = await adminClient.from('meetings').delete().eq('user_id', user.id)

@@ -615,6 +615,18 @@ After real meeting-pack reviews from ChatGPT + Claude Sonnet, three prompt tight
 ### Flash timeouts
 - Master 30s client-side timeout wraps the ENTIRE flow including `supabase.auth.getSession()`. Without wrapping getSession, a sleeping Supabase could hang the loader before the fetch even started — a user reported a 40-minute hang from this. 25s server-side timeout on the Anthropic call (returns clean 504). Error copy: "Flash took longer than 30s — try once more".
 
+## Security posture (audit + durcissement 2026-07-10)
+Passe complète livrée en un commit. Ne pas défaire sans comprendre :
+- **RPC verrouillées** (migration `2026_07_11_lock_down_rpc_functions.sql`, APPLIQUÉE via MCP) : `reset_monthly_uses`/`increment_uses`/`handle_new_user`/`increment` ne sont plus exécutables par anon/authenticated — n'importe qui avec la clé anon pouvait reset tous les compteurs ou cramer le quota d'un utilisateur. Conséquence code : `/api/flash` appelle désormais `increment_uses` avec un client **service role**. `get_auth_providers_for_email` reste anon-exécutable (nécessaire au pré-flight login/signup) — c'est un oracle d'énumération d'emails assumé.
+- **Routes email internes** : `/api/email/welcome` + `/api/email/nudge` exigent le header `x-internal-key: CRON_SECRET` (étaient un relais ouvert depuis hello@meetingflash.work). Les appelants (`/api/account/me`, `/api/flash`) l'envoient. Tout nouveau caller doit le faire.
+- **Partage public réparé + sécurisé** : il n'y a AUCUNE policy RLS anon sur `meetings` (et il ne doit pas y en avoir — une policy `share_token IS NOT NULL` permettrait de lister tous les packs partagés). `/share/[token]` lit via **service role côté serveur**, token exact uniquement. Les tokens sont générés par `crypto.randomUUID()` (plus de Math.random).
+- **/api/checkout** : `priceId` validé contre l'allowlist des 4 price IDs env ; identité dérivée du JWT quand le header Authorization est présent (PricingCards et le modal /app l'envoient). Le webhook gère le fallback invité : `checkout.session.completed` sans metadata.userId → lookup profile par email Stripe.
+- **/api/account/delete** résilie les abonnements Stripe actifs AVANT la suppression (l'ancien TODO "compte supprimé mais toujours facturé" est soldé). Échec Stripe loggé mais non bloquant.
+- **/api/flash** : entrée plafonnée à 60 000 caractères (413 au-delà) — protection coût Anthropic.
+- **Headers de sécurité** dans next.config.js : X-Frame-Options SAMEORIGIN, nosniff, Referrer-Policy strict-origin-when-cross-origin, Permissions-Policy. Ne pas supprimer.
+- **Privacy/FAQ véridiques** : la policy ne prétend plus que les transcripts ne sont pas stockés (raw_notes EST stocké avec le pack, supprimé avec lui) ; Resend + Vercel ajoutés aux sous-traitants ; suppression de compte documentée comme résiliant l'abonnement. Toute nouvelle feature de données doit garder ces pages alignées.
+- **Reste à faire côté dashboard Supabase (action manuelle)** : activer "Leaked password protection" (Auth → Providers → Password). Les 2 advisories npm restantes = Next.js 14 (fix = Next 16, migration écartée volontairement).
+
 ## Roadmap / TODO (priorities)
 
 This section is the **source of truth for what's left to do**. Update as items ship or get deprioritized. Newest decisions go above older ones within a priority bucket.

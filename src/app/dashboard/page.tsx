@@ -221,7 +221,7 @@ export default function Dashboard() {
   }
 
   async function shareMeeting(id: string) {
-    const token = Math.random().toString(36).slice(2) + Date.now().toString(36)
+    const token = crypto.randomUUID()
     await supabase.from('meetings').update({ share_token: token }).eq('id', id)
     await navigator.clipboard.writeText(`${window.location.origin}/share/${token}`)
     setMenuOpen(null)

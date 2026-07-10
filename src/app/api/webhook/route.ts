@@ -42,6 +42,27 @@ export async function POST(req: NextRequest) {
       if (customerId) {
         await stripe.customers.update(customerId, { metadata: { userId } })
       }
+    } else {
+      // Guest checkout (no userId in metadata): fall back to the email Stripe
+      // collected. Without this, a signed-out purchase never upgraded anyone.
+      const email = session.customer_details?.email
+      if (email) {
+        const priceId = session.metadata?.priceId
+        const teamPriceIds = [
+          process.env.NEXT_PUBLIC_STRIPE_TEAM_PRICE_ID,
+          process.env.NEXT_PUBLIC_STRIPE_TEAM_ANNUAL_PRICE_ID,
+        ]
+        const plan = teamPriceIds.includes(priceId) ? 'team' : 'pro'
+        const { data: prof } = await supabase.from('profiles').select('id').eq('email', email).single()
+        if (prof) {
+          await supabase.from('profiles').update({ plan }).eq('id', prof.id)
+          if (customerId) {
+            await stripe.customers.update(customerId, { metadata: { userId: prof.id } })
+          }
+        } else {
+          console.error('checkout.completed: no profile for guest email, plan not applied:', email)
+        }
+      }
     }
   }
 

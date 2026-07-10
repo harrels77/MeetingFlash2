@@ -2,9 +2,11 @@
 import { useState } from 'react'
 import Link from 'next/link'
 import { ArrowRight } from 'lucide-react'
+import { useAuth } from '@/lib/AuthProvider'
 import s from '@/app/pricing/pricing.module.css'
 
 export default function PricingCards() {
+  const { accessToken } = useAuth()
   const [annual, setAnnual] = useState(false)
   const [loading, setLoading] = useState(false)
 
@@ -19,8 +21,11 @@ export default function PricingCards() {
     try {
       const res = await fetch('/api/checkout', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ priceId: proPriceId, email: '' }),
+        headers: {
+          'Content-Type': 'application/json',
+          ...(accessToken ? { Authorization: `Bearer ${accessToken}` } : {}),
+        },
+        body: JSON.stringify({ priceId: proPriceId }),
       })
       const { url } = await res.json()
       if (url) window.location.href = url

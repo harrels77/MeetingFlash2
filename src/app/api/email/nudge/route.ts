@@ -2,6 +2,13 @@ import { NextRequest, NextResponse } from 'next/server'
 import { Resend } from 'resend'
 
 export async function POST(req: NextRequest) {
+  // Internal-only route: called server-side by /api/account/me and /api/flash.
+  // Without this check it was an open relay — anyone could send branded
+  // emails from hello@meetingflash.work to arbitrary addresses.
+  if (req.headers.get('x-internal-key') !== process.env.CRON_SECRET) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  }
+
   const { email, name } = await req.json()
   if (!email) return NextResponse.json({ error: 'Missing email' }, { status: 400 })
 

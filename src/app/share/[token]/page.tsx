@@ -30,9 +30,13 @@ const BLOCKS = [
 ]
 
 async function getMeeting(token: string) {
+  // Server component only — the service role key never reaches the client.
+  // RLS stays strict (no anon policy on meetings, which would let anyone
+  // list every shared pack); access requires knowing the exact token.
+  if (!token || token.length < 10) return null
   const supabase = createClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+    process.env.SUPABASE_SERVICE_ROLE_KEY!
   )
   const { data } = await supabase
     .from('meetings')

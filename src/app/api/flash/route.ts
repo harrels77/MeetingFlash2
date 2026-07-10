@@ -26,6 +26,12 @@ export async function POST(req: NextRequest) {
   try {
     const { text, lang, style, projectId } = await req.json()
 
+    if (text && text.length > 60_000) {
+      return NextResponse.json(
+        { error: 'Notes are too long (max ~60,000 characters). Paste the relevant part of the transcript.' },
+        { status: 413 }
+      )
+    }
     if (!text || text.trim().length < 40) {
       return NextResponse.json({ error: 'Transcript too short' }, { status: 400 })
     }
@@ -299,8 +305,14 @@ ${text}`
             await supabase.from('tasks').insert(tasksToInsert)
           }
 
-          // Increment usage count
-          await supabase.rpc('increment_uses', { user_id: user.id })
+          // Increment usage count — via service role: the RPC's public
+          // EXECUTE grants were revoked (security audit 2026-07) so the
+          // user-scoped client can no longer call it.
+          const adminClient = createClient(
+            process.env.NEXT_PUBLIC_SUPABASE_URL!,
+            process.env.SUPABASE_SERVICE_ROLE_KEY!
+          )
+          await adminClient.rpc('increment_uses', { user_id: user.id })
 
           // Send nudge email when free user hits their limit
           const { data: prof } = await supabase
@@ -311,7 +323,7 @@ ${text}`
           if (prof?.plan === 'free' && prof.uses_this_month >= 5) {
             fetch(`${process.env.NEXT_PUBLIC_APP_URL}/api/email/nudge`, {
               method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
+              headers: { 'Content-Type': 'application/json', 'x-internal-key': process.env.CRON_SECRET || '' },
               body: JSON.stringify({ email: prof.email, name: prof.full_name }),
             }).catch(() => {})
           }

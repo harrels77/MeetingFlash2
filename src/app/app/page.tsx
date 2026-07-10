@@ -191,7 +191,7 @@ const LOADER_MSGS = [
 ]
 
 export default function AppPage() {
-  const { user, profile, loading: authLoading } = useAuth()
+  const { user, profile, loading: authLoading, accessToken } = useAuth()
   const [text, setText]     = useState('')
   const [lang, setLang]     = useState('EN')
   const [style, setStyle]   = useState('Concise')
@@ -1075,8 +1075,11 @@ async function createProject() {
                 onClick={async () => {
                   const res = await fetch('/api/checkout', {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ priceId: process.env.NEXT_PUBLIC_STRIPE_PRO_PRICE_ID, email: '' }),
+                    headers: {
+                      'Content-Type': 'application/json',
+                      ...(accessToken ? { Authorization: `Bearer ${accessToken}` } : {}),
+                    },
+                    body: JSON.stringify({ priceId: process.env.NEXT_PUBLIC_STRIPE_PRO_PRICE_ID }),
                   })
                   const { url } = await res.json()
                   if (url) window.location.href = url
