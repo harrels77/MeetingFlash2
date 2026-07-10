@@ -5,16 +5,6 @@
 
 import { packFieldToString } from '@/lib/supabase'
 
-export const BLOCK_ICONS: Record<string, string> = {
-  decisions: '📋',
-  actions:   '🎯',
-  questions: '💭',
-  risks:     '🚨',
-  email:     '✉️',
-  slack:     '💬',
-  agenda:    '📅',
-}
-
 export interface PackMetrics {
   decisions: number
   actions: number

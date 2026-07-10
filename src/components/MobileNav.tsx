@@ -86,12 +86,13 @@ export default function MobileNav() {
     <>
       <nav className={styles.nav}>
         <Link href="/" className={styles.logo}>
-          <Image src="/logo.png" alt="MeetingFlash" width={28} height={28} style={{ borderRadius: 6 }} priority />
+          <Image src="/logo.png" alt="MeetingFlash" width={36} height={36} style={{ borderRadius: 8 }} priority />
           MeetingFlash
         </Link>
 
         {/* DESKTOP LINKS — cachés sur mobile via CSS */}
         <div className={styles.desktopLinks}>
+          <Link href="/" className={styles.navLink}>Home</Link>
           <div className={styles.forWrap}>
             <button
               type="button"
@@ -189,6 +190,9 @@ export default function MobileNav() {
       {/* MOBILE MENU — rendu uniquement sur mobile via CSS */}
       {open && (
         <div className={styles.mobileMenu}>
+          <Link href="/" className={styles.mobileLink} onClick={() => setOpen(false)}>
+            Home
+          </Link>
           <Link href="/#features" className={styles.mobileLink} onClick={() => setOpen(false)}>
             Features
           </Link>

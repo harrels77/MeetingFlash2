@@ -4,6 +4,7 @@ import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { supabase } from '@/lib/supabase'
 import ThemeToggle from '@/components/ThemeToggle'
+import { Search as SearchIcon, X } from 'lucide-react'
 import styles from './search.module.css'
 
 interface MeetingRaw {
@@ -119,7 +120,7 @@ export default function Search() {
         <ThemeToggle />
       </nav>
       <div className={styles.content} style={{ textAlign: 'center', paddingTop: 80 }}>
-        <div style={{ fontSize: 48, marginBottom: 16 }}>🔍</div>
+        <div style={{ marginBottom: 16, color: 'var(--accent-text)' }}><SearchIcon size={40} strokeWidth={1.75} aria-hidden="true" /></div>
         <h1 style={{ fontSize: 28, fontWeight: 700, color: 'var(--text)', marginBottom: 12 }}>Smart Search is a Pro feature</h1>
         <p style={{ color: 'var(--muted)', fontSize: 15, maxWidth: 480, margin: '0 auto 28px' }}>
           Search across every decision, action, and follow-up you&apos;ve ever flashed. Available on the Pro plan.
@@ -149,7 +150,7 @@ export default function Search() {
             autoFocus
           />
           {query && (
-            <button className={styles.clearBtn} onClick={() => search('')}>✕</button>
+            <button className={styles.clearBtn} onClick={() => search('')} aria-label="Clear search"><X size={14} strokeWidth={1.75} aria-hidden="true" /></button>
           )}
         </div>
 

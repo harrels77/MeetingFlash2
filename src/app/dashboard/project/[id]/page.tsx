@@ -4,6 +4,7 @@ import { useRouter, useParams } from 'next/navigation'
 import Link from 'next/link'
 import { supabase } from '@/lib/supabase'
 import ThemeToggle from '@/components/ThemeToggle'
+import { Brain } from 'lucide-react'
 import styles from './project.module.css'
 
 interface Project {
@@ -195,7 +196,7 @@ export default function ProjectDetail() {
             }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 13, fontWeight: 600, color: 'var(--text)' }}>
-                  <span style={{ fontSize: 16 }}>🧠</span>
+                  <span style={{ color: 'var(--accent-text)', display: 'flex' }}><Brain size={16} strokeWidth={1.75} aria-hidden="true" /></span>
                   Project notes
                   <span style={{ fontSize: 11, color: 'var(--blue3)', fontWeight: 500, fontStyle: 'italic' }}>
                     · injected into every new flash on this project

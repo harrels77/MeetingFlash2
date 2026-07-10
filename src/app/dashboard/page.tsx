@@ -6,6 +6,7 @@ import Image from 'next/image'
 import { supabase } from '@/lib/supabase'
 import { useAuth } from '@/lib/AuthProvider'
 import ThemeToggle from '@/components/ThemeToggle'
+import { Settings, AlertTriangle, ClipboardList } from 'lucide-react'
 import styles from './dashboard.module.css'
 
 
@@ -317,7 +318,7 @@ export default function Dashboard() {
           )}
           <div className={styles.userRow}>
             <div className={styles.userEmail}>{profile?.email ?? user?.email}</div>
-            <Link href="/dashboard/settings" className={styles.settingsLink}>⚙</Link>
+            <Link href="/dashboard/settings" className={styles.settingsLink} aria-label="Settings"><Settings size={16} strokeWidth={1.75} aria-hidden="true" /></Link>
           </div>
         </div>
       </aside>
@@ -341,7 +342,7 @@ export default function Dashboard() {
             fontSize: 13,
             color: 'var(--text)',
           }}>
-            <span style={{ fontSize: 18 }}>⚠️</span>
+            <span style={{ color: 'var(--warning-text)', display: 'flex' }}><AlertTriangle size={18} strokeWidth={1.75} aria-hidden="true" /></span>
             <div style={{ flex: 1 }}>
               <strong>Couldn&apos;t load your data.</strong> Your packs are still saved — this is a temporary connection issue.
             </div>
@@ -389,7 +390,7 @@ export default function Dashboard() {
                 className={`${styles.selectModeBtn} ${selectMode ? styles.selectModeBtnActive : ''}`}
                 onClick={() => { setSelectMode(!selectMode); setSelected([]) }}
               >
-                {selectMode ? '✕ Cancel' : 'Select'}
+                {selectMode ? 'Cancel' : 'Select'}
               </button>
             )}
             {tab === 'projects' && (
@@ -436,7 +437,7 @@ export default function Dashboard() {
           }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 14 }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                <span style={{ fontSize: 18 }}>📋</span>
+                <span style={{ color: 'var(--accent-text)', display: 'flex' }}><ClipboardList size={18} strokeWidth={1.75} aria-hidden="true" /></span>
                 <span style={{ fontWeight: 700, fontSize: 15, color: 'var(--text)' }}>
                   {openTasks.length} open action{openTasks.length > 1 ? 's' : ''} across your meetings
                 </span>

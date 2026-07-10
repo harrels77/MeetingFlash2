@@ -35,7 +35,7 @@
   margin-bottom: 8px;
 }
 
-.tierIcon { font-size: 13px; line-height: 1; }
+.tierIcon { display: inline-flex; line-height: 1; }
 
 .tierLabel {
   font-size: 11px;

@@ -11,7 +11,9 @@ import RisksView from '@/components/RisksView'
 import EmailPreview from '@/components/EmailPreview'
 import SlackPreview from '@/components/SlackPreview'
 import OutcomePill from '@/components/OutcomePill'
-import { BLOCK_ICONS, gmailComposeUrl } from '@/lib/packMeta'
+import { gmailComposeUrl } from '@/lib/packMeta'
+import BlockIcon from '@/components/BlockIcon'
+import { Zap, FolderOpen, FileText, ClipboardList, Lock, X, ArrowUpRight } from 'lucide-react'
 import ThemeToggle from '@/components/ThemeToggle'
 import { useEffect } from 'react'
 
@@ -579,7 +581,7 @@ async function createProject() {
           maxWidth: 320,
           animation: 'mfToastIn 0.4s ease',
         }}>
-          <div style={{ fontSize: 22 }}>⚡</div>
+          <div style={{ color: 'var(--spark)', display: 'flex' }}><Zap size={20} strokeWidth={1.75} aria-hidden="true" /></div>
           <div>
             <div style={{ fontWeight: 700, fontSize: 14, lineHeight: 1.3 }}>
               ~{timeSavedToast} minutes back
@@ -657,7 +659,7 @@ async function createProject() {
                 Upload transcript
               </button>
               <button className={styles.sampleBtn} onClick={() => setText(SAMPLE)}>
-                Load sample ↗
+                Load sample <ArrowUpRight size={12} strokeWidth={1.75} aria-hidden="true" />
               </button>
               {text.length > 0 && (
                 <button
@@ -670,7 +672,7 @@ async function createProject() {
                   title="Clear meeting notes"
                   type="button"
                 >
-                  Clear ✕
+                  Clear <X size={12} strokeWidth={1.75} aria-hidden="true" />
                 </button>
               )}
             </div>
@@ -690,7 +692,7 @@ async function createProject() {
                       <div className={styles.projectBannerHead}>
                         <div className={styles.projectBannerLeft}>
                           <div className={styles.projectBannerTitle}>
-                            <span className={styles.projectBannerIcon} aria-hidden="true">📁</span>
+                            <span className={styles.projectBannerIcon} aria-hidden="true"><FolderOpen size={16} strokeWidth={1.75} aria-hidden="true" /></span>
                             {activeProject?.name || 'Project'}
                           </div>
                           <div className={styles.projectBannerMeta}>
@@ -730,7 +732,7 @@ async function createProject() {
                             {projectMeta.recent.map(m => (
                               <li key={m.id} className={styles.projectFileItem}>
                                 <Link href={`/dashboard/pack/${m.id}`} className={styles.projectFileLink}>
-                                  <span className={styles.projectFileIcon} aria-hidden="true">📄</span>
+                                  <span className={styles.projectFileIcon} aria-hidden="true"><FileText size={13} strokeWidth={1.75} aria-hidden="true" /></span>
                                   <span className={styles.projectFileTitle}>{m.title}</span>
                                   <span className={styles.projectFileDate}>
                                     {new Date(m.created_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })}
@@ -804,7 +806,7 @@ async function createProject() {
                       className={styles.createProjectCancel}
                       onClick={() => { setShowCreateProject(false); setNewProjectName('') }}
                     >
-                      ✕
+                      <X size={13} strokeWidth={1.75} aria-hidden="true" />
                     </button>
                   </div>
                 )}
@@ -815,7 +817,7 @@ async function createProject() {
             <div className={styles.fieldLabel}>Meeting notes / transcript</div>
             {templateBanner && (
               <div className={styles.templateBanner}>
-                <span className={styles.templateBannerIcon}>📋</span>
+                <span className={styles.templateBannerIcon}><ClipboardList size={15} strokeWidth={1.75} aria-hidden="true" /></span>
                 <span className={styles.templateBannerText}>
                   <strong>{templateBanner}</strong> template loaded — replace the bracketed placeholders with your actual notes.
                 </span>
@@ -825,7 +827,7 @@ async function createProject() {
                   onClick={() => setTemplateBanner(null)}
                   aria-label="Dismiss"
                 >
-                  ✕
+                  <X size={13} strokeWidth={1.75} aria-hidden="true" />
                 </button>
               </div>
             )}
@@ -859,7 +861,7 @@ async function createProject() {
                     }}
                     style={locked ? { opacity: 0.5, cursor: 'pointer' } : undefined}
                     title={locked ? 'Upgrade to Pro for all output languages' : undefined}
-                  >{locked ? `🔒 ${k}` : k}</button>
+                  >{locked ? <><Lock size={11} strokeWidth={1.75} aria-hidden="true" /> {k}</> : k}</button>
                 )
               })}
             </div>
@@ -923,7 +925,7 @@ async function createProject() {
         <div className={styles.outputSide} ref={outputRef}>
           <div className={styles.outputHeader}>
             <div className={styles.outputTitle}>
-              {pack ? '⚡ Your Execution Pack' : 'Awaiting flash—'}
+              {pack ? <><Zap size={15} strokeWidth={1.75} aria-hidden="true" /> Your Execution Pack</> : 'Awaiting flash—'}
             </div>
             {pack && (
               <div style={{ display: 'flex', gap: 8 }}>
@@ -936,8 +938,8 @@ async function createProject() {
                   title="Clear and flash another meeting"
                 >
                   {projectId
-                    ? <>⚡ Next meeting in {(projects.find(p => p.id === projectId)?.name) ?? 'project'} →</>
-                    : <>⚡ Flash another →</>}
+                    ? <><Zap size={14} strokeWidth={1.75} aria-hidden="true" /> Next meeting in {(projects.find(p => p.id === projectId)?.name) ?? 'project'} →</>
+                    : <><Zap size={14} strokeWidth={1.75} aria-hidden="true" /> Flash another →</>}
                 </button>
               </div>
             )}
@@ -981,7 +983,7 @@ async function createProject() {
             <div className={styles.snapshot}>
               <OutcomePill pack={pack} />
               <div className={styles.snapshotHead}>
-                <span className={styles.snapshotPill}>⚡ Executive snapshot</span>
+                <span className={styles.snapshotPill}><Zap size={13} strokeWidth={1.75} aria-hidden="true" /> Executive snapshot</span>
                 <button
                   className={`${styles.cpBtn} ${copied === 'snapshot' ? styles.cpDone : ''}`}
                   onClick={() => copy('snapshot', pack.snapshot!)}
@@ -1003,7 +1005,7 @@ async function createProject() {
                 >
                   <div className={styles.blockHead}>
                     <div className={styles.blockType}>
-                      <span className={styles.blockIcon} aria-hidden="true">{BLOCK_ICONS[block.id] || '•'}</span>
+                      <span className={styles.blockIcon} aria-hidden="true"><BlockIcon id={block.id} /></span>
                       <span className={`${styles.blockLabel} ${styles[`label_${block.color}`]}`}>
                         {block.label}
                       </span>
@@ -1045,8 +1047,8 @@ async function createProject() {
                 onClick={flashAnother}
               >
                 {projectId
-                  ? <>⚡ Flash next meeting in {(projects.find(p => p.id === projectId)?.name) ?? 'this project'} →</>
-                  : <>⚡ Flash another meeting →</>}
+                  ? <><Zap size={14} strokeWidth={1.75} aria-hidden="true" /> Flash next meeting in {(projects.find(p => p.id === projectId)?.name) ?? 'this project'} →</>
+                  : <><Zap size={14} strokeWidth={1.75} aria-hidden="true" /> Flash another meeting →</>}
               </button>
             </div>
           )}
@@ -1058,7 +1060,7 @@ async function createProject() {
           onClick={() => setShowUpgradeModal(false)}>
           <div style={{ background:'var(--surface)', border:'1px solid var(--border2)', borderRadius:16, padding:40, maxWidth:420, width:'90%', textAlign:'center' }}
             onClick={e => e.stopPropagation()}>
-            <div style={{ fontSize:36, marginBottom:12 }}>⚡</div>
+            <div style={{ marginBottom:12, color:'var(--spark)' }}><Zap size={32} strokeWidth={1.75} aria-hidden="true" /></div>
             <h2 style={{ color:'var(--text)', fontSize:22, fontWeight:700, marginBottom:8 }}>
               {isLoggedIn ? "You're out of packs" : 'Free pack used'}
             </h2>

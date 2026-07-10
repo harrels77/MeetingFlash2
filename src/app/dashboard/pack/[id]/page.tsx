@@ -9,7 +9,9 @@ import RisksView from '@/components/RisksView'
 import EmailPreview from '@/components/EmailPreview'
 import SlackPreview from '@/components/SlackPreview'
 import OutcomePill from '@/components/OutcomePill'
-import { BLOCK_ICONS, gmailComposeUrl } from '@/lib/packMeta'
+import { gmailComposeUrl } from '@/lib/packMeta'
+import BlockIcon from '@/components/BlockIcon'
+import { Zap, Lock, Link2, Mail } from 'lucide-react'
 import ThemeToggle from '@/components/ThemeToggle'
 import styles from './pack.module.css'
 
@@ -182,7 +184,7 @@ export default function PackDetail() {
             </button>
           ) : (
             <Link href="/pricing" className={styles.pdfBtn} style={{ opacity: 0.7, textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: 6 }}>
-              🔒 Export PDF
+              <Lock size={13} strokeWidth={1.75} aria-hidden="true" /> Export PDF
             </Link>
           )}
         </div>
@@ -207,7 +209,7 @@ export default function PackDetail() {
                   setShowShareMenu(false)
                 }}
               >
-                <span>🔗</span> Copy link
+                <Link2 size={14} strokeWidth={1.75} aria-hidden="true" /> Copy link
               </button>
               
               <a
@@ -215,7 +217,7 @@ export default function PackDetail() {
                 href={`mailto:?subject=${encodeURIComponent(meeting?.title || 'Meeting Pack')}&body=${encodeURIComponent(`Here is the meeting Execution Pack:\n\n${shareUrl}`)}`}
                 onClick={() => setShowShareMenu(false)}
               >
-                <span>✉️</span> Send by email
+                <Mail size={14} strokeWidth={1.75} aria-hidden="true" /> Send by email
               </a>
               
               <a
@@ -251,7 +253,7 @@ export default function PackDetail() {
         {meeting.pack?.snapshot && (
           <div className={styles.snapshot}>
             <OutcomePill pack={meeting.pack} />
-            <div className={styles.snapshotPill}>⚡ Executive snapshot</div>
+            <div className={styles.snapshotPill}><Zap size={13} strokeWidth={1.75} aria-hidden="true" /> Executive snapshot</div>
             <p className={styles.snapshotBody}>{packFieldToString(meeting.pack.snapshot)}</p>
           </div>
         )}
@@ -265,7 +267,7 @@ export default function PackDetail() {
             >
               <div className={styles.blockHead}>
                 <div className={styles.blockType}>
-                  <span className={styles.blockIcon} aria-hidden="true">{BLOCK_ICONS[block.id] || '•'}</span>
+                  <span className={styles.blockIcon} aria-hidden="true"><BlockIcon id={block.id} /></span>
                   <span className={`${styles.blockLabel} ${styles[`label_${block.color}`]}`}>
                     {block.label}
                   </span>

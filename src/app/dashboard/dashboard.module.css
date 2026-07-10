@@ -184,8 +184,9 @@
 }
 
 .settingsLink {
-  color: var(--faint);
-  font-size: 15px;
+  color: var(--muted);
+  display: inline-flex;
+  align-items: center;
   transition: color 0.15s;
   text-decoration: none;
   flex-shrink: 0;

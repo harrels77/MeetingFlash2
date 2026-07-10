@@ -53,9 +53,10 @@
 .header { margin-bottom: 48px; }
 
 .title {
-  font-size: 40px;
-  font-weight: 700;
-  letter-spacing: -2px;
+  font-family: var(--serif);
+  font-size: var(--display-sm);
+  font-weight: 400;
+  letter-spacing: -0.01em;
   color: var(--text);
   margin-bottom: 8px;
 }

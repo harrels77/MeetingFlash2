@@ -2,7 +2,7 @@
 
 **Statut 2026-07-04 : les 15 items sont livrés** (commits `13ab85e` → `cf39814`).
 Restes ouverts, hors périmètre de cette passe :
-- Migration Lucide des emojis dans le produit (/app, /dashboard, blocs de pack 📋🎯💭…) — décision CLAUDE.md à re-arbitrer
+- ~~Migration Lucide des emojis dans le produit~~ — FAIT 2026-07-10 (BlockIcon + passe complète /app, dashboard, pack, share, search, project, settings)
 - Variation de layout des sections (item 11, partie "2 layouts par page") — fait a minima (br supprimés, trust strips sobres) ; une vraie alternance de layouts mérite sa propre passe de design
 - Item 15 : letter-spacing en em fait sur les surfaces marketing ; les modules du produit (dashboard/pack/settings) gardent quelques valeurs px
 

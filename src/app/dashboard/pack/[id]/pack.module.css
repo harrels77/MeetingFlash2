@@ -157,10 +157,11 @@
 .metaDot { color: var(--border2); }
 
 .title {
-  font-size: 36px;
-  font-weight: 700;
-  letter-spacing: -1.5px;
-  line-height: 1.1;
+  font-family: var(--serif);
+  font-size: var(--display-sm);
+  font-weight: 400;
+  letter-spacing: -0.01em;
+  line-height: 1.12;
   color: var(--text);
 }
 
@@ -177,6 +178,9 @@
     0 8px 24px rgba(46,98,255,0.12);
 }
 .snapshotPill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
   font-size: 11px;
   font-weight: 700;
   letter-spacing: 0.08em;
@@ -225,7 +229,7 @@
 .blockType { display: flex; align-items: center; gap: 8px; }
 
 .blockDot { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
-.blockIcon { font-size: 16px; line-height: 1; display: inline-flex; align-items: center; justify-content: center; width: 20px; height: 20px; }
+.blockIcon { display: inline-flex; align-items: center; color: var(--muted); }
 .dot_spark  { background: var(--blue2); }
 .dot_ember  { background: var(--green); }
 .dot_danger { background: var(--amber); }

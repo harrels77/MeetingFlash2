@@ -897,6 +897,9 @@
 }
 
 .snapshotPill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
   font-size: 11px;
   font-weight: 700;
   letter-spacing: 0.08em;
@@ -999,15 +1002,7 @@
 .dot_fog    { background: var(--faint); }
 .dot_paper  { background: rgba(148,163,184,0.5); }
 
-.blockIcon {
-  font-size: 16px;
-  line-height: 1;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 20px;
-  height: 20px;
-}
+.blockIcon { display: inline-flex; align-items: center; color: var(--muted); }
 
 .blockLabel {
   font-size: 11px;

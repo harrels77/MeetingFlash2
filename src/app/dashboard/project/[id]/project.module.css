@@ -75,10 +75,11 @@
 .metaDot { color: var(--border2); }
 
 .title {
-  font-size: 40px;
-  font-weight: 700;
-  letter-spacing: -2px;
-  line-height: 1;
+  font-family: var(--serif);
+  font-size: var(--display-sm);
+  font-weight: 400;
+  letter-spacing: -0.01em;
+  line-height: 1.1;
   color: var(--text);
   margin-bottom: 28px;
 }

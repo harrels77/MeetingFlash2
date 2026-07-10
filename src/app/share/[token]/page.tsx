@@ -9,7 +9,8 @@ import RisksView from '@/components/RisksView'
 import EmailPreview from '@/components/EmailPreview'
 import SlackPreview from '@/components/SlackPreview'
 import OutcomePill from '@/components/OutcomePill'
-import { BLOCK_ICONS } from '@/lib/packMeta'
+import BlockIcon from '@/components/BlockIcon'
+import { Zap } from 'lucide-react'
 import styles from './share.module.css'
 
 export const metadata: Metadata = {
@@ -74,7 +75,7 @@ export default async function SharePage({ params }: { params: { token: string } 
         {meeting.pack?.snapshot && (
           <div className={styles.snapshot}>
             <OutcomePill pack={meeting.pack} />
-            <div className={styles.snapshotPill}>⚡ Executive snapshot</div>
+            <div className={styles.snapshotPill}><Zap size={13} strokeWidth={1.75} aria-hidden="true" /> Executive snapshot</div>
             <p className={styles.snapshotBody}>{packFieldToString(meeting.pack.snapshot)}</p>
           </div>
         )}
@@ -88,7 +89,7 @@ export default async function SharePage({ params }: { params: { token: string } 
             >
               <div className={styles.blockHead}>
                 <div className={styles.blockType}>
-                  <span className={styles.blockIcon} aria-hidden="true">{BLOCK_ICONS[block.id] || '•'}</span>
+                  <span className={styles.blockIcon} aria-hidden="true"><BlockIcon id={block.id} /></span>
                   <span className={`${styles.blockLabel} ${styles[`label_${block.color}`]}`}>
                     {block.label}
                   </span>

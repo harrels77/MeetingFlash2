@@ -86,7 +86,7 @@ persistent project memory, structured ready-to-use outputs.
 - Palette propriétaire "Flash Blue" (plus AUCUN hex Tailwind) : fond encre `#0A101F`, accent `#2E62FF`, accent texte `#7C9BFF`, spark `#FFC53D` (1 dose max par page), états sémantiques `--success/--warning/--danger` (+ variantes `-text/-soft/-border`)
 - Les alias historiques `--blue/--blue2/--blue3/--green/--amber/--red` existent encore, mappés sur la nouvelle palette — les retirer à terme
 - Typo : **titres H1/H2/prix en Instrument Serif 400** (voix display), corps/UI en Plus Jakarta Sans (400-700 seulement, 300/800 non chargés), JetBrains Mono pour les données. Échelle typo/espacements/radius en tokens dans globals.css
-- **Icônes : Lucide uniquement** (`lucide-react`), strokeWidth 1.75, tailles fixes, `aria-hidden` — JAMAIS d'emoji comme icône sur les surfaces marketing. (Les emojis des blocs de pack côté produit /app + /dashboard sont encore là — migration à arbitrer.)
+- **Icônes : Lucide uniquement** (`lucide-react`), strokeWidth 1.75, tailles fixes, `aria-hidden` — JAMAIS d'emoji comme icône, marketing ET produit (migration produit faite 2026-07-10 : `<BlockIcon />` remplace l'ancien map emoji BLOCK_ICONS, supprimé de packMeta.ts ; ActionTiers/ThemeToggle/dashboard/search/project/pack en Lucide).
 - Interdits (liste complète dans DESIGN-SYSTEM.md §7) : gradient text, tableau ✕/✓ concurrent, titres staccato "X. Y. Z.", `<br />` dans les headings, hex hors globals.css, styles inline marketing
 - All CSS variables defined in `src/styles/globals.css`
 - Dark/light theme via `[data-theme="light"]` on `<html>` — CSS vars override in globals.css
@@ -96,7 +96,7 @@ persistent project memory, structured ready-to-use outputs.
 - Pricing featured card: elevated with `translateY(-4px)` + double box-shadow glow
 - Logo bar label: "Works alongside your existing stack" (NOT "Trusted by teams using")
 - Logo bar tools: meeting tools only (Zoom, Teams, Google Meet, Loom, etc.) — no Stripe/Vercel
-- Nav logo: 36px (NOT 28px — was too small)
+- Nav logo: 36px (NOT 28px — was too small). Re-vérifié 2026-07-10 (le 28px avait été réintroduit par erreur).
 
 ---
 
@@ -322,6 +322,10 @@ The user is non-coder, motivated, and worried about retention. These three piece
 - Each article ends with a CTA block linking to `/app`, then a 3-card "Related reading" block (`getRelatedArticles()` in blog.ts: same-category first, then fill) — that's the internal-linking surface for SEO
 - Article renderer (`blog/[slug]/page.tsx:parseInline`) supports `[text](url)` markdown links — internal links use Next `<Link>`, external use `<a rel="noopener">`. Inline `**bold**` still works alongside links. Whole-line `**bold**` becomes an emphasized paragraph.
 - "Blog" link added to MobileNav (desktop + mobile)
+
+### Nav (décision utilisateur 2026-07-10 — ne pas retirer)
+- **Le lien "Home" est présent dans la nav desktop (1er lien) ET dans le menu mobile (1re entrée).** Il avait été retiré lors de la refonte D.A. (item 13) au motif que "le logo fait ce travail" ; l'utilisateur l'a explicitement redemandé. Ne plus le supprimer.
+- Titres produit (pack/project/settings `.title`) en Instrument Serif display, comme le marketing.
 
 ### HeroCta Labels (src/components/HeroCta.tsx)
 - Guest ou loading → `'Try it free'` + icône ArrowRight (Lucide)

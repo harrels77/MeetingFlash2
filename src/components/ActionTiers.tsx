@@ -1,4 +1,5 @@
 import { parseActionTiers } from '@/lib/supabase'
+import { CircleAlert, Pin, Circle } from 'lucide-react'
 import s from './ActionTiers.module.css'
 
 /**
@@ -18,7 +19,7 @@ export default function ActionTiers({ text }: { text: string }) {
       {tiers.p0.length > 0 && (
         <div className={`${s.tier} ${s.tierP0}`}>
           <div className={s.tierHead}>
-            <span className={s.tierIcon}>🔴</span>
+            <span className={s.tierIcon}><CircleAlert size={14} strokeWidth={1.75} aria-hidden="true" /></span>
             <span className={s.tierLabel}>P0 — Blockers</span>
             <span className={s.tierCount}>{tiers.p0.length}</span>
           </div>
@@ -30,7 +31,7 @@ export default function ActionTiers({ text }: { text: string }) {
       {tiers.p1.length > 0 && (
         <div className={`${s.tier} ${s.tierP1}`}>
           <div className={s.tierHead}>
-            <span className={s.tierIcon}>📌</span>
+            <span className={s.tierIcon}><Pin size={14} strokeWidth={1.75} aria-hidden="true" /></span>
             <span className={s.tierLabel}>P1 — Commitments</span>
             <span className={s.tierCount}>{tiers.p1.length}</span>
           </div>
@@ -42,7 +43,7 @@ export default function ActionTiers({ text }: { text: string }) {
       {tiers.p2.length > 0 && (
         <div className={`${s.tier} ${s.tierP2}`}>
           <div className={s.tierHead}>
-            <span className={s.tierIcon}>○</span>
+            <span className={s.tierIcon}><Circle size={12} strokeWidth={1.75} aria-hidden="true" /></span>
             <span className={s.tierLabel}>P2 — Maintenance</span>
             <span className={s.tierCount}>{tiers.p2.length}</span>
           </div>
