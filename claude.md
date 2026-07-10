@@ -49,6 +49,9 @@ This project is assisted by AI coding agents (Claude Code + Claude.ai).
 - All email sends are fire-and-forget with `.catch(() => {})`. They must not block UI. The Resend SDK is lazy-instantiated inside the route handler — never at module top-level (build fails when `RESEND_API_KEY` is missing in CI).
 
 **Workflow**
+- ❌ **Ne JAMAIS supprimer `.next` ni lancer `npx next build` pendant qu'un serveur `npm run dev` tourne.** Le serveur garde en mémoire une carte des routes qui ne correspond plus au disque → il répond 404 sur des routes qui existent (vécu le 2026-07-10 : `/api/account/me` en 404 permanent, profil jamais chargé, "Account" affiché en continu dans la nav — une matinée de confusion). ✅ Tuer le serveur d'abord, builder, puis relancer `npm run dev`.
+- ⚠️ Le port 3000 peut être occupé par un AUTRE projet du user (Hookviral tourne souvent dessus). Next bascule alors MeetingFlash sur 3001 automatiquement. Avant de déboguer "le site ne se met pas à jour", vérifier QUEL site répond sur le port testé (`curl -s localhost:3000 | grep -o 'MeetingFlash\|Hookviral'`).
+- La clé SSH GitHub du user a une passphrase non stockée dans le trousseau → `git push` impossible depuis une session Claude. C'est le user qui pousse depuis son terminal.
 - After non-trivial changes, run `npx tsc --noEmit` before committing. Never skip it.
 - Always commit with HEREDOC for the message body. Never use `--no-verify` or `--amend` on pushed commits.
 - The user is non-coder. Explain in plain language *what* changed and *why*, not *how*. Avoid jargon ("Promise.race") in user-facing replies.
@@ -65,7 +68,7 @@ Target: agencies, freelancers, small product teams who want to eliminate
 post-meeting admin work. Key differentiator vs ChatGPT: zero prompts required,
 persistent project memory, structured ready-to-use outputs.
 
-**Current status:** MVP deployed on Vercel. Stripe live mode active. Auth working. Blog live. Domain `meetingflash.work` active. Email pending (Resend account flagged, awaiting resolution).
+**Current status:** en production sur Vercel — la refonte D.A. complète + le durcissement sécurité + le login personnalisé ont été poussés le 2026-07-10 (19 commits). Stripe live. Emails Resend actifs. Search Console réclamé (premières données : impressions ×20 en 6 semaines, position moyenne ~60 — le levier est l'autorité/backlinks, campagne annuaires faite le 2026-07-10 via BACKLINKS.md).
 
 ---
 
@@ -76,7 +79,7 @@ persistent project memory, structured ready-to-use outputs.
 - **Database:** Supabase PostgreSQL + RLS
 - **AI:** Anthropic Claude API (claude-sonnet-4-20250514) with prompt caching
 - **Payments:** Stripe (subscriptions) — apiVersion: 2026-03-25.dahlia
-- **Email:** Resend — `hello@meetingflash.work` — domain verified, API key set, but Resend account flagged (awaiting support response)
+- **Email:** Resend — `hello@meetingflash.work` — domaine vérifié, compte réactivé (2026-05-15), emails live. Routes internes protégées par `x-internal-key: CRON_SECRET`.
 - **Deployment:** Vercel
 
 ---
@@ -162,7 +165,7 @@ src/
 - `AuthProvider` calls both `getSession()` AND `onAuthStateChange` — both can call `loadProfile` simultaneously (known race condition in prod, do not change without testing). `loadProfile` is idempotent on the result (only `setProfile` when data exists), so two concurrent calls don't fight.
 - `signOut` in AuthProvider: fire-and-forget `supabase.auth.signOut()`, then synchronous wipe of every `sb-*` / `supabase.auth*` key from localStorage, then `window.location.replace('/')`. The synchronous localStorage wipe is **load-bearing** for the transient-SIGNED_OUT distinction (see Mistakes section above). Don't await the Supabase call; don't reorder the wipe.
 - **Always use the canonical `useAuth().signOut`.** `dashboard/page.tsx` and `settings/page.tsx` previously had their own local sign-out that awaited `supabase.auth.signOut()` and could hang when Supabase slept. Both now call `useAuth().signOut` directly. `settings/page.tsx`'s `deleteAccount` also finishes by calling the canonical signOut. Don't reintroduce local awaiting sign-out paths.
-- **Welcome email trigger:** when `loadProfile` creates a new profile (first time, no existing row CONFIRMED via PGRST116 with the JWT attached), it calls `fetch('/api/email/welcome', ...)` fire-and-forget. Currently fails silently (Resend account flagged).
+- **Welcome email trigger:** when `loadProfile` creates a new profile (first time, no existing row CONFIRMED via PGRST116 with the JWT attached), it calls `fetch('/api/email/welcome', ...)` fire-and-forget (avec le header `x-internal-key`). Emails live depuis 2026-05-15.
 
 ### Password reset + login personnalisation (2026-07-10)
 - **`/forgot-password`** : formulaire email → pré-flight RPC `get_auth_providers_for_email` (compte Google-only → message "use Google", pas d'email envoyé) → `supabase.auth.resetPasswordForEmail(email, { redirectTo: origin + '/reset-password' })` → écran "Check your inbox" (ne révèle pas si le compte existe).
@@ -397,7 +400,7 @@ RESEND_API_KEY                          ← get from resend.com (needs custom do
 - Monthly usage reset — Vercel cron job (1st of month, midnight)
 - Dark/light mode toggle — nav button, localStorage, FOUC-free
 - Blog — 4 SEO articles, static, linked from nav
-- Email routes (Resend) — built, blocked (Resend account flagged, awaiting support)
+- Email routes (Resend) — live (welcome, nudge, weekly digest), protégées par secret interne
 - Sitemap + robots.txt for SEO indexing (`src/app/sitemap.ts`, `src/app/robots.ts`). **robots.txt only disallows `/api/` and `/auth/`** (functional endpoints that should never be crawled). Private/auth pages — `/dashboard/*`, `/login`, `/signup`, `/share/[token]` — are kept out of the index via `robots: { index: false, follow: false }` **metadata**, NOT via a robots.txt block. Reason (fixed 2026-07): a robots.txt Disallow prevents Google from crawling the page to *see* the noindex tag, which produced the "Indexed, though blocked by robots.txt" warning in Search Console (flagged `/dashboard`). Crawl must be allowed for noindex to take effect. `/dashboard/*` gets its noindex from `src/app/dashboard/layout.tsx`; `/login` + `/signup` from their `layout.tsx`; `/share/[token]` from its page metadata. Don't re-add these paths to the robots Disallow list.
 - Dynamic OpenGraph image at `/opengraph-image` (1200×630, generated edge-runtime via `next/og` in `src/app/opengraph-image.tsx`) — used by home page; blog posts reference it as their fallback image
 - Structured data (JSON-LD): `Organization` site-wide (root layout), `WebSite` + `SoftwareApplication` + `FAQPage` on home (`page.tsx` — FAQ data lives in `FAQ_ITEMS` const, used by both the JSX and the JSON-LD; keep them in sync), `BlogPosting` on each article (`blog/[slug]/page.tsx:articleJsonLd`)
@@ -427,7 +430,7 @@ RESEND_API_KEY                          ← get from resend.com (needs custom do
 - **Web App Manifest** at `/public/manifest.json` (referenced from root metadata `manifest: '/manifest.json'`) — name/short_name/description, start_url `/app`, theme_color, icons. Signal "real app" to crawlers + lets users "Add to home screen". The `/logo.png` icon is set with `purpose: 'maskable'`.
 - **`prefers-reduced-motion: reduce`** block in `globals.css` — kills all animations / transitions / smooth-scroll for users who request reduced motion. Lighthouse a11y boost + accessibility correctness.
 - **`BreadcrumbList` JSON-LD** added to: blog articles (Home → Blog → Article), each ICP page (Home → For X), each tool page (Home → Free tools → Tool name), `/pricing` (Home → Pricing). Helper at `src/lib/breadcrumb.ts:buildBreadcrumb()` — pass an ordered array of `{name, path}` crumbs; Home is auto-prepended. Google may render breadcrumbs in SERPs (CTR boost).
-- **Search Console verification slot** prepared in root layout metadata as a commented-out `verification: { google: '...' }` line. When you claim the property in https://search.google.com/search-console, paste the token and uncomment.
+- **Search Console verification** : token actif dans le root layout (`verification: { google: ... }`), propriété réclamée.
 
 ### Quality refinements — output upgrade + active memory (Phase 7)
 This phase pivoted the perceived value of a Pack from "structured summary" to "senior-analyst brief". Don't dilute these without an explicit reason.
@@ -554,6 +557,12 @@ The Phase 9 hypothesis was wrong — when we ran the diagnostic SQL on the found
 - Time-saved toast + cognition-style loader messages + open-actions dashboard widget + ICP-targeted templates (retention/stickiness pass)
 - Sharper post-flash guest CTA ("Save this pack") on `/app`
 - Canonical `useAuth().signOut` everywhere — no more local awaiting sign-out paths in dashboard/settings
+- Digest hebdo d'actions ouvertes par email (cron lundi 07:00 UTC + opt-out Settings)
+- Upload de transcript (.txt/.vtt/.srt) + bouton "Open in Gmail" sur le bloc email
+- Démo animée du hero (HeroDemo) + rendu email/Slack au format destination + PDF print propre
+- Mot de passe oublié (/forgot-password + /reset-password) + toast de salutation post-login ("Good morning, Simon") + salutation dashboard
+- Nav : bouton Home (décision user), nom affiché instantanément via session metadata (fin du placeholder "Account")
+- Durcissement sécurité complet 2026-07-10 (voir section "Security posture") : RPC verrouillées, relais email fermé, partage public réparé, checkout validé, résiliation Stripe à la suppression, headers HTTP, privacy véridique
 
 ### Phase 11 — Server-side data architecture + single auth source (May 2026)
 After Phase 10's defensive auth patches, the user kept hitting the "Settings shows No name set / Dashboard blank / Account placeholder in nav" trio. Diagnostic logs revealed the real source: client-side direct queries against Supabase were race-prone on free-tier cold-start AND `supabase.auth.getSession()` itself sometimes hung forever on dev (Supabase tries an internal token refresh that never resolves). All the JWT-wait retries we added didn't help because the underlying call could just sit there. This phase removes the entire class of bugs at the architectural level.
@@ -632,16 +641,13 @@ Passe complète livrée en un commit. Ne pas défaire sans comprendre :
 This section is the **source of truth for what's left to do**. Update as items ship or get deprioritized. Newest decisions go above older ones within a priority bucket.
 
 ### P0 — Live data issue (manual cleanup needed in Supabase)
-- **Migrations not yet applied** — three migrations require manual application in the Supabase SQL editor before the corresponding features work:
-  - `2026_05_02_add_project_notes.sql` — adds `notes` column to projects (Phase 9 project memory)
-  - `2026_05_03_get_auth_providers.sql` — `SECURITY DEFINER` RPC for single-method auth enforcement (Phase 10)
-  - `2026_05_08_user_preferences.sql` — adds `default_lang` / `default_style` columns to profiles (Phase 11 settings preferences)
+- **Migrations : TOUTES APPLIQUÉES** (vérifié via MCP Supabase le 2026-07-10) — project_notes, get_auth_providers, user_preferences (appliquées manuellement par le user), weekly_digest et lock_down_rpc_functions (appliquées via MCP). Plus rien en attente côté schéma. Restent 2 actions dashboard Supabase : activer "Leaked password protection" (Auth → Providers → Password) et ajouter `https://www.meetingflash.work/reset-password` aux Redirect URLs.
 - **Founder's own dual identity** — confirmed resolved 2026-05-10 (only ONE identity row remains for adrienharrel@gmail.com). The Phase 11 architectural fixes (single auth source, server-side data, accessToken via useAuth) eliminate the bug class regardless of identity state.
 - **Orphan meetings on legacy user_ids** — discovered 2026-05-10 that some old meetings are tied to `aba82af8-1a27-4250-b70d-00d1f201130d` (2 packs) while the founder's current auth.users.id is `cd9399cf-a0f5-4821-9970-6ba5871dcc79` (6 packs). The 6 are live; the 2 are inaccessible. Optional cleanup: `UPDATE public.meetings SET user_id = '<current_id>' WHERE user_id = '<orphan_id>';` to consolidate.
 
 ### P0 — Blocked on external action (no code work possible right now)
 - **Resend email account reactivated** — 2026-05-15. All 3 copy fixes shipped: welcome email "5 free Execution Packs", nudge email subject + body "5 free packs", nudge trigger `uses_this_month >= 5` in `/api/flash/route.ts`. Emails are live.
-- **Search Console domain claim** — `meetingflash.work` not yet registered on https://search.google.com/search-console. Slot ready in `src/app/layout.tsx` as commented `verification: { google: '...' }`. When the user claims the domain, paste the token and uncomment.
+- **Search Console : réclamé et actif** (token en clair dans layout.tsx). Premières données (export 2026-07-10, 3 mois) : ~630 impressions, 1 clic, position moyenne ~60, courbe d'impressions ×20 sur 6 semaines. Diagnostic : contenu indexé et bien ciblé, autorité manquante. Meilleurs actifs proches du top 20 : article `meeting-summary-vs-meeting-minutes` (161 imp., pos. 40) et `/for-product-teams` (pos. 23). Prochain chantier SEO code : maillage interne vers ces deux pages + title de l'article aligné sur les requêtes "meeting minutes definition". Ne pas juger sur les clics avant des positions < 20 (point d'étape mi-août 2026).
 
 ### P1 — Pack render polish (next design pass, ~2-3h total)
 Discussed with user 2026-05-11. Goal: turn the pack from "structured text output" into a "premium deliverable feel". Ordered by ROI:
@@ -667,7 +673,7 @@ What NOT to add: density toggle, more block colors, dark/light forcing — alrea
 ### P3 — Content + growth (ongoing)
 - **More blog articles** for long-tail SEO. Current count: 9. Suggested next angles: alternative-to-X comparisons (Otter, Fireflies, Fathom — each as a separate article), "AI for sales call notes", "QBR template", industry-specific (legal, design agencies, etc.). Each new article auto-includes BlogPosting + BreadcrumbList JSON-LD via existing infra.
 - **Real testimonials** — when first paying customers convert. Replace the deliberately-empty social proof slot. **Don't** fabricate (the user explicitly rejected fake testimonials in pre-launch v2).
-- **Directory submissions** (off-code, user action): Product Hunt, AlternativeTo, BetaList, SaaSHub, Indie Hackers product directory. Helps with referral traffic + backlinks for SEO.
+- **Directory submissions — FAIT le 2026-07-10** : le user a publié sur les annuaires listés dans `BACKLINKS.md` (kit de textes prêt à coller à la racine — le réutiliser pour toute nouvelle soumission). Effet attendu sur les positions : 2 à 6 semaines. Prochaine vague possible : Product Hunt (garder pour quand il y aura 2-3 témoignages).
 - **Live Lighthouse audit** post-deploy — Phase 5 added the perf optimizations but only a real production trace measures the actual Core Web Vitals scores.
 
 ### Nits / hygiene (small fixes that can be batched anytime)
@@ -676,5 +682,5 @@ What NOT to add: density toggle, more block colors, dark/light forcing — alrea
 
 ---
 
-*Last updated: 2026-07-04 (Refonte D.A. — AUDIT.md/FIXES.md/DESIGN-SYSTEM.md à la racine. Palette propriétaire + serif display + Lucide + tokens sémantiques ; pricing/mockup/footer unifiés en composants ; middleware supprimé ; titres réécrits. Les 3 fichiers d'audit sont la référence pour toute passe visuelle future.)*
+*Last updated: 2026-07-10 (session growth+sécurité : digest hebdo, upload transcript, Gmail, HeroDemo, previews email/Slack, forgot-password, WelcomeToast, passe sécurité complète, migrations toutes appliquées, Search Console réclamé + première analyse, backlinks publiés, 19 commits poussés en prod par le user.)*
 *Primary AI assistant: Claude (claude.ai + Claude Code)*
