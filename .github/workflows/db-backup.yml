@@ -36,6 +36,11 @@ jobs:
             echo "::error::Secret SUPABASE_DB_URL manquant — voir l'en-tête de ce fichier."
             exit 1
           fi
+          # The runner ships an older pg_dump (16.x) on its default PATH,
+          # which refuses to dump a newer server (Supabase runs 17.6).
+          # Force the pgdg-installed v17 binaries to take priority.
+          export PATH="/usr/lib/postgresql/17/bin:$PATH"
+          pg_dump --version
           pg_dump "$SUPABASE_DB_URL" \
             --schema=public \
             --no-owner --no-privileges \
