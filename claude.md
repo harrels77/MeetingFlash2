@@ -636,6 +636,10 @@ Passe complète livrée en un commit. Ne pas défaire sans comprendre :
 - **Privacy/FAQ véridiques** : la policy ne prétend plus que les transcripts ne sont pas stockés (raw_notes EST stocké avec le pack, supprimé avec lui) ; Resend + Vercel ajoutés aux sous-traitants ; suppression de compte documentée comme résiliant l'abonnement. Toute nouvelle feature de données doit garder ces pages alignées.
 - **Reste à faire côté dashboard Supabase (action manuelle)** : activer "Leaked password protection" (Auth → Providers → Password). Les 2 advisories npm restantes = Next.js 14 (fix = Next 16, migration écartée volontairement).
 
+## Monitoring & backups (2026-07-11)
+- **Sentry actif** (org `harrelfactory`, projet `meetingflash`) : erreurs client + serveur + edge, uniquement en production, tracing/replay désactivés (quota free tier). Configs à la racine (`sentry.*.config.ts`) + `src/instrumentation.ts` (+ `experimental.instrumentationHook` requis en Next 14) + `src/app/global-error.tsx`. DSN en dur (non-secret) surchargeable par `NEXT_PUBLIC_SENTRY_DSN`. Upload des source maps seulement si `SENTRY_AUTH_TOKEN` est défini (optionnel). Vérifié de bout en bout (issue MEETINGFLASH-1, résolue). Consulter les erreurs : https://harrelfactory.sentry.io ou via le connecteur Sentry en session.
+- **Backups DB** : `.github/workflows/db-backup.yml` — pg_dump lundi+jeudi 06:00 UTC en artefacts GitHub (rotation 90 j) + déclenchement manuel. ⚠️ Nécessite le secret `SUPABASE_DB_URL` dans GitHub (Settings → Secrets → Actions) — instructions dans l'en-tête du workflow. Le tier gratuit Supabase n'a AUCUN backup automatique ; ce workflow est la seule protection contre la perte de données.
+
 ## Roadmap / TODO (priorities)
 
 This section is the **source of truth for what's left to do**. Update as items ship or get deprioritized. Newest decisions go above older ones within a priority bucket.
