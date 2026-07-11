@@ -1,5 +1,11 @@
+const { withSentryConfig } = require('@sentry/nextjs')
+
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  experimental: {
+    // Requis en Next 14 pour charger src/instrumentation.ts (init Sentry serveur)
+    instrumentationHook: true,
+  },
   async headers() {
     return [
       {
@@ -18,4 +24,15 @@ const nextConfig = {
     ]
   },
 }
-module.exports = nextConfig
+
+// Enrobage Sentry : instrumente les routes au build. L'upload des source maps
+// ne se fait que si SENTRY_AUTH_TOKEN est présent (optionnel — sans lui les
+// stack traces sont minifiées mais les erreurs remontent quand même).
+module.exports = withSentryConfig(nextConfig, {
+  org: 'harrelfactory',
+  project: 'meetingflash',
+  authToken: process.env.SENTRY_AUTH_TOKEN,
+  silent: true,
+  sourcemaps: { disable: !process.env.SENTRY_AUTH_TOKEN },
+  widenClientFileUpload: false,
+})

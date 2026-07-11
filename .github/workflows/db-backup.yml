@@ -1,0 +1,51 @@
+# Sauvegarde hebdomadaire de la base Supabase.
+# Le tier gratuit Supabase n'a AUCUN backup automatique : sans ceci, une
+# corruption ou une mauvaise commande SQL = toutes les données perdues.
+#
+# Prérequis (une fois) : ajouter le secret SUPABASE_DB_URL dans
+# GitHub → Settings → Secrets and variables → Actions → New repository secret.
+# La valeur se trouve dans Supabase → Project Settings → Database →
+# Connection string → URI (mode "Session pooler", avec le mot de passe).
+#
+# Les dumps sont stockés comme artefacts GitHub (chiffrés au repos),
+# conservés 90 jours en rotation. Restauration : télécharger l'artefact
+# puis `psql $SUPABASE_DB_URL < backup.sql`.
+name: Database backup
+
+on:
+  schedule:
+    - cron: '0 6 * * 1,4' # lundi + jeudi 06:00 UTC
+  workflow_dispatch: {}    # bouton "Run workflow" pour un backup manuel
+
+jobs:
+  backup:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Install PostgreSQL 17 client
+        run: |
+          sudo sh -c 'echo "deb https://apt.postgresql.org/pub/repos/apt $(lsb_release -cs)-pgdg main" > /etc/apt/sources.list.d/pgdg.list'
+          curl -fsSL https://www.postgresql.org/media/keys/ACCC4CF8.asc | sudo apt-key add -
+          sudo apt-get update -qq && sudo apt-get install -y -qq postgresql-client-17
+
+      - name: Dump database
+        env:
+          SUPABASE_DB_URL: ${{ secrets.SUPABASE_DB_URL }}
+        run: |
+          if [ -z "$SUPABASE_DB_URL" ]; then
+            echo "::error::Secret SUPABASE_DB_URL manquant — voir l'en-tête de ce fichier."
+            exit 1
+          fi
+          pg_dump "$SUPABASE_DB_URL" \
+            --schema=public \
+            --no-owner --no-privileges \
+            --file=backup-$(date +%Y-%m-%d).sql
+          gzip backup-*.sql
+          ls -lh backup-*
+
+      - name: Upload backup artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: db-backup-${{ github.run_id }}
+          path: backup-*.sql.gz
+          retention-days: 90
