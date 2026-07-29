@@ -12,6 +12,8 @@ interface Profile {
   created_at?: string
   default_lang?: string | null
   default_style?: string | null
+  weekly_digest?: boolean | null
+  inbound_token?: string | null
 }
 
 interface AuthCtx {

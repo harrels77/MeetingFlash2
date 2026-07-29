@@ -19,6 +19,7 @@ interface Profile {
   default_lang?: string | null
   default_style?: string | null
   weekly_digest?: boolean | null
+  inbound_token?: string | null
 }
 
 export default function Settings() {
@@ -39,6 +40,11 @@ export default function Settings() {
   const [defaultStyle, setDefaultStyle]   = useState<'Concise' | 'Detailed' | 'Email'>('Concise')
   const [savingPrefs, setSavingPrefs]     = useState(false)
   const [weeklyDigest, setWeeklyDigest]   = useState(true)
+  const [copiedAddr, setCopiedAddr]       = useState(false)
+
+  // Private per-user ingest address (see /api/email/inbound).
+  const inboundDomain = process.env.NEXT_PUBLIC_INBOUND_DOMAIN || 'inbound.meetingflash.work'
+  const inboundAddress = `flash+${profile?.inbound_token ?? ''}@${inboundDomain}`
   const [prefsSaved, setPrefsSaved]       = useState(false)
   const [openingPortal, setOpeningPortal] = useState(false)
 
@@ -378,6 +384,46 @@ export default function Settings() {
             </div>
           </div>
         </div>
+
+        {/* EMAIL INGEST — send notes from your phone, get the pack back */}
+        {profile?.inbound_token && (
+          <div className={styles.section}>
+            <div className={styles.sectionTitle}>Flash by email</div>
+            <div className={styles.card}>
+              <p style={{ fontSize: 14, color: 'var(--muted)', lineHeight: 1.6, marginBottom: 16 }}>
+                Email your raw meeting notes to this private address and the finished
+                Execution Pack comes straight back to your inbox — no browser needed.
+                Type notes on your phone during the call, send, done.
+              </p>
+              <div className={styles.fieldGroup}>
+                <label className={styles.label}>Your private ingest address</label>
+                <div className={styles.fieldRow}>
+                  <input
+                    className={styles.input}
+                    readOnly
+                    value={inboundAddress}
+                    onFocus={e => e.currentTarget.select()}
+                    style={{ fontFamily: 'var(--mono)', fontSize: 13 }}
+                  />
+                  <button
+                    className={styles.saveBtn}
+                    onClick={() => {
+                      navigator.clipboard.writeText(inboundAddress)
+                      setCopiedAddr(true)
+                      setTimeout(() => setCopiedAddr(false), 2000)
+                    }}
+                  >
+                    {copiedAddr ? '✓ Copied' : 'Copy'}
+                  </button>
+                </div>
+                <div style={{ fontSize: 12, color: 'var(--muted)', marginTop: 8 }}>
+                  Keep it private — anyone with this address can create packs in your
+                  account. Save it as a contact called &ldquo;MeetingFlash&rdquo; to reach it in two taps.
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* SIGN OUT */}
         <div className={styles.section}>

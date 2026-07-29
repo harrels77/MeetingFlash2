@@ -1,0 +1,690 @@
+# MeetingFlash — AI Context (Codex.ai + Codex)
+
+## AI CONTEXT (IMPORTANT)
+This project is assisted by AI coding agents (Codex + Codex.ai).
+
+### Rules for AI:
+- Always read this file first before making changes
+- Never assume missing architecture decisions
+- If context is unclear, ask before modifying core logic
+- Update this file when new decisions are made
+- This file is the single source of truth
+- **Plan mode default**: for any non-trivial change (CSS rewrite, multiple files, auth/payments touch), present a short plan before editing. Don't speculate-and-fix.
+
+### Mistakes to NOT repeat (learned the hard way)
+
+**Theme / CSS**
+- ❌ Never hardcode colors (`#060C18`, `rgba(255,255,255,0.07)`, etc.) — they don't adapt to light mode and the user has to ask for a fix every time. Always use CSS vars from `globals.css`: `--bg`, `--surface`, `--text`, `--muted`, `--border`, `--blue`, `--blue3`, `--nav-bg`, etc.
+- ❌ Never invent new CSS vars (`--paper`, `--wire`, `--spark`, `--font-mono`, `--ash`, `--void`) — they aren't defined anywhere and break silently. Use the canonical ones already in `globals.css`. Same for non-loaded fonts (e.g. `'Fragment Mono'`, `'Cormorant Garamond'`) — only `--font` (Plus Jakarta Sans), `--serif` (Instrument Serif), `--mono` (JetBrains Mono) are loaded.
+- ❌ Don't apply blue-tinted text via `--blue3` (#60A5FA) on light backgrounds without checking contrast — light mode overrides darken it to #1E40AF.
+- ❌ Watch for hardcoded near-white text inside *featured/elevated cards* (e.g. `color: rgba(248,250,252,0.75)`). Looks fine in dark mode, becomes invisible on the light-blue gradient in light mode. Use `var(--muted)` instead.
+- When adding a top nav with back-button + ThemeToggle, use `display: flex; justify-content: space-between` so the toggle sits at the right edge, not glued to the back arrow. **And** make sure `.backLink` is NOT `position: fixed` — fixed positioning yanks it out of the flex flow and the toggle drops below it. Either drop `position:fixed`, or position both via the wrapper instead.
+- For the share page (`/share/[token]`) and any nav strip on a sub-page (e.g. `blog/blog.module.css .nav`), use `var(--nav-bg)` + `var(--nav-text)` — never `rgba(6,12,24,…)` or `var(--text)` on the nav, which goes invisible in light mode.
+
+**Supabase free tier hangs (root cause of most "infinite loading" bugs)**
+- The Supabase free instance sleeps after inactivity → `supabase.auth.getSession()` and queries can stay pending forever (no error thrown).
+- ✅ `AuthProvider.tsx` has a 4s safety timeout that releases `loading=false` only if `getSession()` itself hasn't resolved (Phase 10 fix — it used to fire unconditionally and wipe profile state mid-`loadProfile`). Don't remove it. Don't make it fire mid-fetch.
+- ✅ `AuthProvider.loadProfile` waits for `session.access_token` to be attached (polls up to 2s, 500ms intervals) BEFORE issuing the profile query. Without this, RLS returns 0 rows on cold start, the code thinks "new user", tries to INSERT a free profile, conflicts with the existing Pro row, and `setProfile` never runs. The "Account" placeholder in the nav was this bug. Don't refactor `loadProfile` to skip the JWT wait.
+- ✅ `AuthProvider.onAuthStateChange` does NOT wipe state on a SIGNED_OUT event when `sb-*` tokens are still in localStorage. That signature distinguishes a real sign-out (our `signOut()` clears those tokens first) from a transient token-refresh failure during cold start. Without this, navigating between pages occasionally logged the user out cosmetically. Don't remove the localStorage check.
+- ✅ Background recovery: a separate effect in AuthProvider polls `loadProfile` every 4s while `user` is set but `profile` is null. Self-heals if all in-flight retries happened during the worst of the cold start. Don't remove.
+- ✅ `signOut` is fire-and-forget (`window.location.replace('/')` runs immediately, doesn't wait for `supabase.auth.signOut()`). It also synchronously deletes every `sb-*` / `supabase.auth*` key from localStorage BEFORE the redirect. The token-clearing is what makes the SIGNED_OUT vs transient-failure distinction work — don't break that order.
+- ✅ Pages that fetch user data (dashboard, settings, pack, project, /app) should:
+  1. Use `useAuth()` from AuthProvider — never call `supabase.auth.getSession()` directly for auth state inside a page useEffect (only call it to **wait for the JWT to be attached** before firing data queries).
+  2. `if (authLoading) return` early.
+  3. `if (!user) router.replace('/login')` — never spinner-on-no-session.
+  4. Before any `supabase.from(...)` query in the data-load function, do `const { data: { session } } = await supabase.auth.getSession(); if (!session?.access_token) return false` — treat missing JWT as a retryable failure. The dashboard `loadData` and /app projects effect both follow this pattern (added Phase 10). Without it, queries fire unauthenticated, RLS silently returns `[]`, and the page renders blank with no error.
+  5. Add an 8s `setTimeout` safety to force `setLoading(false)` even if data fetch hangs.
+- ✅ `/api/ping` exists to keep Supabase warm; user has UptimeRobot hitting it every 5 minutes.
+
+**Stripe**
+- Test-mode and live-mode subscriptions DO NOT cross over. Switching the keys from `sk_test_` → `sk_live_` invalidates all test-mode subscriptions silently.
+- Don't compare `priceId` against `STRIPE_TEAM_PRICE_ID` (which holds a `prod_` ID in `.env.local`). Use `NEXT_PUBLIC_STRIPE_TEAM_PRICE_ID` (real `price_` ID) and include the annual variant in the check.
+
+**Auth Provider**
+- `getSession()` AND `onAuthStateChange` both run on mount and can both call `loadProfile`. This is intentional (race condition that resolves itself in prod). Don't "optimize" it.
+- `loadProfile` retries once after 1.5s if the first fetch returns a hard error (Supabase cold-start). Don't remove the retry — without it, downstream pages see `profile = null` and treat a Pro user as Free until next refresh.
+- **The flash tool (`src/app/app/page.tsx`) NOW uses `useAuth()`** (changed in Phase 9 — previous "leave alone" rule is obsolete). The reason for the swap: the page's old self-managed `getSession()` was async and ran AFTER initial render, so a logged-in Pro user would briefly see "Free pack used" + EN-only language locks while the session resolved. Reads `user`, `profile`, `loading: authLoading` from useAuth and derives `isLoggedIn`, `plan`, `usesLeft` from those — no local auth state. While `authLoading` is true, all guest CTAs ("Free pack used", "1 free pack", post-flash guest banner) are hidden behind a neutral "Loading account…" hint to prevent flashing the wrong UI.
+
+**Email (Resend)**
+- All email sends are fire-and-forget with `.catch(() => {})`. They must not block UI. The Resend SDK is lazy-instantiated inside the route handler — never at module top-level (build fails when `RESEND_API_KEY` is missing in CI).
+
+**Workflow**
+- ❌ **Ne JAMAIS supprimer `.next` ni lancer `npx next build` pendant qu'un serveur `npm run dev` tourne.** Le serveur garde en mémoire une carte des routes qui ne correspond plus au disque → il répond 404 sur des routes qui existent (vécu le 2026-07-10 : `/api/account/me` en 404 permanent, profil jamais chargé, "Account" affiché en continu dans la nav — une matinée de confusion). ✅ Tuer le serveur d'abord, builder, puis relancer `npm run dev`.
+- ⚠️ Le port 3000 peut être occupé par un AUTRE projet du user (Hookviral tourne souvent dessus). Next bascule alors MeetingFlash sur 3001 automatiquement. Avant de déboguer "le site ne se met pas à jour", vérifier QUEL site répond sur le port testé (`curl -s localhost:3000 | grep -o 'MeetingFlash\|Hookviral'`).
+- La clé SSH GitHub du user a une passphrase non stockée dans le trousseau → `git push` impossible depuis une session Codex. C'est le user qui pousse depuis son terminal.
+- After non-trivial changes, run `npx tsc --noEmit` before committing. Never skip it.
+- Always commit with HEREDOC for the message body. Never use `--no-verify` or `--amend` on pushed commits.
+- The user is non-coder. Explain in plain language *what* changed and *why*, not *how*. Avoid jargon ("Promise.race") in user-facing replies.
+
+---
+
+## Product
+Post-meeting execution SaaS. Transforms raw meeting notes into a complete
+Execution Pack in under 20 seconds. Users paste raw notes and get 7 structured
+outputs: decisions, action items, open questions, risks, follow-up email,
+Slack message, and next agenda.
+
+Target: agencies, freelancers, small product teams who want to eliminate
+post-meeting admin work. Key differentiator vs ChatGPT: zero prompts required,
+persistent project memory, structured ready-to-use outputs.
+
+**Current status:** en production sur Vercel — la refonte D.A. complète + le durcissement sécurité + le login personnalisé ont été poussés le 2026-07-10 (19 commits). Stripe live. Emails Resend actifs. Search Console réclamé (premières données : impressions ×20 en 6 semaines, position moyenne ~60 — le levier est l'autorité/backlinks, campagne annuaires faite le 2026-07-10 via BACKLINKS.md).
+
+---
+
+## Tech Stack
+- **Frontend:** Next.js 14 App Router + TypeScript
+- **Styling:** CSS Modules (no Tailwind)
+- **Auth:** Supabase Auth (Google OAuth + email/password)
+- **Database:** Supabase PostgreSQL + RLS
+- **AI:** Anthropic Codex API (Codex-sonnet-4-20250514) with prompt caching
+- **Payments:** Stripe (subscriptions) — apiVersion: 2026-03-25.dahlia
+- **Email:** Resend — `hello@meetingflash.work` — domaine vérifié, compte réactivé (2026-05-15), emails live. Routes internes protégées par `x-internal-key: CRON_SECRET`.
+- **Deployment:** Vercel
+
+---
+
+## Design System
+**La référence complète est `DESIGN-SYSTEM.md` à la racine (adopté 2026-07-04). Toute modification visuelle s'y conforme.** Résumé :
+- Palette propriétaire "Flash Blue" (plus AUCUN hex Tailwind) : fond encre `#0A101F`, accent `#2E62FF`, accent texte `#7C9BFF`, spark `#FFC53D` (1 dose max par page), états sémantiques `--success/--warning/--danger` (+ variantes `-text/-soft/-border`)
+- Les alias historiques `--blue/--blue2/--blue3/--green/--amber/--red` existent encore, mappés sur la nouvelle palette — les retirer à terme
+- Typo : **titres H1/H2/prix en Instrument Serif 400** (voix display), corps/UI en Plus Jakarta Sans (400-700 seulement, 300/800 non chargés), JetBrains Mono pour les données. Échelle typo/espacements/radius en tokens dans globals.css
+- **Icônes : Lucide uniquement** (`lucide-react`), strokeWidth 1.75, tailles fixes, `aria-hidden` — JAMAIS d'emoji comme icône, marketing ET produit (migration produit faite 2026-07-10 : `<BlockIcon />` remplace l'ancien map emoji BLOCK_ICONS, supprimé de packMeta.ts ; ActionTiers/ThemeToggle/dashboard/search/project/pack en Lucide).
+- Interdits (liste complète dans DESIGN-SYSTEM.md §7) : gradient text, tableau ✕/✓ concurrent, titres staccato "X. Y. Z.", `<br />` dans les headings, hex hors globals.css, styles inline marketing
+- All CSS variables defined in `src/styles/globals.css`
+- Dark/light theme via `[data-theme="light"]` on `<html>` — CSS vars override in globals.css
+
+### Design Decisions (do not revert)
+- Ambient glow blobs: opacity ~0.22 (NOT 0.12 — was too subtle, intentionally bolder)
+- Pricing featured card: elevated with `translateY(-4px)` + double box-shadow glow
+- Logo bar label: "Works alongside your existing stack" (NOT "Trusted by teams using")
+- Logo bar tools: meeting tools only (Zoom, Teams, Google Meet, Loom, etc.) — no Stripe/Vercel
+- Nav logo: 36px (NOT 28px — was too small). Re-vérifié 2026-07-10 (le 28px avait été réintroduit par erreur).
+
+---
+
+## All Pages & Routes
+src/
+├── app/
+│   ├── page.tsx                     ← Landing page (hero, live demo, ProductShowcase, features, compare, agencies, outcomes, pricing, FAQ, founder note)
+│   ├── pricing/                     ← /pricing standalone page (server) + PricingClient (client island for monthly/annual toggle)
+│   ├── for-agencies/                ← /for-agencies SEO landing (ICP-targeted)
+│   ├── for-product-teams/           ← /for-product-teams SEO landing (ICP-targeted)
+│   ├── for-freelancers/             ← /for-freelancers SEO landing (ICP-targeted)
+│   ├── tools/
+│   │   ├── follow-up-email-generator/        ← Free-tool SEO landing → /app
+│   │   ├── meeting-action-items-extractor/   ← Free-tool SEO landing → /app
+│   │   └── discovery-call-recap-tool/        ← Free-tool SEO landing → /app
+│   ├── not-found.tsx                ← Global 404 page (popular-pages cards, noindex)
+│   ├── layout.tsx                   ← Root layout + AuthProvider + Analytics + theme FOUC script
+│   ├── app/page.tsx                 ← Flash tool (main product)
+│   ├── blog/
+│   │   ├── page.tsx                 ← Blog index (4 articles)
+│   │   └── [slug]/page.tsx          ← Article page (static)
+│   ├── dashboard/
+│   │   ├── page.tsx                 ← Dashboard (recent packs + projects tabs)
+│   │   ├── pack/[id]/page.tsx       ← Pack detail + task tracker
+│   │   ├── project/[id]/page.tsx    ← Project memory (decisions + tasks)
+│   │   ├── search/page.tsx          ← Smart search across meetings
+│   │   └── settings/page.tsx        ← Account settings
+│   ├── api/
+│   │   ├── flash/route.ts           ← Core AI route (Codex API)
+│   │   ├── checkout/route.ts        ← Stripe checkout session
+│   │   ├── webhook/route.ts         ← Stripe webhook handler
+│   │   ├── email/
+│   │   │   ├── welcome/route.ts     ← Welcome email via Resend (new accounts)
+│   │   │   └── nudge/route.ts       ← Upgrade nudge email (free limit reached)
+│   │   └── cron/
+│   │       └── reset-uses/route.ts  ← Monthly reset of uses_this_month (Vercel cron)
+│   ├── auth/callback/route.ts       ← OAuth callback → redirect /
+│   ├── login/page.tsx               ← Login (email + Google OAuth)
+│   ├── signup/page.tsx              ← Signup
+│   ├── share/[token]/page.tsx       ← Public shareable pack + sticky CTA banner
+│   ├── privacy/page.tsx             ← Privacy Policy
+│   └── terms/page.tsx               ← Terms of Service
+├── components/
+│   ├── MobileNav.tsx                ← Nav with auth state + dark/light toggle
+│   ├── HeroCta.tsx                  ← Smart CTA (4 states based on auth)
+│   ├── ProductShowcase.tsx          ← 3-tab static mockups on landing page (App / Dashboard / Pack)
+│   └── FooterAccount.tsx            ← Footer with dynamic auth state
+└── lib/
+    ├── supabase.ts                  ← Supabase client singleton
+    ├── AuthProvider.tsx             ← Global auth context (useAuth hook)
+    └── blog.ts                      ← Blog articles data (4 articles, static)
+
+---
+
+## Important Decisions
+
+### Authentication
+- Handled via Supabase Auth (Google OAuth + email/password)
+- Google OAuth consent screen branded as "MeetingFlash" (verified, in production) — authorized domains include `meetingflash.work`, `supabase.co`, and Vercel preview domains
+- Global session managed by `AuthProvider.tsx` — every page uses `useAuth()`. The earlier exception for `/app` was removed in Phase 9; do not reintroduce a self-managed `getSession()` in any page.
+- After login/signup: redirect to `/?welcome=1` (pas `/dashboard`) — le param déclenche le WelcomeToast puis est strippé de l'URL
+- OAuth callback route: `src/app/auth/callback/route.ts` — also enforces single-method auth post-OAuth (see "Single-method auth enforcement" below).
+- `AuthProvider` calls both `getSession()` AND `onAuthStateChange` — both can call `loadProfile` simultaneously (known race condition in prod, do not change without testing). `loadProfile` is idempotent on the result (only `setProfile` when data exists), so two concurrent calls don't fight.
+- `signOut` in AuthProvider: fire-and-forget `supabase.auth.signOut()`, then synchronous wipe of every `sb-*` / `supabase.auth*` key from localStorage, then `window.location.replace('/')`. The synchronous localStorage wipe is **load-bearing** for the transient-SIGNED_OUT distinction (see Mistakes section above). Don't await the Supabase call; don't reorder the wipe.
+- **Always use the canonical `useAuth().signOut`.** `dashboard/page.tsx` and `settings/page.tsx` previously had their own local sign-out that awaited `supabase.auth.signOut()` and could hang when Supabase slept. Both now call `useAuth().signOut` directly. `settings/page.tsx`'s `deleteAccount` also finishes by calling the canonical signOut. Don't reintroduce local awaiting sign-out paths.
+- **Welcome email trigger:** when `loadProfile` creates a new profile (first time, no existing row CONFIRMED via PGRST116 with the JWT attached), it calls `fetch('/api/email/welcome', ...)` fire-and-forget (avec le header `x-internal-key`). Emails live depuis 2026-05-15.
+
+### Password reset + login personnalisation (2026-07-10)
+- **`/forgot-password`** : formulaire email → pré-flight RPC `get_auth_providers_for_email` (compte Google-only → message "use Google", pas d'email envoyé) → `supabase.auth.resetPasswordForEmail(email, { redirectTo: origin + '/reset-password' })` → écran "Check your inbox" (ne révèle pas si le compte existe).
+- **`/reset-password`** : page d'atterrissage du lien email. Attend la session recovery (detectSessionInUrl du client singleton) jusqu'à 5s ; sans session → état "link expired" + lien vers /forgot-password. Soumission : `auth.updateUser({ password })` (min 8 chars + confirmation) → redirect `/?welcome=1`.
+- ⚠️ **Config Supabase requise** : `https://www.meetingflash.work/reset-password` doit être dans Auth → URL Configuration → Redirect URLs (sinon le lien de l'email retombe sur la Site URL). Non gérable via MCP — action manuelle dashboard Supabase.
+- **Salutation post-login** : convention `/?welcome=1`. Le login password (`router.push('/?welcome=1')`) et le callback OAuth (redirect final) la posent ; `<WelcomeToast />` (monté dans le root layout, dans AuthProvider) strippe le param via replaceState, attend le prénom du profil (max 4s puis "Welcome back."), affiche "Good morning, Simon." (serif italique, pilule top-center, auto-dismiss ~5s). Helpers `timeGreeting`/`firstNameOf` dans `src/lib/greeting.ts`.
+- **Salutation dashboard** : bloc `.greetingBlock` en haut de l'onglet Recent — "{timeGreeting()}, {prénom}." + sous-ligne avec le compte d'actions ouvertes.
+- **Fix** : le bouton œil du login ne changeait jamais le `type` de l'input (state présent mais non câblé) — réparé, et les emojis 🙈/👁 des deux pages auth remplacés par Eye/EyeOff Lucide.
+- **Fix sécurité** : le bouton Google du **signup** redirigeait vers `/dashboard` en court-circuitant `/auth/callback` — l'enforcement anti-double-identité ne s'exécutait pas sur ce chemin. Corrigé vers `/auth/callback` (même flux que le login).
+
+### Single-method auth enforcement (Phase 10)
+Prevents a single email from ending up with both a Google identity and an email/password identity, which produced the "name flicker" bug (see Phase 10 in this file).
+- **RPC** `public.get_auth_providers_for_email(check_email text) returns text[]` — `SECURITY DEFINER`, callable by anon. Migration: `supabase/migrations/2026_05_03_get_auth_providers.sql` (must be applied manually). Returns the providers linked to the email or `[]`.
+- **`/signup`**: pre-flight RPC. If providers exist → block with method-specific message ("Use Continue with Google" / "Sign in instead").
+- **`/login` password form**: pre-flight RPC. If providers exist but `'email'` is not in them → block ("This email is registered via Google").
+- **`/auth/callback`**: post-OAuth check. If `user.identities.length > 1` AND any identity was created in the last 60s (`FRESH_MS = 60_000`) → freshly-linked dual identity, sign out + redirect to `/login?error=multi_identity`. Existing legacy dual-identity accounts (no fresh identity) are allowed through to avoid permanently locking them out — they need to be cleaned up via SQL (procedure documented in "Known data issue: dual identities" section). Same freshness gate covers the brand-new-Google-on-existing-email-account case via the RPC.
+- **Login page** reads `?error=use_email | use_google | multi_identity | oauth_failed` from URL and surfaces the appropriate message inline.
+
+### Database (Supabase PostgreSQL)
+Tables: `profiles`, `projects`, `meetings`, `tasks`
+
+Key schema:
+- `meetings.pack` = JSONB with keys: `decisions`, `actions`, `questions`,
+  `risks`, `email`, `slack`, `agenda`, `tasks[]`
+- `meetings.share_token` = string (nullable) — for public share links
+- `profiles.plan` = `'free'` | `'pro'` | `'team'`
+- `profiles.uses_this_month` = integer (reset monthly via Vercel cron)
+- `tasks` = `{ user_id, meeting_id, text, owner, deadline, priority, status }`
+- RLS enabled on all tables
+- Auto-profile creation via `handle_new_user()` trigger
+- **IMPORTANT:** webhook + cron use `SUPABASE_SERVICE_ROLE_KEY` (not anon key) to bypass RLS
+
+### AI — /api/flash
+- Model: `Codex-haiku-4-5-20251001` (Phase 10 swap from `Codex-sonnet-4-20250514` — ~3× faster on this structured-JSON task with comparable quality, since the schema does most of the heavy lifting). Don't revert without measuring; the user feedback was specifically that packs were too slow.
+- max_tokens: 2500 (lowered from 4000 in Phase 10 — the old ceiling almost never got close, and lower budget = faster response).
+- Called via direct `fetch('https://api.anthropic.com/v1/messages')` — NOT the Anthropic SDK
+- Headers: `x-api-key`, `anthropic-version: 2023-06-01`, `anthropic-beta: prompt-caching-2024-07-31`
+- System message has `cache_control: { type: 'ephemeral' }` for prompt caching
+- Rate limiting: 10 requests/minute per IP (in-memory Map, resets on server restart)
+- Response format: raw JSON (no markdown, no backticks) — strips ```json if present
+- Pack includes `tasks[]` array — saved separately to `tasks` table with `status: 'todo'`
+- Tasks insert uses meeting ID from `.select('id').single()` on the meetings insert
+- Saves meeting + tasks to DB if `Authorization: Bearer <token>` header present
+- Supabase client in this route: created per-request with user's auth header, uses `NEXT_PUBLIC_SUPABASE_ANON_KEY`
+- Calls `supabase.rpc('increment_uses', { user_id: user.id })` after each successful flash
+- After increment, fetches profile to check if free user hit 5 uses → sends nudge email (fire-and-forget). The nudge email's literal copy still says "3 free packs" because user said skip email infra changes; update when Resend reactivates.
+- **Server-side language gate:** at the top of the route, if `lang !== 'EN'` we look up the caller's plan via the auth header. Free users / guests get `effectiveLang = 'EN'` (cannot be bypassed by the client). Only `pro` / `team` keep their requested lang. The prompt and the `meetings.lang` insert both use `effectiveLang`, never the raw `lang`.
+
+### Payments (Stripe)
+- Pro: $12/month or $8/month billed annually ($96/yr)
+- Team: **landing card replaced with "Coming soon" + mailto Notify-me CTA.** No checkout button on the page anymore. Stripe price IDs (`NEXT_PUBLIC_STRIPE_TEAM_PRICE_ID` / `_ANNUAL_PRICE_ID`) are still in env so the webhook keeps recognizing existing Team subscribers, but no new Team checkouts can be triggered from the site.
+- Monthly price IDs: `NEXT_PUBLIC_STRIPE_PRO_PRICE_ID`, `NEXT_PUBLIC_STRIPE_TEAM_PRICE_ID`
+- Annual price IDs: `NEXT_PUBLIC_STRIPE_PRO_ANNUAL_PRICE_ID`, `NEXT_PUBLIC_STRIPE_TEAM_ANNUAL_PRICE_ID`
+- **All keys are LIVE mode** (`sk_live_`, `pk_live_`) — real payments active
+- Checkout sends `metadata: { userId, priceId }` — both are needed
+- Checkout: `success_url` → `/dashboard?upgraded=true`, `cancel_url` → `/#pricing`
+- Webhook uses `SUPABASE_SERVICE_ROLE_KEY` (bypasses RLS) — client created fresh per request
+- **Webhook team detection:** checks if priceId is in `[NEXT_PUBLIC_STRIPE_TEAM_PRICE_ID, NEXT_PUBLIC_STRIPE_TEAM_ANNUAL_PRICE_ID]` — covers both monthly and annual
+- On `checkout.session.completed`: updates plan + saves userId to Stripe customer metadata
+- On `customer.subscription.deleted` / `invoice.payment_failed`: looks up by userId from customer metadata, falls back to email
+
+### Plan Gates (truth-in-advertising — every Pro bullet on the landing must hold)
+- **Free** (`profiles.plan === 'free'`):
+  - 5 Execution Packs / month (enforced in `/api/flash` and surfaced in app/settings/dashboard)
+  - **English output only** — UI greys out FR/ES/DE with 🔒 and opens upgrade modal; `/api/flash` server-side overrides `lang` to `EN` for free users (`effectiveLang` in route.ts).
+  - **1 project max** — checked in `dashboard/page.tsx:handleCreateProject` and `app/page.tsx:createProject`; over-limit creation routes user to `/#pricing`.
+  - **No smart search** — `/dashboard/search` checks plan and renders an "Upgrade to Pro" lock screen instead of the search UI.
+  - **No PDF export** — pack page swaps the Export PDF button for a 🔒 link to pricing.
+- **Pro / Team** (`plan === 'pro' || 'team'`): all gates above lift. There is currently no Team-only feature in code; Team is hidden as "Coming soon" on the landing.
+- **DON'T** silently revert any of these gates without also rewriting the corresponding landing-page bullet — they are paired by design (the user explicitly rejected misleading bullets).
+
+### Landing Page Anatomy (conversion-focused — don't revert these copy decisions)
+The landing was rewritten in two pre-launch passes after external reviewer rounds. Each section earns its place; do not re-introduce removed elements without explicit ask.
+- **Hero headline**: "Send a client-ready meeting recap before they finish their coffee." Agency + privacy positioning. Badge above is serif italic with shimmer. Don't rewrite as a generic productivity headline.
+- **No fake testimonials.** Reviewer-flagged as the #1 trust killer for a solo-shipped product. The old "Sarah K. / Marcus T. / etc." block was deleted and must NOT be re-added. If real testimonials arrive, we add them with full names + verifiable links.
+- **No "Watch it work" duplicate demo section.** The Live Demo + ProductShowcase already cover this — a second demo block was reviewer-flagged as redundant.
+- **For Agencies section** (`#agencies`, between `compare` and outcomes): ICP-targeted block with three pain-points (discovery → recap, status updates, project memory) + a Discovery Pack mockup ("Discovery call · Acme Corp" with Decisions / Action Items / Follow-up Email) + CTA "Try it on a discovery call →". The mockup reuses the same premium multi-layer shadow + hover lift pattern as ProductShowcase. Don't dilute by making it generic — the section earns its place by being specific to agencies.
+- **Three outcome cards** (replaced the testimonials slot): "20 minutes back per meeting" / "Every action has an owner" / "Recap before next meeting starts". Honest, claim-based, no fake metrics.
+- **Pro card bullets (6, all backed by code)**: unlimited packs, unlimited projects + project memory, smart search, output in EN/FR/ES/DE, PDF export, priority email support. Free counter-bullets sit right next to it: 5 packs/month, English output, 1 project, copy-to-clipboard. Do not add bullets that aren't actually gated in code (see Plan Gates section).
+- **Team card** = "Coming soon" + `mailto:hello@meetingflash.work?subject=Notify me about Team` CTA. No price, no checkout. (See Payments.)
+- **FAQ section (6 entries)** addresses the most common reviewer objections: accuracy on messy notes, where the data goes, supported languages, cancellation behavior, "built solo" reliability concerns, and why Team is delayed. The "built solo" answer is the trust anchor — keep its tone direct, not defensive.
+- **"From the maker" note** (replaced the old "Built solo and shipping fast" one-liner): named founder Simon, direct `hello@meetingflash.work` email, plain-language. This adds the human/trust dimension reviewers said was missing. Don't replace with growth-hacking copy.
+- **Currency consistency**: Free is `$0` (was `
+` — mixed currencies confused users since Pro is `$12`). All prices on the landing are USD.
+- **Brand mark = `/logo.png` everywhere.** Login, signup, share page, dashboard sidebar, ProductShowcase mockups all use `<Image src="/logo.png" />`. The old "blue square" placeholder is gone — don't re-introduce it on new pages.
+
+### Growth & retention pass (2026-07-04, après la refonte D.A.)
+- **Digest hebdo d'actions ouvertes** : `/api/cron/weekly-digest` (cron Vercel lundi 07:00 UTC, `CRON_SECRET`). Regroupe les tasks `status != 'done'` par user (service role), envoie via Resend le top 8 (P0 d'abord) + CTA dashboard. Opt-out : `profiles.weekly_digest` (migration `2026_07_04_weekly_digest.sql`, **à appliquer manuellement**) ; la route ne skippe que sur `false` explicite donc fonctionne avant migration. Toggle dans Settings → Flash preferences ; champ whitelisté dans `/api/account/update`.
+- **Upload de transcript** sur /app : bouton "Upload transcript" (.txt/.vtt/.srt, 1 MB max) — parsing VTT/SRT client-side dans `parseTranscriptFile` (page.tsx) : strip timestamps/numéros de cue/balises `<v>`.
+- **"Open in Gmail"** sur le bloc email (/app + pack page) : helpers `emailParts`/`gmailComposeUrl` dans `src/lib/packMeta.ts` (extraction de la ligne `Subject:`).
+- **Rendu format destination** : `<EmailPreview />` (carte mail To/Subject/corps) et `<SlackPreview />` (bulle "You · now") sur /app, /share/[token], pack page — même pattern que ActionTiers.
+- **Démo animée du hero** : `src/components/HeroDemo.tsx` (boucle notes → éclair → pack ; statique sous prefers-reduced-motion). Remplace l'ancien MiniBeforeAfter statique.
+- **Print/PDF** : bloc `@media print` dans `pack.module.css` — page blanche, chrome masqué, task tracker masqué, pied "Generated with MeetingFlash".
+
+### Refonte D.A. 2026-07-04 (AUDIT.md → FIXES.md, 15 items livrés)
+- **Section Compare** : le tableau "✕ ChatGPT / ✓ MeetingFlash" est REMPLACÉ par un avant/après factuel (deux timelines chiffrées, H2 "Why not just paste it into ChatGPT?"). Ne pas réintroduire de croix rouges sur les concurrents.
+- **Pricing = un seul composant** : `src/components/PricingCards.tsx` (ex-PricingClient), rendu par `/` ET `/pricing`. La section pricing dupliquée de la landing (qui affichait un "Save 20%" faux — le vrai chiffre est 33%) n'existe plus.
+- **Mockup Discovery partagé** : `src/components/DiscoveryMockup.tsx`, utilisé par la landing et /for-agencies. Ne pas re-dupliquer.
+- **Footer unique** : `src/components/SiteFooter.tsx` (+ Footer.module.css) sur landing + 3 ICP + 3 tools. Logo = `/logo.png` (le carré bleu placeholder est mort). Les classes `miniFooter` ont été supprimées de marketing.module.css.
+- **Titres** : tous les staccato "X. Y. Z." réécrits en phrases complètes (règles DESIGN-SYSTEM.md §6). "Simple. Honest. No surprises." / "Built differently." / "Join teams who…" sont interdits de retour.
+- **H1 /for-agencies** : "The meeting recap tool built for agency client work." — ne plus dupliquer le H1 "coffee" de la home.
+- **Code mort supprimé** : Nav.tsx + Nav.module.css (2e nav jamais importée), Ticker.*, classes .testimonial*/.social*, middleware.ts (no-op qui appelait Supabase sans pont cookies sur chaque requête — si un vrai refresh session serveur est voulu un jour, utiliser @supabase/ssr avec cookie handlers).
+- FAQ landing : `<details>` stylées via page.module.css (.faqItem), icône Plus Lucide qui pivote à l'ouverture. Note fondateur : classes .makerNote/.makerText (serif italique).
+
+### Post-flash Guest CTA (`src/app/app/page.tsx`)
+After a guest finishes their 1 free pack, the CTA copy below the result is: *"That took 20 seconds. Save this pack, and get 4 more like it this month — free, no credit card."* Button label: **"Save this pack"** (not "Create free account" — action-oriented beats generic). This is the conversion moment from guest → free signup; don't soften it back to a generic CTA.
+
+### Activation & Stickiness (don't remove without replacement)
+The user is non-coder, motivated, and worried about retention. These three pieces exist to anchor users into the product and are load-bearing for retention; redesigning them is fine, removing them isn't.
+- **Time-saved toast** (`src/app/app/page.tsx`): after `setPack()`, computes `actionsCount * 3 + 10` minutes (floor 15), renders a top-right gradient card "~X minutes back — That's how long this would've taken to write by hand." auto-dismisses after 6s. This is the wow moment — anchors value at the exact second the user feels it.
+- **Loader messages** rewritten to feel like cognition: "Reading your notes—", "Identifying decisions—", "Mapping owners to actions—", "Drafting your follow-up email—", "Building the next agenda—". Cycles every 1.1s. Don't revert to the old generic "Analyzing transcript—" set.
+- **Open-actions widget** (`src/app/dashboard/page.tsx`, top of "Recent packs" tab): loads up to 20 tasks where `status != 'done'`, renders the top 5 with owner / deadline / meeting title, each row links to the pack page. Hidden when there are zero open tasks. This is the recurring-return hook: "I have 8 open actions sitting there."
+- **ICP-targeted templates** in `app/page.tsx` `TEMPLATES` const: Discovery call (agency → prospect), Client status update, Sprint retro (product team), 1-on-1 (manager ↔ IC). Each is written as a coaching framework, not just a meeting agenda — they prompt the user to capture felt-vs-unsaid, blockers, commitments, so the resulting Pack is meaningfully richer. Don't replace with generic agenda outlines.
+
+### Free Trial Logic
+- Guest (not logged in): 1 free pack via `localStorage('mf_guest_used')`
+- Free plan: 5 packs/month tracked in `profiles.uses_this_month`
+- Reset: Vercel cron job hits `GET /api/cron/reset-uses` on the 1st of each month at midnight
+- Cron protected by `Authorization: Bearer CRON_SECRET` header
+- When limit reached: show upgrade modal (not just an error message)
+
+### Email (Resend) — BLOCKED until domain acquired
+- Routes exist: `/api/email/welcome` and `/api/email/nudge`
+- Both use `from: 'MeetingFlash <hello@meetingflash.work>'`
+- Domain `meetingflash.work` purchased and connected to Vercel
+- All email calls are fire-and-forget with `.catch(() => {})` — fail silently until activated
+- Domain verified in Resend, `RESEND_API_KEY` added to Vercel — account reactivated by Resend on 2026-05-15. Emails are live.
+- `hello@meetingflash.work` created and configured on **ImprovMX** (email forwarding) — 2026-05-15
+- Welcome triggers: `AuthProvider.loadProfile` when inserting new profile
+- Nudge triggers: `/api/flash` after `increment_uses` when `plan === 'free' && uses_this_month >= 3` — the literal "3" mismatch with the new 5-pack limit is intentional (user said don't touch email infra). When Resend reactivates, also bump nudge threshold + the email body copy to "5".
+
+### Dark / Light Mode
+- Toggle button (☀/☾) in MobileNav, desktop and mobile
+- State persisted in `localStorage('mf_theme')`
+- Applied via `document.documentElement.setAttribute('data-theme', ...)`
+- FOUC prevention: inline script in `<head>` in layout.tsx reads localStorage and sets attribute before paint
+- Light theme CSS vars defined in `[data-theme="light"]` block in globals.css
+- **In light mode, blue accents are darkened**: `--blue` → #1D4ED8, `--blue2` → #2563EB, `--blue3` → #1E40AF (otherwise blue3 #60A5FA had poor contrast on white)
+- **Nav-specific vars**: `--nav-bg` and `--nav-text` adapt to theme so the nav doesn't stay dark in light mode
+- All hardcoded colors in MobileNav.module.css were replaced with CSS variables
+
+### Product Showcase
+- `src/components/ProductShowcase.tsx` — 3-tab static mockup on the landing page (after the Live Demo section)
+- Tabs: Flash tool / Dashboard / Pack + Tasks
+- All visuals built with theme variables — adapts to dark/light mode automatically
+- Responsive: stacks columns on mobile, hides sidebar on dashboard mockup, tighter padding
+
+### Blog
+- **14 static articles** in `src/lib/blog.ts` (Article[] data array). Slugs:
+  - `how-to-write-effective-meeting-notes`
+  - `post-meeting-workflow-for-teams`
+  - `how-to-write-follow-up-email-after-meeting`
+  - `meeting-action-items-best-practices`
+  - `how-to-summarize-meeting-notes-with-ai` (AI/automation, broad)
+  - `best-ai-meeting-recap-tools-for-agencies` (comparison, agency ICP)
+  - `discovery-call-recap-template` (agency ICP — links to /app discovery template)
+  - `sprint-retrospective-template` (product team ICP)
+  - `client-status-update-email-template` (agency ICP)
+  - `how-to-write-meeting-minutes-with-ai` (AI/automation — added 2026-06)
+  - `best-ai-meeting-assistants-2026` (Tools — capture-vs-execution landscape, added 2026-06)
+  - `meeting-summary-vs-meeting-minutes` (Productivity — definitional/long-tail, added 2026-06)
+  - `client-follow-up-emails-after-meeting` (Communication — agency ICP, added 2026-06)
+  - `fireflies-vs-otter-vs-meetingflash` (Tools — honest competitor comparison, added 2026-06)
+- Blog index at `/blog`, articles at `/blog/[slug]`
+- `generateStaticParams()` used — pre-rendered at build time
+- Each article ends with a CTA block linking to `/app`, then a 3-card "Related reading" block (`getRelatedArticles()` in blog.ts: same-category first, then fill) — that's the internal-linking surface for SEO
+- Article renderer (`blog/[slug]/page.tsx:parseInline`) supports `[text](url)` markdown links — internal links use Next `<Link>`, external use `<a rel="noopener">`. Inline `**bold**` still works alongside links. Whole-line `**bold**` becomes an emphasized paragraph.
+- "Blog" link added to MobileNav (desktop + mobile)
+
+### Nav (décision utilisateur 2026-07-10 — ne pas retirer)
+- **Le lien "Home" est présent dans la nav desktop (1er lien) ET dans le menu mobile (1re entrée).** Il avait été retiré lors de la refonte D.A. (item 13) au motif que "le logo fait ce travail" ; l'utilisateur l'a explicitement redemandé. Ne plus le supprimer.
+- Titres produit (pack/project/settings `.title`) en Instrument Serif display, comme le marketing.
+
+### HeroCta Labels (src/components/HeroCta.tsx)
+- Guest ou loading → `'Try it free'` + icône ArrowRight (Lucide)
+- Logged in → `'Continue'` + ArrowRight
+- (Hiérarchie verbale unifiée 2026-07-04 : le CTA primaire invité est "Try it free" partout — nav, hero, CTA banners ICP. "Try with sample notes" / "Run your first Flash" retirés.)
+
+### Share Page
+- Public read-only pack view at `/share/[token]`
+- Sticky banner fixed at bottom: "Turn your own meeting notes into an Execution Pack — Try free →"
+- Banner links to `/app`
+- Theme: uses canonical CSS vars (`--bg`, `--surface`, `--nav-bg`, `--blue`, `--amber`, `--red`, `--muted`) and the project fonts (`--font` / `--serif`). Adapts to light/dark. Block category accents = decisions/agenda blue, actions amber, risks red, questions/email/slack muted. Pack-not-found state lives in `.notFound` styles, not inline.
+
+---
+
+## Environment Variables
+NEXT_PUBLIC_SUPABASE_URL
+NEXT_PUBLIC_SUPABASE_ANON_KEY
+SUPABASE_SERVICE_ROLE_KEY               ← used in webhook + cron to bypass RLS
+ANTHROPIC_API_KEY
+NEXT_PUBLIC_APP_URL                     ← used in email links
+STRIPE_SECRET_KEY
+STRIPE_WEBHOOK_SECRET
+NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY
+NEXT_PUBLIC_STRIPE_PRO_PRICE_ID         ← price_xxx (monthly)
+NEXT_PUBLIC_STRIPE_TEAM_PRICE_ID        ← price_xxx (monthly)
+NEXT_PUBLIC_STRIPE_PRO_ANNUAL_PRICE_ID  ← price_xxx (annual)
+NEXT_PUBLIC_STRIPE_TEAM_ANNUAL_PRICE_ID ← price_xxx (annual)
+CRON_SECRET                             ← random string, protects /api/cron/reset-uses
+RESEND_API_KEY                          ← get from resend.com (needs custom domain to work)
+
+---
+
+## Features Completed ✅
+- Google OAuth + email/password auth
+- Flash tool — 7 outputs via Codex API
+- Auto-save packs if logged in
+- Guest free trial (1 pack without account)
+- Dashboard — recent packs + projects tabs
+- Pack hover preview (summary from decisions + actions)
+- Task tracker — todo/in_progress/done per pack
+- Project memory — decisions + tasks across meetings
+- Smart search — full-text across all meetings
+- Shareable recap — public link per meeting + sticky CTA banner
+- Export PDF via window.print()
+- Templates — sprint, client, standup, product
+- Real usage counter from Supabase
+- New project inline in /app
+- Rename/delete/share on packs and projects
+- Multi-select for batch delete
+- Settings page — profile, plan, usage, delete account
+- Mobile responsive — hamburger nav
+- MobileNav + FooterAccount with auth state via useAuth
+- Stripe checkout + webhook (all 3 events handled, team detection covers monthly + annual)
+- Rate limiting on /api/flash (10 req/min per IP)
+- Prompt caching on Codex API (~80% cost reduction)
+- Upgrade modal when free limit reached
+- Annual/monthly pricing toggle — wired to Stripe annual Price IDs
+- SEO meta tags + OpenGraph in layout.tsx
+- Vercel Analytics (`<Analytics />` in layout.tsx)
+- Monthly usage reset — Vercel cron job (1st of month, midnight)
+- Dark/light mode toggle — nav button, localStorage, FOUC-free
+- Blog — 4 SEO articles, static, linked from nav
+- Email routes (Resend) — live (welcome, nudge, weekly digest), protégées par secret interne
+- Sitemap + robots.txt for SEO indexing (`src/app/sitemap.ts`, `src/app/robots.ts`). **robots.txt only disallows `/api/` and `/auth/`** (functional endpoints that should never be crawled). Private/auth pages — `/dashboard/*`, `/login`, `/signup`, `/share/[token]` — are kept out of the index via `robots: { index: false, follow: false }` **metadata**, NOT via a robots.txt block. Reason (fixed 2026-07): a robots.txt Disallow prevents Google from crawling the page to *see* the noindex tag, which produced the "Indexed, though blocked by robots.txt" warning in Search Console (flagged `/dashboard`). Crawl must be allowed for noindex to take effect. `/dashboard/*` gets its noindex from `src/app/dashboard/layout.tsx`; `/login` + `/signup` from their `layout.tsx`; `/share/[token]` from its page metadata. Don't re-add these paths to the robots Disallow list.
+- Dynamic OpenGraph image at `/opengraph-image` (1200×630, generated edge-runtime via `next/og` in `src/app/opengraph-image.tsx`) — used by home page; blog posts reference it as their fallback image
+- Structured data (JSON-LD): `Organization` site-wide (root layout), `WebSite` + `SoftwareApplication` + `FAQPage` on home (`page.tsx` — FAQ data lives in `FAQ_ITEMS` const, used by both the JSX and the JSON-LD; keep them in sync), `BlogPosting` on each article (`blog/[slug]/page.tsx:articleJsonLd`)
+- Canonical URLs on every public page via `alternates.canonical` in metadata (root, `/app`, `/blog`, `/blog/[slug]`); `/login`, `/signup`, `/share` are `noindex` instead
+- **Canonical host = `https://www.meetingflash.work` (WITH www).** The primary domain in Vercel is www; the non-www apex 301-redirects to it. ALL in-code SEO signals must use www: `SITE_URL`/`metadataBase` in layout.tsx, sitemap.ts `base`, robots.ts `sitemap`+`host`, and every hardcoded OpenGraph URL / JSON-LD `@id`/`url`/`item` across the ICP, tool, blog, and pricing pages. Fixed 2026-06-19 — previously everything declared non-www, which caused Search Console's "Duplicate without user-selected canonical" and split ranking signals across the two hosts. Don't reintroduce bare `https://meetingflash.work` URLs. (Production Vercel env `NEXT_PUBLIC_APP_URL` should also be the www host so email links + Stripe portal returns don't take an extra redirect hop.)
+- Per-route metadata via dedicated `layout.tsx` for client pages (`/app/layout.tsx`, `/login/layout.tsx`, `/signup/layout.tsx`) — these client pages can't export metadata themselves
+
+### ICP landing pages + standalone /pricing (SEO Phase 3)
+- **Shared styles** in `src/styles/marketing.module.css` — used by `/for-agencies`, `/for-product-teams`, `/for-freelancers`, and (partially) `/pricing`. Don't duplicate hero/section/card/mockup/FAQ classes per page; extend the shared module instead.
+- **`/for-agencies`, `/for-product-teams`, `/for-freelancers`** are full SEO landings: hero with ICP badge + agency/team/freelancer-specific headline, 4 meeting-type cards, pain-point + Discovery/Sprint/Client mockup split, ICP-specific FAQ (5 entries each, also exposed as `FAQPage` JSON-LD), CTA banner, mini-footer. Each has `WebPage` + `FAQPage` JSON-LD. Mockup uses the same multi-layer shadow language as ProductShowcase.
+- **`/pricing` standalone** = server component for metadata + `Product` JSON-LD with all 3 offers (Free, Pro Monthly, Pro Annual) + `FAQPage`. Toggle is in `PricingClient.tsx` (client island) with monthly/annual + Stripe checkout call. Pricing-specific module at `src/app/pricing/pricing.module.css`. The Team card here matches the landing rule: "Coming soon" + Notify-me mailto, no checkout button.
+- **All `/#pricing` redirects updated to `/pricing`** site-wide: dashboard upgrade buttons, settings upgrade, search Pro lock, pack PDF gate, Stripe `cancel_url`, nudge email CTA, Nav.tsx + MobileNav. The on-page `#pricing` anchor on the landing still exists as a deep-link fallback but new code should target `/pricing`.
+- **Sitemap** includes the 4 new pages with priorities: `/pricing` 0.85, `/for-*` pages 0.8 each.
+- **Footer** on landing has a new "Use cases" column with the 3 ICP pages. MobileNav (mobile menu) also lists them.
+
+### Free-tool SEO landings + 404 (SEO Phase 4)
+- **`/tools/follow-up-email-generator`, `/tools/meeting-action-items-extractor`, `/tools/discovery-call-recap-tool`** are single-purpose SEO landings that target long-tail tool queries ("free follow-up email generator", "extract action items from meeting notes", "discovery call recap tool"). Each has hero, "how it works" or example mockup, FAQ, CTA → `/app`. Each declares `WebApplication` JSON-LD (free Offer, applicationCategory: BusinessApplication) + `FAQPage` JSON-LD. Each cross-links to the others, to the related blog article, and to the related ICP page. They reuse `marketing.module.css` — no new CSS module.
+- **The `/app` flash tool is the same destination** — the `/tools/*` pages are framing layers that match a specific search intent and convert to the same /app entry point. Don't build a new tool route per landing — reuse /app.
+- **Sitemap** includes all 3 tool pages at priority 0.75.
+- **Footer** on landing has a new "Free tools" column listing all three. (MobileNav doesn't list them — the menu would get too long; footer is enough for crawl discovery.)
+- **`src/app/not-found.tsx`** = global 404 with `noindex, follow` — a styled page with 4 popular-page cards (/app, /pricing, /blog, /for-agencies) so visitors who land on a broken link have routes back into the funnel. The `follow` directive lets Google still crawl the links from this page.
+
+### Performance + advanced schemas + a11y (SEO Phase 5)
+- **All `<img src="/logo.png">` migrated to `next/image`** across MobileNav, ProductShowcase, login/signup/dashboard/share/app pages. Critical above-the-fold logos (nav, auth, dashboard) get `priority`. Auto-generates WebP/AVIF, lazy-loads non-critical, sized-attribute reservation prevents layout shift (CLS Core Web Vital).
+- **`viewport` export** in root layout: `themeColor` adapts dark/light, mobile width/scale set explicitly. Mobile address-bar matches the theme.
+- **Preconnect / dns-prefetch** in root layout `<head>`: Google Fonts (preconnect with crossOrigin), Anthropic API + Stripe (dns-prefetch). Browser opens TLS sessions in parallel with HTML parse — faster first interaction.
+- **Web App Manifest** at `/public/manifest.json` (referenced from root metadata `manifest: '/manifest.json'`) — name/short_name/description, start_url `/app`, theme_color, icons. Signal "real app" to crawlers + lets users "Add to home screen". The `/logo.png` icon is set with `purpose: 'maskable'`.
+- **`prefers-reduced-motion: reduce`** block in `globals.css` — kills all animations / transitions / smooth-scroll for users who request reduced motion. Lighthouse a11y boost + accessibility correctness.
+- **`BreadcrumbList` JSON-LD** added to: blog articles (Home → Blog → Article), each ICP page (Home → For X), each tool page (Home → Free tools → Tool name), `/pricing` (Home → Pricing). Helper at `src/lib/breadcrumb.ts:buildBreadcrumb()` — pass an ordered array of `{name, path}` crumbs; Home is auto-prepended. Google may render breadcrumbs in SERPs (CTR boost).
+- **Search Console verification** : token actif dans le root layout (`verification: { google: ... }`), propriété réclamée.
+
+### Quality refinements — output upgrade + active memory (Phase 7)
+This phase pivoted the perceived value of a Pack from "structured summary" to "senior-analyst brief". Don't dilute these without an explicit reason.
+
+- **Executive Snapshot** (`pack.snapshot`) — new field at the top of every Pack. The prompt asks Codex to produce a 2-3 sentence senior-consultant brief: what just happened, the cardinal risk, the next critical move — with specific names/numbers from the notes. Rendered as a gradient blue card *above* the regular blocks in `/app`, `/share/[token]`, and `/dashboard/pack/[id]`. Included in "Copy All". This is the wow moment now — not the speed.
+- **P0 / P1 / P2 priority tiers** in the `actions` block — the prompt forces a single string with three inline section headers ("P0 — Blockers", "P1 — Commitments", "P2 — Maintenance"), each followed by `•` items. Empty sections are skipped. **Critical**: `actions` MUST be a single string, NOT a JSON object — Codex will sometimes try to return it as `{P0: ..., P1: ..., P2: ...}` and the React renderer would crash with "Objects are not valid as a React child". Two layers of defense: (1) the prompt repeats "actions is one string" multiple times; (2) `packFieldToString()` in `src/lib/supabase.ts` defensively coerces any object/array back to a clean line-broken string. ALWAYS render Pack fields through `packFieldToString` — never `pack.field` directly.
+- **Differentiated tones** — the prompt now imposes 3 registers: `email` = agency-premium client-facing (warm but specific, references a detail from the call, no template phrases like "I hope this email finds you well"), `slack` = casual-direct internal team voice with optional emojis, `agenda` = strategic with "why it's on the agenda" framing (not "Status update / Q&A").
+- **Risks + Mitigation** — every risk bullet is followed by a `Mitigation:` line on the next line. The prompt enforces this with a literal format example.
+- **Inferred Open Questions** — the `questions` block now includes BOTH explicit questions AND implicit gaps (missing approvers, unconfirmed dependencies, unscoped commitments) prefixed with `Inferred:`. This is the one piece with hallucination risk — monitor user feedback.
+- **Active memory (cross-meeting context)** — when `projectId` is set, `/api/flash` fetches three things from the project and injects them as a "PROJECT MEMORY" preamble: (1) the project's free-text `notes` field as a "PROJECT BRIEF" sub-block at the top (added in Phase 9 — long-running context like client info, tone, do's/don'ts), (2) the last 5 meetings' decisions, (3) all non-done tasks from those meetings. The prompt instructs Codex to cross-reference: progress on prior commitments, surface still-open items as inferred questions if not addressed, flag prior decisions being revisited. **This is the moat vs ChatGPT** — ChatGPT has no access to prior context. DB errors during the memory fetch are caught silently (try/catch) so a broken query never blocks a flash.
+
+### Bug fixes shipped with Phase 7
+- **Sign-out reliability fix** in `AuthProvider.signOut` — `supabase.auth.signOut()` is fire-and-forget but races against `window.location.replace('/')`. If the redirect fired before Supabase cleared its localStorage tokens, the next page load restored the session and "sign out" silently failed. Fix: synchronously delete every `localStorage` key starting with `sb-` or containing `supabase.auth` BEFORE the redirect. Don't undo this — the symptom was hard to debug.
+- **HeroCta simplified to 2 states** — was 4 states (signed-out × guest-used / signed-in × meeting-count). User feedback: inconsistent, confusing. New rule: signed-out OR loading → "Try with sample notes →"; signed-in → "Continue →". Reflects real intent: a logged-in user already has account context, the CTA should simply send them to the tool. Don't restore the meeting-count branch — it caused regressions on cold cache.
+- **Defensive Pack rendering** via `packFieldToString` (helper in `src/lib/supabase.ts`) — coerces any field (string / object / array / null) to a safe newline-joined string. Used in `/app`, `/share/[token]`, `/dashboard/pack/[id]`. Prevents the recurring "Objects are not valid as a React child" crash when Codex returns a structured field.
+- **Dashboard pack detail JSX bug** in `dashboard/pack/[id]/page.tsx` — the `.blockContent` div was rendering the literal string `: meeting.pack?.[block.id] ?? '—'` (missing JSX `{}` braces, pre-existing). Fixed by wrapping in `{packFieldToString(...)}`.
+- **Stale "3 free packs" copy in /app** (`src/app/app/page.tsx:613`) — the post-flash guest CTA said "Create account for 3 more →" from the era when Free was 3 packs/month. Bumped to "Create account for 5 more →" to match the actual Free plan (5 packs/month). NOTE: the matching copy in the welcome + nudge **emails** is intentionally still "3" — see the P0 roadmap entry. The email copy gets bumped when Resend reactivates the account; the in-app UI copy was the only one safe to fix independently.
+
+### "For" dropdown in nav (visibility for ICP pages)
+- ICP pages (`/for-agencies`, `/for-product-teams`, `/for-freelancers`) were buried in the footer only — feedback was they felt hidden. Added a "For ▾" dropdown in the desktop nav (`MobileNav.tsx:forWrap` / `forMenu`). Mobile menu already lists them flat. The dropdown closes on outside click (handler in `MobileNav` useEffect). Don't replace this with 3 inline links — the desktop nav is already at capacity; a dropdown groups them semantically.
+
+### ICP → /app template prefill (Phase 8a)
+The 3 ICP pages were "marketing only" — same `/app` for everyone. Now each ICP CTA sends to `/app?template=<slug>` and the textarea auto-fills with the matching template on mount.
+- Mapping: `/for-agencies` → `?template=discovery`, `/for-product-teams` → `?template=retro`, `/for-freelancers` → `?template=status`. The 1-on-1 template stays available via the in-app templates dropdown but isn't an ICP-page entry point.
+- Slug map lives in `src/app/app/page.tsx:TEMPLATE_SLUG_MAP` (URL-safe slugs → TEMPLATES keys). `useEffect` on mount reads `window.location.search` (no `useSearchParams`, avoids the Suspense boundary requirement).
+- Each ICP page now delivers something concrete: a pre-filled call template, not just a generic redirect. Don't revert to plain `/app` links — that's what made the pages feel like dead-end content marketing.
+
+### Premium P0/P1/P2 priority view (Phase 8b)
+The `actions` block parses its string client-side into 3 visually distinct tier cards.
+- Helper `parseActionTiers(text)` in `src/lib/supabase.ts` — robust to header variations (`P0 — Blockers`, `P0 -`, `P0:`), strips bullets, returns `{ p0, p1, p2, unsorted }`. The `unsorted` bucket catches items Codex emitted before any tier header (fallback rendering).
+- **Single shared component** `<ActionTiers />` at `src/components/ActionTiers.tsx` + `ActionTiers.module.css` — used by `/app`, `/share/[token]`, `/dashboard/pack/[id]`. Renders P0 with red gradient + 🔴 icon, P1 with amber + 📌, P2 muted + ○. Counts shown as pill badges. Falls back to plain text if `total === 0` (Codex skipped headers). Server-component compatible (no hooks). Don't recreate per-page copies — Phase 8 originally had 3 duplicated locals; the refactor consolidated them.
+- Light-mode tier colors are darkened via `:global([data-theme="light"])` overrides for contrast.
+- Don't revert to a single text block — the visual hierarchy is the whole point of the priority work.
+
+### Inferred-Question badge (Phase 8b cont.)
+The `questions` block has its own renderer `<QuestionsView />` at `src/components/QuestionsView.tsx` (+ module CSS) that parses each line and visually distinguishes items prefixed with `Inferred:` (gaps the tool surfaced from absences in the notes — see Phase 7 prompt) from explicit questions raised in the call.
+- Inferred items render with: 💭 icon, blue tinted background, blue left border, an "INFERRED" pill badge inline with the text. Explicit questions render plain with a "?" round dot.
+- The "Inferred" treatment is the visual hook that signals the tool actually thought about the meeting, not just extracted text. Don't remove it — Phase 7 went to the trouble of inferring those items in the prompt; the UI must surface that effort.
+- Used in `/app`, `/share/[token]`, `/dashboard/pack/[id]` via the shared component.
+
+### Template-loaded banner on /app (Phase 8a cont.)
+When `/app?template=<slug>` prefills the textarea (from an ICP-page CTA), a dismissible banner appears above the textarea: 📋 icon + "{TemplateName} template loaded — replace the bracketed placeholders with your actual notes." + ✕ dismiss button.
+- State `templateBanner` holds the readable template name; `setTemplateBanner(null)` on dismiss. Animation reuses `blockIn` keyframe.
+- Without this banner the textarea looked pre-filled-for-no-reason, which felt confusing. Don't ship the prefill without the banner — they're paired UX.
+
+### PWA polish (Phase 8c)
+- iOS-specific metadata in root layout (`appleWebApp.capable: true`, `statusBarStyle: 'black-translucent'`, `formatDetection.telephone: false`) → "Add to Home Screen" on iPhone gives a real fullscreen app feel, no auto-linking phone numbers.
+- Service worker at `public/sw.js` — minimal cache-first strategy for static assets only (`/manifest.json`, `/favicon.png`, `/logo.png`, plus regex match on image/font extensions). API routes (`/api/`) and auth (`/auth/`) bypass the SW entirely (always network — the app needs fresh AI/auth responses). Versioned via `CACHE_NAME = 'meetingflash-v1'` — bump the version on breaking changes.
+- Registration via `<SwRegister />` client component (rendered in root layout body). Only registers in production (`NODE_ENV === 'production'`), only if `serviceWorker` is supported, errors swallowed silently. Don't await the registration — it must never block the UI.
+- ⚠️ NOT yet done: a proper "maskable" icon with safe-area padding. The current `/logo.png` is set with `purpose: 'maskable'` in the manifest but it's a square image without inner safe area, so it'll get cropped on circular Android masks. To fix: regenerate `/logo.png` with the icon centered inside the inner 80% of a 512×512 canvas. Defer until you have actual install metrics that show this matters.
+
+### Phase 9 — /app auth fix, integrated projects, dashboard cold-start recovery, project notes
+This phase tackled 4 reported bugs + 1 product upgrade in one pass.
+
+- **/app now uses `useAuth()`** (replaces the page's old self-managed `getSession()` + local `isLoggedIn`/`plan`/`usesLeft` state). Reason: a logged-in Pro user briefly saw "Free pack used" + EN-only language locks because the local async auth hadn't resolved by first render. With useAuth, those values are derived synchronously from React context. This OVERRIDES the previous "leave alone" rule in the Auth Provider section above. While `authLoading` is true, all guest CTAs (the bottom hint, the post-flash "Save this pack" banner) are hidden behind a neutral "Loading account…" placeholder so the wrong UI never shows.
+- **Clear button on /app** — small red-tinted "Clear ✕" button next to "Load sample" in the input header, visible only when the textarea has content. Clears text + dismisses any active template banner + clears errors in one click. Pattern lives in `src/app/app/app.module.css:.clearBtn`.
+- **Project UX integration on /app** — when a project is selected the dropdown stays visible (so the user can switch projects on the fly), but: (1) the select gets a blue tint via `.selectActive` class to signal context-mode, (2) the "+ New" button disappears (you're already in a project; deselect first to make another), (3) the field label appends "· memory active (last 5 meetings injected)" so the user understands what selecting a project changes. Don't revert to a static dropdown — the active-tint + memory hint is the visual feedback that makes the persistent-context feature legible.
+- **Project notes (long-running context)** — new `notes` text column on `projects` (migration in `supabase/migrations/2026_05_02_add_project_notes.sql` — must be applied manually in Supabase SQL editor). Edited on `/dashboard/project/[id]` Overview tab via a "🧠 Project notes" card at the top with Edit/Save flow. Injected into `/api/flash` as a new "PROJECT BRIEF" block at the top of PROJECT MEMORY when projectId is set — this comes BEFORE prior decisions and open tasks because it's the most-stable context. Use case: client name + roles, deal size, tone preferences, do's/don'ts that should colour every meeting recap. This is what turns a project from a "tag" into a real client dossier.
+- **Dashboard cold-start recovery** — `loadData` no longer blindly calls `setMeetings([])` / `setProjects([])` on Supabase errors (the previous behaviour silently wiped visible state when the free-tier instance was sleeping). Now: returns boolean ok/fail, retries once after 1.5s on hard error, and on persistent failure surfaces a yellow "Couldn't load your data — Retry" banner above the dashboard header instead of a blank page. Same defensive retry pattern applied to `dashboard/settings/page.tsx` (fixed the "my saved name disappeared" bug — same root cause) and to `AuthProvider.loadProfile` (so the profile/plan doesn't come back null on cold-start, which would cascade into Pro-being-shown-as-Free everywhere).
+- **Select button hidden when there's nothing to select** — on `/dashboard`, the "Select" button only renders if the active tab has at least one item (`meetings.length > 0` for recent, `projects.length > 0` for projects). Don't restore the unconditional render — there is nothing useful for the user to do with bulk-select on an empty list.
+
+### Phase 10 — Auth stability + speed (May 2026)
+The "Free plan flicker" symptom that triggered Phase 9 turned out to be the surface of three deeper bugs in the auth flow. This phase fixes them root-and-branch and locks the door against the underlying cause.
+
+**Speed**
+- AI model swap: `Codex-sonnet-4-20250514` → `Codex-haiku-4-5-20251001` in `/api/flash`. Roughly 3× faster on this tightly-structured JSON task with comparable quality (the schema does most of the heavy lifting). Combined with `max_tokens: 4000 → 2500` (which was a safety ceiling that almost never got close), packs now load in roughly half the previous time. Don't revert to Sonnet without measuring — the user feedback was specifically "too slow".
+
+**Auth — stop wiping state on transient SIGNED_OUT**
+- Symptom: navigating between /app and /dashboard occasionally flipped the account into Free mode even though the user was still logged in. Page-level Supabase queries 401 on free-tier cold-start; the JS client tries to refresh; the refresh also fails; the client fires SIGNED_OUT; our handler called `setUser(null) + setProfile(null)`. The localStorage tokens were still present — it wasn't a real sign-out.
+- Fix in `AuthProvider.onAuthStateChange`: when the event has no session, scan localStorage for `sb-*` keys. If present → transient refresh failure, KEEP user/profile state and retry `getSession()` after 1.5s. If absent → real sign-out (our `signOut()` synchronously clears those keys before redirecting), wipe state.
+- Don't undo this — without it, every cold-start refresh logs the user out cosmetically.
+
+**Auth — `loadProfile` waits for the JWT before querying**
+- Root cause of the "Account" placeholder + Free-mode UI for a paying Pro user. After a session resolves, the global `supabase` client takes a beat to attach the JWT to outgoing requests. If `loadProfile` fires its `.from('profiles').single()` in that window, RLS sees an unauthenticated request and returns 0 rows (PGRST116). The old code interpreted PGRST116 as "no profile yet" and tried to INSERT a new free profile, which conflicted with the existing Pro row → `setProfile` never ran → UI shows nothing or falls back to "free".
+- Fix in `AuthProvider.loadProfile`: poll `supabase.auth.getSession()` until `session.access_token` is attached (up to 2s, 500ms intervals) before issuing the profile query. Then fetch with three retries at 0/1.5s/3s backoff. Only run the new-profile INSERT branch when PGRST116 is observed AFTER the JWT is confirmed present.
+- Background recovery: a separate effect retries `loadProfile` every 4s while `user` is set but `profile` is still null. Self-healing if the cold start outlasts the in-flight retries.
+
+**Auth — MobileNav placeholder while profile pending**
+- Symptom: even when the profile load was healthy, the nav briefly rendered "adrienharrel" (the email prefix) before swapping to "Harrel" (the Google name). The displayName fallback chain was `profile?.full_name → profile?.email?.split('@')[0] → user?.email?.split('@')[0]` — that second-to-last step would fire while profile was still in flight.
+- Fix in `MobileNav.tsx:60`: define `profilePending = loading || (!!user && !profile)`; while pending, render "Account" + "·" initial instead of the email-prefix fallback. **Amélioré 2026-07-10** : pendant le pending, la nav affiche désormais `user.user_metadata.full_name` (dispo instantanément dans la session, sans requête DB — nom Google ou nom saisi au signup) et ne retombe sur "Account" que si le metadata n'a pas de nom. Toujours JAMAIS le préfixe email pendant le pending. Plan badge similarly shows "—" instead of the false "free" fallback during pending.
+- The 4s `loading` safety timeout in AuthProvider was also bug-fixed (`useEffect` body, ~line 105): it used to fire `setLoading(false)` unconditionally even mid-`loadProfile`. Now only fires if `getSession()` itself hasn't resolved, letting `loadProfile` finish on its own retry budget.
+
+**Auth — single-method enforcement (anti-doublon)**
+- Migration `supabase/migrations/2026_05_03_get_auth_providers.sql` creates `public.get_auth_providers_for_email(check_email text) returns text[]` as a `SECURITY DEFINER` RPC, callable by the anon key — returns `['google']`, `['email']`, both, or `[]`. **Must be applied manually in Supabase SQL editor.** Don't wire any new check to this without confirming the migration ran.
+- `/signup`: pre-flight RPC call. If providers exist, block with method-specific error ("Use Google" vs "Sign in").
+- `/login` (password form): pre-flight RPC. If email has only Google identity → block with "Use Continue with Google" before `signInWithPassword` (which would otherwise return generic "invalid credentials" and send the user in circles).
+- `/auth/callback` (Google OAuth): after `exchangeCodeForSession`, check `user.identities`. If `length > 1` AND any identity was created within the last 60s → freshly-linked dual identity, sign out + redirect to `/login?error=multi_identity`. Existing legacy dual-identity accounts (no fresh identity) are allowed through to avoid permanently locking them out — they need to be cleaned up manually via SQL. Same freshness gate applied to the case where a brand-new Google user collides with an existing email/password account.
+- Login page reads `?error=use_email | use_google | multi_identity` from URL on mount and shows the appropriate red error inline.
+
+**Dashboard / /app — wait for JWT before querying (same root cause)**
+- Same race that bit `loadProfile` was hiding the dashboard's data + emptying the project dropdown on `/app`. Symptom: dashboard sidebar showing the contradictory "FREE / Unlimited" combo (because the local `profile` state was null → planName fallback `'free'` + ternary picking the non-free branch `'Unlimited'`).
+- `dashboard/page.tsx:loadData` now starts with `supabase.auth.getSession()` and treats a missing `access_token` as a retryable failure (returns `false`, surfaces the yellow "Couldn't load your data — Retry" banner if both attempts fail).
+- Dashboard sidebar now reads `effectiveProfile = profile ?? authProfile` (where `authProfile` is from `useAuth()`) so the badge can never show the contradictory state. It defaults to "—" / "—" while truly unknown rather than a misleading "free".
+- `/app` projects effect uses the same `getSession` → query → 1.5s retry pattern. Without this, navigating from /dashboard to /app would fire the projects query before the JWT attached, RLS returned `[]`, and the dropdown appeared empty even though projects existed.
+
+**Other**
+- Next.js: `14.2.0 → 14.2.35`. Fixed the HMR `removeChild` runtime error in dev. Stayed on 14.x; do NOT jump to 16.x without a separate migration plan (async params in server components is a breaking change).
+- Added `<meta name="mobile-web-app-capable" content="yes" />` in root layout `<head>` — silences Chrome's deprecation warning about the apple-only variant. The `appleWebApp` metadata still emits the iOS variant.
+
+### Known data issue: dual identities on same auth user (NOT dual profiles)
+The Phase 9 hypothesis was wrong — when we ran the diagnostic SQL on the founder's account it showed only ONE row in both `auth.users` and `profiles`, but `auth.identities` had **two rows** for the same `user_id` (one `provider='google'`, one `provider='email'`). Supabase had linked them when the project's auth setting "Allow same email across providers" was on.
+
+**Symptom**: Same single auth user appears differently depending on session — "adrienharrel" (email-prefix fallback) vs "harrel" (Google name) — because each identity carries different `user_metadata`, and which one populates `session.user` depends on the active sign-in method. The plan stays correct because Stripe → profile → `auth.users.id` is a single chain.
+
+**Manual cleanup** (use this when a user reports cross-method confusion):
+1. List both identities: `SELECT i.id AS identity_id, i.provider, i.created_at FROM auth.identities i JOIN auth.users u ON u.id = i.user_id WHERE u.email = '<email>' ORDER BY i.created_at;`
+2. Decide which method to keep (usually whichever is the user's primary).
+3. Delete the unwanted identity row: `DELETE FROM auth.identities WHERE id = '<identity_id>' AND provider = '<email|google>';`
+4. The user can no longer log in via the deleted method on that account, but the profile, plan, meetings, tasks, projects all stay intact (they're keyed on `auth.users.id`, not the identity).
+
+**Prevention** is shipped in Phase 10 (single-method enforcement above) — new users can't end up in this state. The legacy "two separate auth.users rows" scenario from Phase 9 may also exist for some users; the cleanup procedure for that case is preserved below for completeness.
+
+**Legacy "two separate auth.users rows" cleanup** (rare — happens when the linking setting was off at sign-up time):
+1. `SELECT id, email, raw_app_meta_data->>'provider' AS provider, created_at FROM auth.users WHERE email = '<email>' ORDER BY created_at;`
+2. Identify the row with the active Stripe subscription via `profiles.plan = 'pro'`.
+3. Reassign data: `UPDATE meetings SET user_id = '<winner_id>' WHERE user_id = '<loser_id>';` (then `tasks`, `projects`).
+4. Delete the loser auth.user via Supabase dashboard.
+
+- Favicon tight-cropped (was 1536×1024 with 70% whitespace, now 512×512 transparent)
+- Light-mode contrast fix on blue accents + nav (was hardcoded dark)
+- Product showcase section on landing page — 3 interactive mockups
+- Pre-launch landing redesign — agency-positioned hero, three outcome cards (replaced fake testimonials), 6-entry FAQ, "From the maker" founder note
+- Truthful Pro plan gates enforced server- and client-side (lang, projects, search, PDF export)
+- Time-saved toast + cognition-style loader messages + open-actions dashboard widget + ICP-targeted templates (retention/stickiness pass)
+- Sharper post-flash guest CTA ("Save this pack") on `/app`
+- Canonical `useAuth().signOut` everywhere — no more local awaiting sign-out paths in dashboard/settings
+- Digest hebdo d'actions ouvertes par email (cron lundi 07:00 UTC + opt-out Settings)
+- Upload de transcript (.txt/.vtt/.srt) + bouton "Open in Gmail" sur le bloc email
+- Démo animée du hero (HeroDemo) + rendu email/Slack au format destination + PDF print propre
+- Mot de passe oublié (/forgot-password + /reset-password) + toast de salutation post-login ("Good morning, Simon") + salutation dashboard
+- Nav : bouton Home (décision user), nom affiché instantanément via session metadata (fin du placeholder "Account")
+- Durcissement sécurité complet 2026-07-10 (voir section "Security posture") : RPC verrouillées, relais email fermé, partage public réparé, checkout validé, résiliation Stripe à la suppression, headers HTTP, privacy véridique
+
+### Phase 11 — Server-side data architecture + single auth source (May 2026)
+After Phase 10's defensive auth patches, the user kept hitting the "Settings shows No name set / Dashboard blank / Account placeholder in nav" trio. Diagnostic logs revealed the real source: client-side direct queries against Supabase were race-prone on free-tier cold-start AND `supabase.auth.getSession()` itself sometimes hung forever on dev (Supabase tries an internal token refresh that never resolves). All the JWT-wait retries we added didn't help because the underlying call could just sit there. This phase removes the entire class of bugs at the architectural level.
+
+**Server-side data routes via service role**
+- `/api/dashboard/data` (GET) — replaces the dashboard's 4 parallel `supabase.from()` calls. Verifies caller via JWT, then fetches profile + projects + meetings + open tasks using the service role (RLS-bypassed, no race possible).
+- `/api/account/me` (GET) — replaces direct profile queries in AuthProvider and settings. Also handles the new-user case: if PGRST116, creates a default profile with the service role and fires the welcome email. This is now the canonical place to create profiles — removed from AuthProvider entirely.
+- `/api/account/update` (POST) — strict whitelist (`full_name`, `default_lang`, `default_style`). Plan and uses_this_month stay webhook-only. Replaces direct `supabase.from('profiles').update()` from settings.
+- `/api/account/delete` (POST) — proper account deletion: tasks → meetings → projects → profile → `auth.admin.deleteUser()`. The old client-side path silently failed under RLS, never deleted the auth.users row, never deleted tasks. Stripe subscription cancellation is NOT in here yet — TODO in route header.
+- `/api/stripe/portal` (POST) — looks up customer by email, creates a Billing Portal Session, returns URL. The "Manage subscription →" button in settings hits this. Lets paying users update card / view invoices / cancel without us building any of that UI.
+
+**Single source of truth for auth — `useAuth()`**
+- Pages no longer keep their own local `profile` state. The dashboard's `[profile, setProfile]` and settings' equivalent are gone. Everything reads from `useAuth().profile`. This was the bug class where "dashboard shows Pro, settings shows free" — they had divergent local copies.
+- `useAuth()` exposes `refetchProfile()` — call after a mutation (e.g. settings save) and the global store re-hydrates, so the nav badge, sidebar, /app prefill all reflect the change immediately.
+- `useAuth()` exposes `accessToken` — the current Supabase JWT, kept in sync via the existing getSession + onAuthStateChange wiring. Pages that need to call our `/api/*` routes should read this rather than calling `supabase.auth.getSession()` themselves. The latter call hangs on dev (confirmed via diagnostic logs: `loadData: start` fired, `getSession result` never came back, even past the 12s safety timeout). The dashboard and settings now use the accessToken directly — no more getSession in their data-load paths.
+
+**AuthProvider.loadProfile rewrite**
+- Now takes `(token: string)` and goes through `/api/account/me`. No more `supabase.from('profiles').select()`, no more internal getSession polling. The previous design used a `waitForToken()` helper that called getSession in a loop — same hang. Now all 5 callers pass the token they already have (initial getSession callback, onAuthStateChange callback, recoverOrSignOut after refresh, refetchProfile, background recovery interval).
+- Background recovery interval reads from `accessTokenRef` (a ref mirror of the accessToken state) so it always has the latest token without re-creating the effect on every rotation.
+
+**Dashboard hardening**
+- Coherence guard: if AuthProvider has confirmed a profile but the API returns fully empty (no profile, no projects, no meetings), treat as upstream blip and retry instead of rendering "new account" empty state. Eliminates the "I just navigated in and my packs are gone" panic.
+- "Time saved this month" stat card at the top — heuristic `Math.max(15, actions*3+10)` per meeting since the 1st of the month. Hidden when 0. Value reinforcement on every dashboard visit.
+- Project filter dropdown: All / No project / per-project (with counts). "Clear filter" link when active. Only renders if at least one project exists.
+- "Open actions" widget: clickable "+N more — show all ↓" button expands the full list inline. Previous static "+15 more" text looked clickable but did nothing.
+
+**Settings additions**
+- "Flash preferences" card — default output language (free locked to EN) and default style (Concise/Detailed/Email). Saved to `profiles.default_lang` / `.default_style` via /api/account/update. `/app` prefills these on mount through a `userTouchedPrefsRef`-guarded effect so a mid-session manual toggle isn't clobbered.
+- "Manage subscription →" button for Pro/Team — opens the Stripe Customer Portal.
+- "Hard reset session" button — wipes localStorage + sessionStorage + cookies, then calls canonical signOut. Escape hatch for any zombie-state. Below the standard Sign out button in Settings → Session.
+- "— Loading…" placeholder replaces the misleading `'Team plan'` fall-through default in the Plan card. The user reported being confused by "Team plan" appearing during cold-start when they're actually Pro — the ternary's default branch fired on null and showed Team. Fixed.
+- "Member since —" replaces the literal "Member since Invalid Date" that appeared when `created_at` was briefly undefined.
+
+**Project workspace (Phase 9 extension)**
+- When a project is selected on `/app`, the field collapses into a workspace banner showing `📁 Project Name · X previous meetings · Last: <title> (date) · memory active`. The dropdown becomes a discreet `— Leave project / Switch to: <name>` selector. The `+ New` button disappears by construction (the whole branch is replaced).
+- Banner also lists the project's meetings as clickable rows (file-like). Optimistic count bump after a successful flash so chained meetings update without a page reload.
+- Flash-another button reads `⚡ Next meeting in <Project> →` when in a project context.
+
+**Migration**
+- `supabase/migrations/2026_05_08_user_preferences.sql` — adds `default_lang text default 'EN'` and `default_style text default 'Concise'` to `profiles`. Must be applied manually in the Supabase SQL editor before the preferences card saves anything.
+
+**SUPABASE_SERVICE_ROLE_KEY required in `.env.local`**
+- All the new server routes use the service role key. It was already in Vercel env (webhook + cron) but the founder's local `.env.local` didn't have it. Confirmed added 2026-05-10. Without it, every new API route returns 500 silently and the yellow "Couldn't load your data" banner appears.
+
+### Diagnostic logs in dashboard's loadData
+Currently kept in for visibility (`[dashboard]` prefixed console.log calls). Once we're confident the Phase 11 architecture is stable in prod, those logs should be stripped — they exist purely to surface where the load might silently drop. Not load-bearing for any user-facing behavior.
+
+### Pack output prompt improvements (May 2026)
+After real meeting-pack reviews from ChatGPT + Codex Sonnet, three prompt tightenings shipped:
+- Decisions MUST carry rationale on the same line (`• X — because Y` or `*(rationale not stated)*`)
+- Risks block excludes concerns raised AND addressed in-meeting (those belong in snapshot/decisions, not risks)
+- Inferred questions priority order: (1) stakeholder ask without owner, (2) success metric without measurement criteria, (3) fuzzy-scope commitment, (4) unconfirmed dependency. Cap 2-4 items rather than 6 weak ones.
+- Risks now emit `[CRITICAL]`/`[MEDIUM]`/`[LOW]` severity markers parsed and rendered by `<RisksView />` as colored pills (red/amber/green).
+- Inferred questions get an explicit "Items marked Inferred were surfaced by AI from gaps in the notes — not raised in the meeting" legend when at least one inferred item exists, so external readers of a `/share/` pack don't think the AI is making things up.
+- Next-agenda items must use the `If [condition]: [path A] / Otherwise: [path B]` format when the precondition is uncertain.
+- Per-block emoji icons (📋 decisions, 🎯 actions, 💭 questions, 🚨 risks, ✉ email, 💬 slack, 📅 agenda) replace the 6px colored dot — scannable at distance.
+- `<OutcomePill />` above the executive snapshot — computed metrics like "3 decisions · 4 actions · 1 critical risk · 2 open questions". 1-second scan of meeting shape before reading anything. Critical risks tinted red.
+
+### Flash timeouts
+- Master 30s client-side timeout wraps the ENTIRE flow including `supabase.auth.getSession()`. Without wrapping getSession, a sleeping Supabase could hang the loader before the fetch even started — a user reported a 40-minute hang from this. 25s server-side timeout on the Anthropic call (returns clean 504). Error copy: "Flash took longer than 30s — try once more".
+
+## Security posture (audit + durcissement 2026-07-10)
+Passe complète livrée en un commit. Ne pas défaire sans comprendre :
+- **RPC verrouillées** (migration `2026_07_11_lock_down_rpc_functions.sql`, APPLIQUÉE via MCP) : `reset_monthly_uses`/`increment_uses`/`handle_new_user`/`increment` ne sont plus exécutables par anon/authenticated — n'importe qui avec la clé anon pouvait reset tous les compteurs ou cramer le quota d'un utilisateur. Conséquence code : `/api/flash` appelle désormais `increment_uses` avec un client **service role**. `get_auth_providers_for_email` reste anon-exécutable (nécessaire au pré-flight login/signup) — c'est un oracle d'énumération d'emails assumé.
+- **Routes email internes** : `/api/email/welcome` + `/api/email/nudge` exigent le header `x-internal-key: CRON_SECRET` (étaient un relais ouvert depuis hello@meetingflash.work). Les appelants (`/api/account/me`, `/api/flash`) l'envoient. Tout nouveau caller doit le faire.
+- **Partage public réparé + sécurisé** : il n'y a AUCUNE policy RLS anon sur `meetings` (et il ne doit pas y en avoir — une policy `share_token IS NOT NULL` permettrait de lister tous les packs partagés). `/share/[token]` lit via **service role côté serveur**, token exact uniquement. Les tokens sont générés par `crypto.randomUUID()` (plus de Math.random).
+- **/api/checkout** : `priceId` validé contre l'allowlist des 4 price IDs env ; identité dérivée du JWT quand le header Authorization est présent (PricingCards et le modal /app l'envoient). Le webhook gère le fallback invité : `checkout.session.completed` sans metadata.userId → lookup profile par email Stripe.
+- **/api/account/delete** résilie les abonnements Stripe actifs AVANT la suppression (l'ancien TODO "compte supprimé mais toujours facturé" est soldé). Échec Stripe loggé mais non bloquant.
+- **/api/flash** : entrée plafonnée à 60 000 caractères (413 au-delà) — protection coût Anthropic.
+- **Headers de sécurité** dans next.config.js : X-Frame-Options SAMEORIGIN, nosniff, Referrer-Policy strict-origin-when-cross-origin, Permissions-Policy. Ne pas supprimer.
+- **Privacy/FAQ véridiques** : la policy ne prétend plus que les transcripts ne sont pas stockés (raw_notes EST stocké avec le pack, supprimé avec lui) ; Resend + Vercel ajoutés aux sous-traitants ; suppression de compte documentée comme résiliant l'abonnement. Toute nouvelle feature de données doit garder ces pages alignées.
+- **Reste à faire côté dashboard Supabase (action manuelle)** : activer "Leaked password protection" (Auth → Providers → Password). Les 2 advisories npm restantes = Next.js 14 (fix = Next 16, migration écartée volontairement).
+
+## Monitoring & backups (2026-07-11)
+- **Sentry actif** (org `harrelfactory`, projet `meetingflash`) : erreurs client + serveur + edge, uniquement en production, tracing/replay désactivés (quota free tier). Configs à la racine (`sentry.*.config.ts`) + `src/instrumentation.ts` (+ `experimental.instrumentationHook` requis en Next 14) + `src/app/global-error.tsx`. DSN en dur (non-secret) surchargeable par `NEXT_PUBLIC_SENTRY_DSN`. Upload des source maps seulement si `SENTRY_AUTH_TOKEN` est défini (optionnel). Vérifié de bout en bout (issue MEETINGFLASH-1, résolue). Consulter les erreurs : https://harrelfactory.sentry.io ou via le connecteur Sentry en session.
+- **Backups DB** : `.github/workflows/db-backup.yml` — pg_dump lundi+jeudi 06:00 UTC en artefacts GitHub (rotation 90 j) + déclenchement manuel. ⚠️ Nécessite le secret `SUPABASE_DB_URL` dans GitHub (Settings → Secrets → Actions) — instructions dans l'en-tête du workflow. Le tier gratuit Supabase n'a AUCUN backup automatique ; ce workflow est la seule protection contre la perte de données.
+
+## Roadmap / TODO (priorities)
+
+This section is the **source of truth for what's left to do**. Update as items ship or get deprioritized. Newest decisions go above older ones within a priority bucket.
+
+### P0 — Live data issue (manual cleanup needed in Supabase)
+- **Migrations : TOUTES APPLIQUÉES** (vérifié via MCP Supabase le 2026-07-10) — project_notes, get_auth_providers, user_preferences (appliquées manuellement par le user), weekly_digest et lock_down_rpc_functions (appliquées via MCP). Plus rien en attente côté schéma. Restent 2 actions dashboard Supabase : activer "Leaked password protection" (Auth → Providers → Password) et ajouter `https://www.meetingflash.work/reset-password` aux Redirect URLs.
+- **Founder's own dual identity** — confirmed resolved 2026-05-10 (only ONE identity row remains for adrienharrel@gmail.com). The Phase 11 architectural fixes (single auth source, server-side data, accessToken via useAuth) eliminate the bug class regardless of identity state.
+- **Orphan meetings on legacy user_ids** — discovered 2026-05-10 that some old meetings are tied to `aba82af8-1a27-4250-b70d-00d1f201130d` (2 packs) while the founder's current auth.users.id is `cd9399cf-a0f5-4821-9970-6ba5871dcc79` (6 packs). The 6 are live; the 2 are inaccessible. Optional cleanup: `UPDATE public.meetings SET user_id = '<current_id>' WHERE user_id = '<orphan_id>';` to consolidate.
+
+### P0 — Blocked on external action (no code work possible right now)
+- **Resend email account reactivated** — 2026-05-15. All 3 copy fixes shipped: welcome email "5 free Execution Packs", nudge email subject + body "5 free packs", nudge trigger `uses_this_month >= 5` in `/api/flash/route.ts`. Emails are live.
+- **Search Console : réclamé et actif** (token en clair dans layout.tsx). Premières données (export 2026-07-10, 3 mois) : ~630 impressions, 1 clic, position moyenne ~60, courbe d'impressions ×20 sur 6 semaines. Diagnostic : contenu indexé et bien ciblé, autorité manquante. Meilleurs actifs proches du top 20 : article `meeting-summary-vs-meeting-minutes` (161 imp., pos. 40) et `/for-product-teams` (pos. 23). Prochain chantier SEO code : maillage interne vers ces deux pages + title de l'article aligné sur les requêtes "meeting minutes definition". Ne pas juger sur les clics avant des positions < 20 (point d'étape mi-août 2026).
+
+### P1 — Pack render polish (next design pass, ~2-3h total)
+Discussed with user 2026-05-11. Goal: turn the pack from "structured text output" into a "premium deliverable feel". Ordered by ROI:
+- **Email + Slack blocks rendered as their destination format** (~1h, top ROI). Email = mail-client preview (Subject line in bold, gray-bordered card, generous line-height, sender/signature separated). Slack = chat-bubble style (rounded corners, generic avatar + "You · time", emojis prominent). Transforms two raw-text blocks into "ready-to-paste-into-Gmail-or-Slack" deliverables — the conversion moment that signals "this isn't a summarizer, this is finished work".
+- **Print/PDF stylesheet cleanup** (~1h). Today the "Export PDF" button on the pack page just calls `window.print()`, which dumps the full page including nav/sidebar/copy-buttons. Add a `@media print` block that hides chrome, expands content margins, adds a header with meeting title + date, and a footer "Generated by MeetingFlash". This unblocks Pro users who want a clean PDF for their client. Also worth: when the user accesses /share/[token] from a print intent, the same stylesheet applies.
+- **Mini sticky nav on desktop for jumping between blocks** (~45min). On wide screens, a thin right-column with `📋 Decisions · 🎯 Actions · 💭 Questions · 🚨 Risks · ✉ Email · 💬 Slack · 📅 Agenda` that scroll-anchors to each block. Especially useful when the pack is dense (Detailed style). Hide on mobile.
+- **Empty state "Awaiting flash—" upgrade** (~30min). Today it's a gray placeholder with a numbered list of forthcoming blocks. Replace with a faded sample pack in the background + a more inviting "Paste notes → flash → get this in 15s" pattern. First-impression value for new visitors landing on /app cold.
+
+What NOT to add: density toggle, more block colors, dark/light forcing — already covered or would oversaturate.
+
+### P1 — Other high-impact ready to execute
+- **i18n FR / ES / DE (SEO Phase 6)** — Pro plan already outputs in EN/FR/ES/DE but the marketing site is EN-only. Big SEO opportunity: each language gets its own Google index footprint.
+  - Recommended approach: subpath routes `/fr/*`, `/es/*`, `/de/*` (English stays at root), `hreflang` alternates in metadata, sitemap includes all variants, lightweight in-house translations dict at `src/lib/i18n.ts` (no `next-i18next` dep).
+  - Pages to translate (priority order): home → pricing → 3 ICP pages → 3 tools → 3-4 phare blog articles. The `/app`, `/dashboard`, `/login`, `/signup`, `/share` routes do NOT need translation (product UI vs marketing surface).
+  - Translation quality: Codex can do FR well, ES/DE acceptably but ideally relit by a native before launch. Recommended: **Option C — start with FR only** (6 pages: home, pricing, 3 ICP, lang switcher), validate quality, then ES/DE once native reviewers are available.
+
+### P2 — Product features (planned, not started)
+- **Team plan implementation** — currently "Coming soon" mailto everywhere. Real build needs: shared workspaces (multi-user projects), per-seat billing in Stripe (the price IDs exist in env but no flow), admin controls + SSO, Slack/Notion sync. Weeks of focused work — don't start without a clear customer demand signal (mailto inbox).
+- **Slack integration** — export a Pack directly to a Slack channel via webhook. The Pack already includes a draft "Slack message" output, this would automate the actual posting.
+- **Notion integration** — export decisions + tasks to a Notion database. Useful for product teams that live in Notion.
+- **Google Calendar integration** — turn the next-agenda output into pre-filled calendar invites for the next meeting.
+
+### P3 — Content + growth (ongoing)
+- **More blog articles** for long-tail SEO. Current count: 9. Suggested next angles: alternative-to-X comparisons (Otter, Fireflies, Fathom — each as a separate article), "AI for sales call notes", "QBR template", industry-specific (legal, design agencies, etc.). Each new article auto-includes BlogPosting + BreadcrumbList JSON-LD via existing infra.
+- **Real testimonials** — when first paying customers convert. Replace the deliberately-empty social proof slot. **Don't** fabricate (the user explicitly rejected fake testimonials in pre-launch v2).
+- **Directory submissions — FAIT le 2026-07-10** : le user a publié sur les annuaires listés dans `BACKLINKS.md` (kit de textes prêt à coller à la racine — le réutiliser pour toute nouvelle soumission). Effet attendu sur les positions : 2 à 6 semaines. Prochaine vague possible : Product Hunt (garder pour quand il y aura 2-3 témoignages).
+- **Live Lighthouse audit** post-deploy — Phase 5 added the perf optimizations but only a real production trace measures the actual Core Web Vitals scores.
+
+### Nits / hygiene (small fixes that can be batched anytime)
+- Unused import `createClient` in `src/app/api/checkout/route.ts:3` — never used. Safe to delete.
+- Bump `*Last updated*` date at the bottom of this file when major work ships.
+
+---
+
+*Last updated: 2026-07-10 (session growth+sécurité : digest hebdo, upload transcript, Gmail, HeroDemo, previews email/Slack, forgot-password, WelcomeToast, passe sécurité complète, migrations toutes appliquées, Search Console réclamé + première analyse, backlinks publiés, 19 commits poussés en prod par le user.)*
+*Primary AI assistant: Codex (Codex.ai + Codex)*

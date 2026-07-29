@@ -8,7 +8,7 @@ import PricingCards from '@/components/PricingCards'
 import DiscoveryMockup from '@/components/DiscoveryMockup'
 import SiteFooter from '@/components/SiteFooter'
 import HeroDemo from '@/components/HeroDemo'
-import { Layers, Brain, Lock, Globe, ClipboardList, Search, Target, RefreshCw, Timer, Send, ArrowRight, ArrowDown, Plus } from 'lucide-react'
+import { Layers, Brain, Lock, Globe, ClipboardList, Search, Link2, Target, RefreshCw, Timer, Send, ArrowRight, ArrowDown, Plus } from 'lucide-react'
 import s from './page.module.css'
 
 const LOGOS = ['Notion', 'Slack', 'Linear', 'Figma', 'Loom', 'Asana', 'Jira', 'Zoom', 'Google Meet', 'Teams']
@@ -21,6 +21,10 @@ const FAQ_ITEMS = [
   {
     q: 'Where do my notes go?',
     a: 'Your notes are sent to Anthropic\'s Claude API to generate the pack — Anthropic processes them in-memory and never stores them or uses them for training. If you\'re signed in, the generated Pack and your original notes are saved in your account (Supabase, EU region) so you can come back to them; guest flashes aren\'t saved at all. You can delete any pack in one click, and your full account from Settings.',
+  },
+  {
+    q: 'Can I send a recap to a client who has no account?',
+    a: 'Yes. Every Execution Pack has a one-click Share button that creates a public read-only link — your client opens it in a browser, no signup, no login, nothing to install. Pro plans can also export the same recap as a clean PDF for formal deliverables. You can revoke a link at any time by deleting the pack.',
   },
   {
     q: 'Which languages work?',
@@ -203,7 +207,7 @@ export default function Home() {
           <div className={`${s.bentoCard}`}>
             <div className={s.bentoIcon}><Lock size={24} strokeWidth={1.75} aria-hidden="true" /></div>
             <h3 className={s.bentoTitle}>Private by design</h3>
-            <p className={s.bentoDesc}>Transcripts processed and discarded. Never stored. Never used for training.</p>
+            <p className={s.bentoDesc}>No bot joins your calls. Your notes stay in your account and are never used to train AI models.</p>
           </div>
 
           <div className={`${s.bentoCard}`}>
@@ -222,6 +226,12 @@ export default function Home() {
             <div className={s.bentoIcon}><Search size={24} strokeWidth={1.75} aria-hidden="true" /></div>
             <h3 className={s.bentoTitle}>Smart Search</h3>
             <p className={s.bentoDesc}>Search across all your meetings instantly. Find any decision or commitment in seconds.</p>
+          </div>
+
+          <div className={`${s.bentoCard}`}>
+            <div className={s.bentoIcon}><Link2 size={24} strokeWidth={1.75} aria-hidden="true" /></div>
+            <h3 className={s.bentoTitle}>Client-ready share links</h3>
+            <p className={s.bentoDesc}>Send any recap as a clean public link — read-only, no account needed on their side. Or export a formatted PDF.</p>
           </div>
         </div>
       </section>
