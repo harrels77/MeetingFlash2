@@ -562,6 +562,8 @@ The Phase 9 hypothesis was wrong — when we ran the diagnostic SQL on the found
 - Démo animée du hero (HeroDemo) + rendu email/Slack au format destination + PDF print propre
 - Mot de passe oublié (/forgot-password + /reset-password) + toast de salutation post-login ("Good morning, Simon") + salutation dashboard
 - Nav : bouton Home (décision user), nom affiché instantanément via session metadata (fin du placeholder "Account")
+- Flash by email : envoi des notes par email → pack en retour (route inbound signée, jeton par utilisateur)
+- Lien de partage client mis en avant sur la home (carte + FAQ/JSON-LD)
 - Durcissement sécurité complet 2026-07-10 (voir section "Security posture") : RPC verrouillées, relais email fermé, partage public réparé, checkout validé, résiliation Stripe à la suppression, headers HTTP, privacy véridique
 
 ### Phase 11 — Server-side data architecture + single auth source (May 2026)
@@ -636,6 +638,15 @@ Passe complète livrée en un commit. Ne pas défaire sans comprendre :
 - **Privacy/FAQ véridiques** : la policy ne prétend plus que les transcripts ne sont pas stockés (raw_notes EST stocké avec le pack, supprimé avec lui) ; Resend + Vercel ajoutés aux sous-traitants ; suppression de compte documentée comme résiliant l'abonnement. Toute nouvelle feature de données doit garder ces pages alignées.
 - **Reste à faire côté dashboard Supabase (action manuelle)** : activer "Leaked password protection" (Auth → Providers → Password). Les 2 advisories npm restantes = Next.js 14 (fix = Next 16, migration écartée volontairement).
 
+## Flash by email — ingestion entrante (2026-07-21)
+- **Principe** : l'utilisateur envoie ses notes brutes à une adresse privée, reçoit l'Execution Pack en retour par email. Zéro navigateur, zéro login — le cas d'usage est "je tape mes notes sur mon téléphone pendant le call et j'envoie en sortant".
+- **Adresse** : `flash+<inbound_token>@inbound.meetingflash.work`. Le domaine est surchargeable par `NEXT_PUBLIC_INBOUND_DOMAIN`.
+- **Identité = le jeton, JAMAIS l'expéditeur.** L'en-tête From est trivialement usurpable ; matcher dessus permettrait de cramer le quota d'un tiers ou d'injecter des packs dans son compte. Migration `add_inbound_email_token` APPLIQUÉE via MCP (colonne `profiles.inbound_token`, index unique, default sur les nouvelles lignes, backfill fait).
+- **Signature webhook** : schéma Svix (celui de Resend) vérifié à la main dans `src/lib/inboundEmail.ts` avec `node:crypto` — le package `svix` n'a PAS été ajouté volontairement (il embarque un uuid vulnérable, signalé à l'audit sécurité). La route échoue fermée : pas de `RESEND_INBOUND_SECRET` → 500, signature absente/invalide → 401. Ne pas assouplir.
+- **Règles métier respectées à l'identique** : quota 5/mois en Free, verrou langue EN pour les Free, préférences `default_lang`/`default_style`, incrément du compteur, sauvegarde dans meetings + tasks (le pack apparaît dans le dashboard). Les cas rejetés (quota, notes trop courtes, échec de génération) répondent par un email explicatif — jamais de silence.
+- **⚠️ Setup manuel restant avant que ça reçoive du courrier** : (1) Resend → Domains → ajouter `inbound.meetingflash.work` + son enregistrement MX ; (2) Resend → Webhooks → événement `email.received` pointé sur `https://www.meetingflash.work/api/email/inbound` ; (3) `RESEND_INBOUND_SECRET` (le secret `whsec_…`) dans les variables Vercel.
+- **Refactor associé** : le prompt et l'appel Anthropic vivent désormais dans `src/lib/flashCore.ts`, partagés par `/api/flash` ET la route inbound. NE JAMAIS redupliquer le prompt — les deux copies divergeraient en quelques semaines.
+
 ## Monitoring & backups (2026-07-11)
 - **Sentry actif** (org `harrelfactory`, projet `meetingflash`) : erreurs client + serveur + edge, uniquement en production, tracing/replay désactivés (quota free tier). Configs à la racine (`sentry.*.config.ts`) + `src/instrumentation.ts` (+ `experimental.instrumentationHook` requis en Next 14) + `src/app/global-error.tsx`. DSN en dur (non-secret) surchargeable par `NEXT_PUBLIC_SENTRY_DSN`. Upload des source maps seulement si `SENTRY_AUTH_TOKEN` est défini (optionnel). Vérifié de bout en bout (issue MEETINGFLASH-1, résolue). Consulter les erreurs : https://harrelfactory.sentry.io ou via le connecteur Sentry en session.
 - **Backups DB** : `.github/workflows/db-backup.yml` — pg_dump lundi+jeudi 06:00 UTC en artefacts GitHub (rotation 90 j) + déclenchement manuel. ⚠️ Nécessite le secret `SUPABASE_DB_URL` dans GitHub (Settings → Secrets → Actions) — instructions dans l'en-tête du workflow. Le tier gratuit Supabase n'a AUCUN backup automatique ; ce workflow est la seule protection contre la perte de données.
@@ -686,5 +697,5 @@ What NOT to add: density toggle, more block colors, dark/light forcing — alrea
 
 ---
 
-*Last updated: 2026-07-10 (session growth+sécurité : digest hebdo, upload transcript, Gmail, HeroDemo, previews email/Slack, forgot-password, WelcomeToast, passe sécurité complète, migrations toutes appliquées, Search Console réclamé + première analyse, backlinks publiés, 19 commits poussés en prod par le user.)*
+*Last updated: 2026-07-21 (Flash by email : ingestion entrante signée + jeton par utilisateur + flashCore partagé ; partage client rendu visible sur la home ; claim privacy périmée corrigée sur la bento.)*
 *Primary AI assistant: Claude (claude.ai + Claude Code)*
