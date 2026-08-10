@@ -7,7 +7,7 @@ import SiteFooter from '@/components/SiteFooter'
 import s from '@/styles/marketing.module.css'
 
 export const metadata: Metadata = {
-  title: 'Free Follow-Up Email Generator (After Meeting) — MeetingFlash',
+  title: 'Free Follow-Up Email Generator (After Meeting)',
   description: 'Paste your meeting notes — get a polished follow-up email drafted in 20 seconds. Free, no signup, no ChatGPT prompt-writing required.',
   alternates: { canonical: '/tools/follow-up-email-generator' },
   openGraph: {

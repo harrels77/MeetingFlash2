@@ -1,7 +1,7 @@
 import type { Metadata } from 'next'
 
 export const metadata: Metadata = {
-  title: 'Dashboard — MeetingFlash',
+  title: 'Dashboard',
   // Private, auth-gated area. noindex so Google drops it from the index.
   // NOTE: /dashboard is intentionally NOT disallowed in robots.ts — a
   // robots.txt block would stop Google from crawling the page to SEE this

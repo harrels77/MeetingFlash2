@@ -7,7 +7,7 @@ import SiteFooter from '@/components/SiteFooter'
 import s from '@/styles/marketing.module.css'
 
 export const metadata: Metadata = {
-  title: 'AI Meeting Recap Tool for Freelancers — MeetingFlash',
+  title: 'AI Meeting Recap Tool for Freelancers',
   description: 'You don\'t have an admin team. Get client-ready recap emails, action lists, and follow-ups in 20 seconds — so you can charge for delivery, not paperwork.',
   alternates: { canonical: '/for-freelancers' },
   openGraph: {

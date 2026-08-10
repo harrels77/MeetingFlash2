@@ -15,7 +15,7 @@ export async function generateMetadata({ params }: { params: { slug: string } })
   if (!article) return {}
   const url = `https://www.meetingflash.work/blog/${article.slug}`
   return {
-    title: `${article.title} — MeetingFlash`,
+    title: article.title,
     description: article.description,
     alternates: { canonical: `/blog/${article.slug}` },
     openGraph: {

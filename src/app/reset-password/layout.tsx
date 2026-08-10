@@ -1,7 +1,7 @@
 import type { Metadata } from 'next'
 
 export const metadata: Metadata = {
-  title: 'Choose a new password — MeetingFlash',
+  title: 'Choose a new password',
   description: 'Set a new password for your MeetingFlash account.',
   robots: { index: false, follow: false },
   alternates: { canonical: '/reset-password' },

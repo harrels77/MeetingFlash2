@@ -7,7 +7,7 @@ import SiteFooter from '@/components/SiteFooter'
 import s from '@/styles/marketing.module.css'
 
 export const metadata: Metadata = {
-  title: 'Free Meeting Action Items Extractor — MeetingFlash',
+  title: 'Free Meeting Action Items Extractor',
   description: 'Extract action items with owners and deadlines from any meeting notes in 20 seconds. Free, no signup required for the first one.',
   alternates: { canonical: '/tools/meeting-action-items-extractor' },
   openGraph: {

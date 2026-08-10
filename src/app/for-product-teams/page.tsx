@@ -7,7 +7,7 @@ import SiteFooter from '@/components/SiteFooter'
 import s from '@/styles/marketing.module.css'
 
 export const metadata: Metadata = {
-  title: 'AI Meeting Recap Tool for Product Teams — MeetingFlash',
+  title: 'AI Meeting Recap Tool for Product Teams',
   description: 'Sprint retros, planning, 1-on-1s, and stakeholder reviews — turned into structured commitments with owners and deadlines, in 20 seconds. Built for product teams.',
   alternates: { canonical: '/for-product-teams' },
   openGraph: {

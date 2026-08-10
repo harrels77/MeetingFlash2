@@ -31,7 +31,7 @@ Effective meeting notes have four components:
 
 **1. Decisions made** — Not discussed, not proposed. Decisions that were actually made. "We decided to push the launch to May 2nd" is useful. "Launch date was discussed" is not.
 
-**2. Action items with owners** — Every action item needs a person's name and a deadline. "Tom will send the feature list by Friday" is actionable. "Feature list needed" is not. (This is where most notes break down — see [Meeting Action Items: Why They Fail and How to Fix It](/blog/meeting-action-items-best-practices).)
+**2. Action items with owners** — Every action item needs a person's name and a deadline. "Tom will send the feature list by Friday" is actionable. "Feature list needed" is not. (This is where most notes break down — see [Meeting Action Items: Why They Fail and How to Fix It](/blog/meeting-action-items-best-practices).) If the meeting needs a formal record rather than working notes, see [what meeting minutes are](/blog/meeting-summary-vs-meeting-minutes).
 
 **3. Open questions** — Things that came up but weren't resolved. These become the agenda for your next meeting.
 
@@ -262,6 +262,8 @@ Examples:
 - Marcus → Prepare Q2 budget slides (by April 25)
 
 Notice what's in every one: a name, a concrete deliverable, and a date.
+
+That same line is what makes formal minutes usable months later — if you are writing an official record rather than a quick recap, see [what meeting minutes are and what they must include](/blog/meeting-summary-vs-meeting-minutes).
 
 ## How to track them
 
@@ -771,7 +773,7 @@ Good AI-assisted minutes land on something like this:
 - **Action items** — [Person] → [task] by [date]
 - **Open questions** — unresolved items that become the next agenda
 
-If you want the distinction between this kind of formal record and a quick recap, read [Meeting Summary vs Meeting Minutes](/blog/meeting-summary-vs-meeting-minutes).
+If you are unsure what belongs in a formal record versus a quick recap, start with [what meeting minutes are and how they differ from a summary](/blog/meeting-summary-vs-meeting-minutes).
 
 ## Try it on your last meeting
 
@@ -830,15 +832,21 @@ Want to feel the difference? Paste notes from your last meeting into [MeetingFla
   },
   {
     slug: 'meeting-summary-vs-meeting-minutes',
-    title: 'Meeting Summary vs Meeting Minutes: What is the Difference?',
-    description: 'Meeting summary and meeting minutes are not the same thing. Here is the practical difference, when to use each, and how to produce both in seconds.',
+    title: 'What Are Meeting Minutes? Definition, and How They Differ From a Summary',
+    description: 'Meeting minutes are the official record of a meeting; a summary is the fast recap. Here are both definitions, what minutes must include, when to use each, and how to produce them in seconds.',
     date: '2026-06-29',
-    readTime: '5 min',
+    readTime: '6 min',
     category: 'Productivity',
     content: `
-## Same meeting, two different documents
+## What are meeting minutes?
 
-People use "summary" and "minutes" interchangeably, but they are different deliverables with different jobs. Using the wrong one makes you look either sloppy (a casual summary where minutes were expected) or stiff (formal minutes where a quick recap would do).
+**Meeting minutes are the official written record of a meeting** — who attended, what was decided, and what was agreed as next steps, written in a neutral tone so that someone who was not in the room can rely on them later. They are sometimes abbreviated **MoM**, for "minutes of meeting".
+
+## What is a meeting summary?
+
+**A meeting summary is a short recap of what happened and what comes next**, written for people who need the gist quickly rather than a permanent record. It is shorter, less formal, and meant to be read once and acted on.
+
+People use the two words interchangeably, but they are different deliverables with different jobs. Using the wrong one makes you look either sloppy (a casual summary where minutes were expected) or stiff (formal minutes where a quick recap would do).
 
 Here is the practical difference.
 
@@ -867,6 +875,19 @@ A good summary is scannable in 30 seconds: the key decisions, the main action it
 - **Audience:** minutes serve a record/accountability need; summaries serve speed.
 - **Completeness:** minutes aim to be complete; summaries deliberately leave out detail.
 - **Permanence:** minutes are archived and referenced; summaries are often disposable.
+
+## What should meeting minutes include?
+
+At minimum, complete minutes cover:
+
+- **Logistics** — date, time, location or call link, attendees, apologies
+- **Agenda items** — each topic discussed, in order
+- **Decisions** — what was agreed, ideally with the reason and who approved it
+- **Action items** — the task, the named owner, and the deadline
+- **Open questions** — anything unresolved, carried into the next meeting
+- **Next meeting** — date and provisional agenda
+
+Anything beyond that is usually noise. The most common failure is not missing detail — it is action items with no named owner, which quietly become nobody's job. For how to write those well, see [Meeting Action Items: Best Practices](/blog/meeting-action-items-best-practices).
 
 ## When to use each
 

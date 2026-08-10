@@ -7,7 +7,7 @@ import SiteFooter from '@/components/SiteFooter'
 import s from '@/styles/marketing.module.css'
 
 export const metadata: Metadata = {
-  title: 'Free Discovery Call Recap Tool — MeetingFlash',
+  title: 'Free Discovery Call Recap Tool',
   description: 'Turn your discovery call notes into a polished recap email and action list in 20 seconds. Send the recap before the prospect finishes their coffee. Free, no signup.',
   alternates: { canonical: '/tools/discovery-call-recap-tool' },
   openGraph: {

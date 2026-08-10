@@ -7,7 +7,7 @@ import s from '@/styles/marketing.module.css'
 import PricingCards from '@/components/PricingCards'
 
 export const metadata: Metadata = {
-  title: 'Pricing — MeetingFlash',
+  title: 'Pricing',
   description: 'Free plan with 5 packs / month, Pro at $12/month or $96/year for unlimited packs, project memory, smart search, multi-language output, and PDF export.',
   alternates: { canonical: '/pricing' },
   openGraph: {

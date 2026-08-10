@@ -1,7 +1,7 @@
 import type { Metadata } from 'next'
 
 export const metadata: Metadata = {
-  title: 'Free meeting notes to action items — MeetingFlash',
+  title: 'Free meeting notes to action items',
   description: 'Paste raw meeting notes and get a complete Execution Pack — decisions, action items with owners, follow-up email, Slack message, next agenda — in under 20 seconds. Free, no signup required for the first pack.',
   alternates: { canonical: '/app' },
   openGraph: {
