@@ -314,7 +314,7 @@ The user is non-coder, motivated, and worried about retention. These three piece
 - Responsive: stacks columns on mobile, hides sidebar on dashboard mockup, tighter padding
 
 ### Blog
-- **14 static articles** in `src/lib/blog.ts` (Article[] data array). Slugs:
+- **15 static articles** in `src/lib/blog.ts` (Article[] data array). Slugs:
   - `how-to-write-effective-meeting-notes`
   - `post-meeting-workflow-for-teams`
   - `how-to-write-follow-up-email-after-meeting`
@@ -329,6 +329,9 @@ The user is non-coder, motivated, and worried about retention. These three piece
   - `meeting-summary-vs-meeting-minutes` (Productivity — definitional/long-tail, added 2026-06)
   - `client-follow-up-emails-after-meeting` (Communication — agency ICP, added 2026-06)
   - `fireflies-vs-otter-vs-meetingflash` (Tools — honest competitor comparison, added 2026-06)
+  - `bot-free-meeting-recorders-privacy` (Tools — "bot-free n'est pas privé" + question du consentement, ajouté 2026-11)
+- **Champ `updated` (ajouté 2026-11-04)** : `Article.updated?` alimente `dateModified` (JSON-LD BlogPosting), `openGraph.modifiedTime` et un "Updated <mois année>" visible dans l'en-tête de l'article. Ne le poser QUE sur un vrai rafraîchissement de fond — un `dateModified` qui ment est un signal négatif.
+- ⚠️ **`best-ai-meeting-assistants-2026` : le slug dit 2026, le titre dit 2027.** C'est VOLONTAIRE — le slug est gelé pour ne pas casser l'autorité accumulée (c'est la page n°1 des surfaces IA). À refaire chaque automne : retitrer en année+1, rafraîchir les faits, bumper `updated`. NE PAS renommer le slug ni créer un doublon annuel.
 - Blog index at `/blog`, articles at `/blog/[slug]`
 - `generateStaticParams()` used — pre-rendered at build time
 - Each article ends with a CTA block linking to `/app`, then a 3-card "Related reading" block (`getRelatedArticles()` in blog.ts: same-category first, then fill) — that's the internal-linking surface for SEO
@@ -666,6 +669,8 @@ This section is the **source of truth for what's left to do**. Update as items s
 - **Redirection apex → www : à passer de 307 en 308** (Vercel → Project → Settings → Domains → `meetingflash.work` → redirect status code). En 307 (temporaire) Google garde les deux hôtes indexés : au 10 août, `meetingflash.work` (sans www) captait 3 des 5 clics en position 13.6 pendant que `www` était à 21 avec 0 clic — les signaux sont scindés. C'est aussi la cause de l'alerte GSC "Page en double sans URL canonique" du 18 juillet. Non modifiable via MCP (pas d'outil domaine) — action dashboard.
 - **Titres de page** : le root layout applique déjà le template `%s — MeetingFlash`. NE JAMAIS remettre " — MeetingFlash" dans un `title:` de premier niveau (produisait "Sign in — MeetingFlash — MeetingFlash" sur 13 pages, corrigé le 2026-08-10). En revanche `openGraph.title` / `twitter.title` ne reçoivent pas le template et doivent garder la marque.
 - **Search Console : réclamé et actif** (token en clair dans layout.tsx). Premières données (export 2026-07-10, 3 mois) : ~630 impressions, 1 clic, position moyenne ~60, courbe d'impressions ×20 sur 6 semaines. Diagnostic : contenu indexé et bien ciblé, autorité manquante. Meilleurs actifs proches du top 20 : article `meeting-summary-vs-meeting-minutes` (161 imp., pos. 40) et `/for-product-teams` (pos. 23). Prochain chantier SEO code : maillage interne vers ces deux pages + title de l'article aligné sur les requêtes "meeting minutes definition". Ne pas juger sur les clics avant des positions < 20 (point d'étape mi-août 2026).
+- **Surfaces IA de Google (export 2026-11-04, nouveau rapport "Generative AI features")** : 147 impressions au total depuis mai, mais **127 sur les six derniers jours** (28 oct → 2 nov), en accélération (27 → 32 → 40). Les pages tirées par l'IA sont le contenu comparatif : `best-ai-meeting-assistants` 91, home 40, `/for-agencies` 20, `fireflies-vs-otter` 13, `/pricing` 13. Géographie inversée vs recherche classique : **Europe 77 %, US seulement 8 %** (et 92 % desktop) — cohérent avec le déploiement progressif des AI Overviews en Europe, donc une partie du pic vient de Google, pas de nous. L'export ne contient QUE des impressions (pas de clics) — ne pas en déduire du trafic. Enseignement actionnable : **le format comparatif honnête est ce que les moteurs IA citent** → c'est le type d'article à continuer d'écrire.
+- **Redirection apex 307 → 308 : FAITE** (vérifiée en prod le 2026-11-04, `https://meetingflash.work/` renvoie bien 308 vers www).
 - **Point d'étape mi-août FAIT (export 2026-08-10)** : la campagne backlinks a produit son effet dans la fenêtre annoncée. Clics 1 → 5, impressions 627 → 875, position moyenne ~60 → ~28 (plusieurs jours à 13-19 fin juillet/août). Les impressions/jour ont baissé (37 → 10) : Google a resserré le site sur moins de requêtes mais bien mieux positionnées — ce n'est pas une régression. Page vedette `meeting-summary-vs-meeting-minutes` : 272 imp, pos 27.5, 2 clics (optimisée le 2026-08-10 sur l'intention "définition"). Mobile bien meilleur que desktop (pos 38.75 vs 56.39, CTR 1.8% vs 0.28%). Marché US = 557 imp mais position 63 — c'est là que reste le combat. Prochain point d'étape : mi-septembre.
 
 ### P1 — Pack render polish (next design pass, ~2-3h total)
@@ -701,5 +706,5 @@ What NOT to add: density toggle, more block colors, dark/light forcing — alrea
 
 ---
 
-*Last updated: 2026-07-21 (Flash by email : ingestion entrante signée + jeton par utilisateur + flashCore partagé ; partage client rendu visible sur la home ; claim privacy périmée corrigée sur la bento.)*
+*Last updated: 2026-11-04 (Surfaces IA Google : le contenu comparatif est ce qui est cité → listicle rafraîchi en 2027 (slug gelé) + nouvel article bot-free/privacy + champ `updated` pour signaler les rafraîchissements.)*
 *Primary AI assistant: Claude (claude.ai + Claude Code)*
