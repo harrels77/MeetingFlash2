@@ -3,6 +3,11 @@ export interface Article {
   title: string
   description: string
   date: string
+  /** Date du dernier rafraîchissement réel du contenu. Alimente dateModified
+   *  (JSON-LD) + openGraph.modifiedTime + le "Updated" affiché sur la page.
+   *  Ne la poser QUE sur une vraie mise à jour de fond — un dateModified
+   *  qui ment est un signal négatif pour Google. */
+  updated?: string
   readTime: string
   category: string
   content: string
@@ -782,52 +787,151 @@ Take the notes from your most recent meeting — however rough — and paste the
   },
   {
     slug: 'best-ai-meeting-assistants-2026',
-    title: 'Best AI Meeting Assistants in 2026',
-    description: 'A practical, honest rundown of the AI meeting assistants worth knowing in 2026 — transcription bots, recording tools, and execution tools — and how to pick the right one for how you actually work.',
+    title: 'Best AI Meeting Assistants in 2027',
+    description: 'A practical, honest rundown of the AI meeting assistants worth knowing in 2027 — bot-based capture, the fast-growing bot-free category, and execution tools — and how to pick the right one for how you actually work.',
     date: '2026-06-29',
-    readTime: '7 min',
+    updated: '2026-11-04',
+    readTime: '8 min',
     category: 'Tools',
     content: `
-## There are two kinds of AI meeting assistant
+## The landscape split into three
 
-Before comparing tools, understand the split — because picking the wrong category is the most common mistake.
+Before comparing tools, understand the split — picking the wrong category is the most common and most expensive mistake in this market.
 
-**Capture tools** join your call (or record it), transcribe the audio, and generate a summary from the transcript. The value is that you do not have to take notes at all.
+**Bot-based capture.** A recorder joins your call as a visible participant, transcribes the audio, and generates a summary. You take no notes at all.
 
-**Execution tools** start from notes you already took and turn them into structured, ready-to-use outputs — decisions, action items, a follow-up email. The value is finished work, not a transcript.
+**Bot-free capture.** The newer category, and the biggest shift of the past year. The tool records from your own device — microphone plus system audio — so nothing appears in the participant list. Same output, no visible attendee.
 
-Neither is "better." They solve different problems. Here is the honest landscape in 2026.
+**Execution tools.** These start from notes you already took and turn them into finished, ready-to-send work: decisions, action items with owners, a client-ready follow-up email. The deliverable is the work itself, not a transcript.
 
-## Capture tools (transcription + recording)
+None of these is "better". They solve different problems, and for most people the category matters far more than the brand.
 
-**Otter** — one of the most established live-transcription tools. Strong real-time transcript, speaker labels, decent AI summaries. Best when you want a searchable verbatim record of what was said.
+## Bot-based capture
 
-**Fireflies** — a recorder bot that joins your calls, transcribes, and produces summaries and action items from the transcript. Strong integrations and a searchable archive of past calls.
+**Fireflies** — the broadest integrations of any tool here: Salesforce, HubSpot, Notion, Slack. Also the widest language coverage in this group, reported at 60+ languages. The pick when the transcript has to land somewhere else automatically.
 
-**Fathom** and **tl;dv** — both record video calls, transcribe, and clip highlights. Popular with sales teams who want to revisit exact moments of a call.
+**Otter** — chosen when a live transcript during the call genuinely matters. Its free tier is tight: roughly 300 transcription minutes a month with individual conversations capped near 30 minutes, and its language support is the narrowest of this group.
 
-The tradeoff for all capture tools: a bot has to join, the call gets recorded, and you end up with a long transcript that still needs to be turned into action. For a deeper head-to-head, see [Fireflies vs Otter vs MeetingFlash](/blog/fireflies-vs-otter-vs-meetingflash).
+**Fathom** — consistently rated the strongest free option, with unlimited core recording and transcription on the free plan. Its own bot-free mode was still a Mac beta at last check rather than a finished cross-platform feature.
 
-## Execution tools (notes in, finished work out)
+**tl;dv** — records video calls and clips highlights. Popular with sales teams who want to revisit the exact moment something was said.
 
-**MeetingFlash** — you paste your raw notes (no recording, no bot) and get a complete Execution Pack: decisions with rationale, action items with owners and deadlines, open questions, risks, a client-ready follow-up email, a Slack message, and the next agenda. It also keeps persistent project memory across meetings. Best when you take your own notes and want the post-meeting work done, not a transcript to read.
+For a closer head-to-head on the first two, see [Fireflies vs Otter vs MeetingFlash](/blog/fireflies-vs-otter-vs-meetingflash).
 
-**Fellow** — meeting-management software with agendas, notes, and action-item tracking, plus some AI assistance. Best for teams that want a structured meeting workflow tool.
+## Bot-free capture — the category that grew the most
+
+**Granola** — the reference point here. It captures from the device rather than joining the call, works across desktop and mobile, and is the usual recommendation when you do not want a recorder visible in a client call. The tradeoffs are real: fewer integrations than the bot-based tools, and no live captions during the call.
+
+Most established tools have now shipped some version of this. But it is worth knowing exactly what "bot-free" buys you, because it is not the same thing as private — in most of these tools the audio still leaves your machine. We wrote the honest version of that here: [what "no bot" actually means for client calls](/blog/bot-free-meeting-recorders-privacy).
+
+## Execution tools
+
+**MeetingFlash** — you paste the notes you already took (no recording, no bot, no audio at any point) and get a complete Execution Pack: decisions with their rationale, action items with owners and deadlines, open questions, risks, a client-ready follow-up email, a Slack message, and the next agenda. It keeps project memory across meetings, so the fourth call with a client already knows what was promised on the first. Best when you take your own notes and what you actually want is the post-meeting work done.
+
+**Fellow** — meeting-management software: agendas, shared notes, action-item tracking, with AI assistance layered on top. Best for teams that want to run the meeting itself in a structured way.
 
 ## How to choose
 
-Ask yourself four questions:
+Four questions, in order:
 
-- **Do you need a verbatim recording?** If yes (legal, sales review, training), a capture tool like Otter or Fireflies fits. If no, you are paying a privacy and clutter cost you do not need.
-- **Do you already take notes?** If you jot fragments during calls anyway, an execution tool turns those into finished work without a bot ever joining.
-- **What do you do with the output?** If your real job is sending a recap, assigning tasks, and prepping the next meeting, you want execution, not a transcript.
-- **How sensitive are your meetings?** No-recording tools sidestep the "is this call being recorded?" conversation entirely.
+- **Do you need a verbatim record?** If yes — legal exposure, sales coaching, training — you need capture, and the only question left is bot or bot-free. If no, you are paying a privacy and clutter cost for nothing.
+- **Can a recorder appear in the call?** For internal meetings, usually fine. For client calls, discovery calls, and anything sensitive, a visible recorder changes how people talk. That is the entire reason the bot-free category exists.
+- **Do you already take notes?** If you jot fragments during calls anyway, capture is redundant. An execution tool turns what you already wrote into finished work.
+- **What do you actually do after the meeting?** If the real job is sending a recap, assigning tasks and prepping the next call, you want execution — a transcript leaves all of that still to do.
 
 ## The honest summary
 
-If you want a searchable archive of exactly what was said, use a transcription tool. If you want the 20 minutes of post-meeting admin to disappear, use an execution tool.
+Want a searchable archive of exactly what was said? Use a capture tool — and pick bot-free if your calls are client-facing.
 
-Want to feel the difference? Paste notes from your last meeting into [MeetingFlash](/app) — first pack free, no signup — and see a finished Execution Pack in about 20 seconds.
+Want the twenty minutes of post-meeting admin to disappear? Use an execution tool.
+
+Want both? Plenty of people run a capture tool for the record and an execution tool for the output. They are not competing for the same slot.
+
+One caveat worth stating plainly: pricing in this category moves constantly and published figures disagree between sources, so check the current plan on the vendor's own site before committing. Feature claims age fast too — which is why this page carries a visible update date.
+
+Paste notes from your last meeting into [MeetingFlash](/app) — first pack free, no signup — and see a finished Execution Pack in about 20 seconds.
+    `.trim(),
+  },
+  {
+    slug: 'bot-free-meeting-recorders-privacy',
+    title: 'Bot-Free Meeting Recorders: What "No Bot" Actually Means for Client Calls',
+    description: 'Almost every AI meeting tool now advertises a bot-free mode. Here is what that genuinely changes for client calls, what it quietly does not change, and the consent question the marketing pages skip.',
+    date: '2026-11-04',
+    readTime: '6 min',
+    category: 'Tools',
+    content: `
+## Bot-free became the selling point of the year
+
+A year ago, almost every AI meeting tool joined your call as a visible participant. Today nearly all of them advertise a bot-free mode: the tool records from your own device instead of showing up in the attendee list.
+
+If you run client calls, that sounds like the privacy problem solved. It is not. It is one specific problem solved — and a different one quietly created.
+
+Here is the honest version.
+
+## What bot-free actually changes
+
+Bot-free capture records on your machine: a desktop app takes your microphone and your system audio, or a browser extension captures the meeting tab. No extra attendee appears in the call.
+
+That genuinely solves one thing: **the optics**. Nobody watches a notetaker bot join. No client asks what the extra participant is. For discovery calls and sensitive client work, that matters more than vendors give it credit for — a visible recorder changes how candidly people speak.
+
+## What it usually does not change
+
+Here is the part the marketing pages skip: **bot-free does not mean on-device**.
+
+In most bot-free tools, audio is captured on your machine and then uploaded to the vendor's servers for transcription and summarisation. The bot disappeared from the participant list. Your client's words still left your laptop.
+
+Genuinely private capture requires the processing to happen locally, and only a handful of tools do that — usually trading away speed and features for it. So if privacy is the actual reason you are shopping for bot-free, the question to ask a vendor is not "does a bot join?" but **"where is the audio processed, and what do you keep?"**
+
+Three levels, worth naming clearly:
+
+- **Bot in the call** — visible recorder, audio to the vendor's cloud.
+- **Bot-free, cloud processing** — nothing visible, audio still to the vendor's cloud. This is where most of the category sits today.
+- **Local processing** — audio never leaves the machine. Rare, usually slower, usually fewer features.
+
+Most buyers think they are getting the third when they are getting the second.
+
+## The consent problem nobody advertises
+
+There is a second-order effect that deserves far more attention than it gets.
+
+The visible bot was ugly, but it was also **the clearest possible signal that a call was being recorded**. Removing it removes that signal. Participants no longer have an obvious cue that the conversation is being captured.
+
+That does not make bot-free recording wrong. It means the obligation shifts entirely onto you: you now have to say it out loud. And recording-consent rules vary by country and by state — in some jurisdictions every participant has to agree, not just the person hitting record.
+
+For agencies and freelancers running client calls, this is not a technicality. It is the difference between a recap your client thanks you for and a conversation you would rather not have.
+
+The practical rule: if you are capturing audio at all, say so at the start of the call. The tool got quieter. Your disclosure should not.
+
+## When bot-free capture is genuinely the right answer
+
+To be clear, this category exists for good reasons:
+
+- You need a verbatim record — legal exposure, sales coaching, training.
+- You cannot take notes yourself because you are the one leading the conversation.
+- The meeting is internal, where recording is normal and expected.
+- You are the only participant, dictating a recap after an in-person meeting.
+
+In those cases bot-free beats a visible bot on every axis. Pick one, check where it processes the audio, and tell people you are recording.
+
+## The third option: do not capture at all
+
+The option that gets forgotten is simply not recording.
+
+If you already jot fragments during a call — most people running client meetings do — the audio was never the valuable part. The notes were. What is actually missing is the twenty minutes afterwards spent turning those fragments into a recap email, a task list, and an agenda for next time.
+
+That is the approach [MeetingFlash](/app) takes: no bot, no recording, no audio at any point. You paste the notes you already took and get back a complete Execution Pack — decisions with their rationale, action items with owners and deadlines, open questions, risks, a client-ready follow-up email and the next agenda.
+
+The privacy question becomes trivial, because there is no recording to have a policy about. The tradeoff is equally honest: you have to take your own notes. If what you need is a verbatim record, you need a capture tool, and this is not one.
+
+## How to decide in one minute
+
+- **Need a verbatim record?** Capture tool. Choose bot-free if your calls are client-facing, and ask where the audio is processed.
+- **Meetings genuinely confidential?** Look specifically for local processing, not just the words "bot-free".
+- **Already taking notes?** You do not need capture at all. You need the work done afterwards.
+
+Whichever you pick: tell people when you are recording. The bot used to do that for you.
+
+For the full landscape across all three categories, see [Best AI Meeting Assistants in 2027](/blog/best-ai-meeting-assistants-2026).
     `.trim(),
   },
   {
@@ -1004,7 +1108,7 @@ MeetingFlash takes a different starting point. There is no bot and no recording.
 
 The choice comes down to three questions:
 
-- **Recording or not?** Fireflies and Otter record and transcribe. MeetingFlash never records — you bring the notes. If "is this being recorded?" is an awkward question in your meetings, that matters.
+- **Recording or not?** Fireflies and Otter record and transcribe. MeetingFlash never records — you bring the notes. If "is this being recorded?" is an awkward question in your meetings, that matters. Both now offer a bot-free mode, but that is not the same thing as private — see [what "no bot" actually means for client calls](/blog/bot-free-meeting-recorders-privacy).
 - **Transcript or finished work?** Capture tools hand you a transcript and a summary. MeetingFlash hands you the actual deliverables you would otherwise spend 20 minutes writing.
 - **Single calls or cross-meeting context?** MeetingFlash's project memory connects meetings over time; transcription archives store calls but do not build that running context into each new recap.
 

@@ -24,6 +24,7 @@ export async function generateMetadata({ params }: { params: { slug: string } })
       url,
       type: 'article',
       publishedTime: article.date,
+      modifiedTime: article.updated || article.date,
       authors: ['Simon Harrel'],
       section: article.category,
     },
@@ -35,7 +36,7 @@ export async function generateMetadata({ params }: { params: { slug: string } })
   }
 }
 
-function articleJsonLd(article: { slug: string; title: string; description: string; date: string; category: string }) {
+function articleJsonLd(article: { slug: string; title: string; description: string; date: string; updated?: string; category: string }) {
   return [
     {
       '@context': 'https://schema.org',
@@ -48,7 +49,7 @@ function articleJsonLd(article: { slug: string; title: string; description: stri
       description: article.description,
       image: 'https://www.meetingflash.work/opengraph-image',
       datePublished: article.date,
-      dateModified: article.date,
+      dateModified: article.updated || article.date,
       articleSection: article.category,
       author: {
         '@type': 'Person',
@@ -153,6 +154,14 @@ export default function ArticlePage({ params }: { params: { slug: string } }) {
           <span className={styles.cardCategory}>{article.category}</span>
           <span className={styles.cardDot}>·</span>
           <span className={styles.cardRead}>{article.readTime} read</span>
+          {article.updated && (
+            <>
+              <span className={styles.cardDot}>·</span>
+              <span className={styles.cardRead}>
+                Updated {new Date(article.updated).toLocaleDateString('en-GB', { month: 'long', year: 'numeric' })}
+              </span>
+            </>
+          )}
         </div>
 
         <h1 className={styles.articleTitle}>{article.title}</h1>
