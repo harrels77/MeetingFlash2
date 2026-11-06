@@ -218,6 +218,8 @@ Keep it clear and searchable. "Quick follow-up" is too vague. "Follow-up: Produc
 If you're running multiple meetings a day, manually writing follow-ups adds up fast. MeetingFlash takes your raw meeting notes and generates a complete, professional follow-up email automatically — along with the decision list, action items, Slack message, and next agenda.
 
 Paste your notes. Get the email. Send it.
+
+If you would rather start from a written model, the [free follow-up email generator](/tools/follow-up-email-generator) page also carries four copy-paste templates — discovery call, weekly client update, internal action items, and the one you send when nobody has replied.
     `.trim(),
   },
   {
@@ -284,6 +286,8 @@ Manually extracting action items from notes takes time and attention. It's easy 
 Tools like MeetingFlash automatically extract action items from your raw meeting notes, format them with owners and deadlines, and include them in the follow-up email and Slack message — all in one step.
 
 The less friction there is in capturing action items, the more likely they are to get done.
+
+Action items only count once somebody has been told about them, which in practice means the follow-up email. If that is the part you keep postponing, the [free follow-up email generator](/tools/follow-up-email-generator) has four ready-made templates, including one built around owners and deadlines.
     `.trim(),
   },
   {

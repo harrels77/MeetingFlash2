@@ -213,6 +213,150 @@ export default function FollowUpEmailGeneratorPage() {
         </div>
       </section>
 
+      {/* Contenu de fond : la requête "follow-up email generator" est très
+          disputée et la page n'avait quasiment aucun texte à indexer. Ces
+          modèles répondent directement à l'intention (beaucoup de gens
+          cherchent simplement un bon modèle) et donnent enfin de la matière
+          à Google. */}
+      <section className={s.section} id="templates">
+        <div className={s.container}>
+          <div className={s.sectionHead}>
+            <div className={s.sectionPill}>Copy-paste templates</div>
+            <h2 className={s.sectionTitle}>Four follow-up email templates that actually get replies.</h2>
+            <p className={s.sectionLede}>
+              Use these as-is and fill in the brackets, or skip the typing and
+              generate one from your real meeting notes. Every template follows
+              the same rule: recap the decision, name the owner, give a date.
+            </p>
+          </div>
+
+          <div className={s.mockup}>
+            <div className={s.mockupHead}>
+              <div className={s.mockupDots}><span /><span /><span /></div>
+              <div className={s.mockupTitle}>1 · After a discovery or sales call</div>
+            </div>
+            <div className={s.mockupBody}>
+              <div className={`${s.mockBlock} ${s.mockBlockPaper}`}>
+                <div className={s.mockBlockLabel}>Subject</div>
+                <div className={s.mockBlockContent}>
+                  [Project] — recap and next steps
+                </div>
+              </div>
+              <div className={`${s.mockBlock} ${s.mockBlockBlue}`}>
+                <div className={s.mockBlockLabel}>Body</div>
+                <div className={s.mockBlockContent}>
+                  Hi [Name],<br /><br />
+                  Thanks for the time today. Confirming what we agreed so nothing gets lost:<br /><br />
+                  • Scope: [what you will deliver]<br />
+                  • Budget: [amount], [payment structure]<br />
+                  • Timeline: [duration], starting [date]<br /><br />
+                  Next steps:<br />
+                  • I will send [deliverable] by [day]<br />
+                  • You will share [what you need from them] by [day]<br /><br />
+                  One open point: [the thing nobody decided]. I will come back to you on it by [date].<br /><br />
+                  [Your name]
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div className={s.mockup} style={{ marginTop: 20 }}>
+            <div className={s.mockupHead}>
+              <div className={s.mockupDots}><span /><span /><span /></div>
+              <div className={s.mockupTitle}>2 · Weekly client status update</div>
+            </div>
+            <div className={s.mockupBody}>
+              <div className={`${s.mockBlock} ${s.mockBlockPaper}`}>
+                <div className={s.mockBlockLabel}>Subject</div>
+                <div className={s.mockBlockContent}>
+                  [Project] — week of [date]
+                </div>
+              </div>
+              <div className={`${s.mockBlock} ${s.mockBlockGreen}`}>
+                <div className={s.mockBlockLabel}>Body</div>
+                <div className={s.mockBlockContent}>
+                  Hi [Name],<br /><br />
+                  Quick update on where we are.<br /><br />
+                  Shipped this week: [what is actually done]<br />
+                  In progress: [what is moving, with expected date]<br />
+                  Needs a decision from you: [the thing blocking us] — ideally by [date]<br /><br />
+                  Nothing is at risk this week. Next update [day].<br /><br />
+                  [Your name]
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div className={s.mockup} style={{ marginTop: 20 }}>
+            <div className={s.mockupHead}>
+              <div className={s.mockupDots}><span /><span /><span /></div>
+              <div className={s.mockupTitle}>3 · Internal meeting with action items</div>
+            </div>
+            <div className={s.mockupBody}>
+              <div className={`${s.mockBlock} ${s.mockBlockPaper}`}>
+                <div className={s.mockBlockLabel}>Subject</div>
+                <div className={s.mockBlockContent}>
+                  [Meeting] — decisions and owners
+                </div>
+              </div>
+              <div className={`${s.mockBlock} ${s.mockBlockBlue}`}>
+                <div className={s.mockBlockLabel}>Body</div>
+                <div className={s.mockBlockContent}>
+                  Team,<br /><br />
+                  What we decided:<br />
+                  • [Decision] — because [reason]<br />
+                  • [Decision] — because [reason]<br /><br />
+                  Who owns what:<br />
+                  • [Name] → [task] (by [date])<br />
+                  • [Name] → [task] (by [date])<br /><br />
+                  Still open: [question nobody answered]. [Name] to come back on it before [next meeting].<br /><br />
+                  [Your name]
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div className={s.mockup} style={{ marginTop: 20 }}>
+            <div className={s.mockupHead}>
+              <div className={s.mockupDots}><span /><span /><span /></div>
+              <div className={s.mockupTitle}>4 · When they have not replied</div>
+            </div>
+            <div className={s.mockupBody}>
+              <div className={`${s.mockBlock} ${s.mockBlockPaper}`}>
+                <div className={s.mockBlockLabel}>Subject</div>
+                <div className={s.mockBlockContent}>
+                  Re: [original subject]
+                </div>
+              </div>
+              <div className={`${s.mockBlock} ${s.mockBlockAmber}`}>
+                <div className={s.mockBlockLabel}>Body</div>
+                <div className={s.mockBlockContent}>
+                  Hi [Name],<br /><br />
+                  Bringing this back up — I know [their situation] is busy right now.<br /><br />
+                  The only thing I need is [one specific decision], so I can [what it unblocks].<br /><br />
+                  If [date] still works on your side, I will proceed as planned. If not, tell me what changed and I will adjust.<br /><br />
+                  [Your name]
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <p className={s.sectionLede} style={{ marginTop: 28 }}>
+            The hard part is never the wording — it is remembering who committed
+            to what, and by when. That is the part the generator does for you:
+            paste the notes you already took and the email comes back with the
+            decisions, owners and dates already filled in. See also{' '}
+            <Link href="/blog/how-to-write-follow-up-email-after-meeting" style={{ color: 'var(--accent-text)' }}>
+              how to write a follow-up email after a meeting
+            </Link>{' '}
+            and{' '}
+            <Link href="/blog/client-follow-up-emails-after-meeting" style={{ color: 'var(--accent-text)' }}>
+              client follow-up emails that get answered
+            </Link>.
+          </p>
+        </div>
+      </section>
+
       <section className={s.section}>
         <div className={s.container}>
           <div className={s.sectionHead}>
